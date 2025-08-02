@@ -32,21 +32,7 @@ const Header = () => {
             </h1>
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-4">
-             {navLinks.map((link) => (
-                <Link key={link.href} href={link.href} passHref>
-                   <Button variant="ghost" className={cn(
-                        "text-muted-foreground transition-colors hover:text-primary",
-                        pathname === link.href && "text-primary"
-                   )}>
-                        {link.label}
-                   </Button>
-                </Link>
-             ))}
-             <ThemeToggle />
-          </nav>
-          
-           <div className="flex md:hidden items-center gap-2">
+          <div className="flex items-center gap-2">
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
@@ -55,7 +41,7 @@ const Header = () => {
                         <span className="sr-only">Open menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="left">
+                <SheetContent side="right">
                     <SheetHeader>
                         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                     </SheetHeader>
