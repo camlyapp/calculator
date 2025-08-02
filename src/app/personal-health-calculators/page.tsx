@@ -1,6 +1,7 @@
 
 "use client";
 
+import AgeCalculator from '@/components/age-calculator';
 import BodySurfaceAreaCalculator from '@/components/body-surface-area-calculator';
 import CarbonFootprintCalculator from '@/components/carbon-footprint-calculator';
 import CookingConverter from '@/components/cooking-converter';
@@ -14,14 +15,18 @@ export default function PersonalHealthCalculators() {
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="gpa" className="w-full max-w-5xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 h-auto">
+        <Tabs defaultValue="age" className="w-full max-w-5xl mx-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 h-auto">
+                <TabsTrigger value="age">Age</TabsTrigger>
                 <TabsTrigger value="gpa">GPA</TabsTrigger>
                 <TabsTrigger value="loan-eligibility">Loan Eligibility</TabsTrigger>
                 <TabsTrigger value="carbon-footprint">Carbon Footprint</TabsTrigger>
                 <TabsTrigger value="bsa">Body Surface Area</TabsTrigger>
                 <TabsTrigger value="cooking-converter">Cooking Converter</TabsTrigger>
             </TabsList>
+            <TabsContent value="age">
+                <AgeCalculator />
+            </TabsContent>
             <TabsContent value="gpa">
                 <GpaCalculator />
             </TabsContent>
