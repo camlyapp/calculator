@@ -1,5 +1,9 @@
 "use client";
 
+import { useState, useMemo } from 'react';
+import { useForm, useFieldArray } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   Card,
   CardContent,
@@ -7,20 +11,258 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { PlusCircle, Trash2 } from 'lucide-react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
+import { ChartTooltipContent } from '@/components/ui/chart';
+import { Separator } from './ui/separator';
+
+const itemSchema = z.object({
+  description: z.string().min(1, "Description is required."),
+  amount: z.coerce.number().min(0, "Amount must be positive."),
+  category: z.string().optional(),
+});
+
+const budgetSchema = z.object({
+  incomes: z.array(itemSchema),
+  expenses: z.array(itemSchema.extend({
+      category: z.string().min(1, "Category is required."),
+  })),
+});
+
+type BudgetFormValues = z.infer<typeof budgetSchema>;
+
+const expenseCategories = ['Housing', 'Food', 'Transportation', 'Utilities', 'Entertainment', 'Health', 'Other'];
+const COLORS = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    'hsl(var(--primary))',
+    'hsl(var(--accent))',
+];
 
 const BudgetCalculator = () => {
+  const form = useForm<BudgetFormValues>({
+    resolver: zodResolver(budgetSchema),
+    defaultValues: {
+      incomes: [{ description: 'Monthly Salary', amount: 5000 }],
+      expenses: [
+        { description: 'Rent', category: 'Housing', amount: 1500 },
+        { description: 'Groceries', category: 'Food', amount: 400 },
+      ],
+    },
+  });
+
+  const { fields: incomeFields, append: appendIncome, remove: removeIncome } = useFieldArray({
+    control: form.control,
+    name: 'incomes',
+  });
+
+  const { fields: expenseFields, append: appendExpense, remove: removeExpense } = useFieldArray({
+    control: form.control,
+    name: 'expenses',
+  });
+  
+  const watchedValues = form.watch();
+
+  const { totalIncome, totalExpenses, netBalance, expenseByCategory } = useMemo(() => {
+    const totalIncome = watchedValues.incomes.reduce((sum, item) => sum + item.amount, 0);
+    const totalExpenses = watchedValues.expenses.reduce((sum, item) => sum + item.amount, 0);
+    const netBalance = totalIncome - totalExpenses;
+    
+    const expenseByCategory = watchedValues.expenses.reduce((acc, expense) => {
+        const category = expense.category || 'Other';
+        if (!acc[category]) {
+            acc[category] = 0;
+        }
+        acc[category] += expense.amount;
+        return acc;
+    }, {} as {[key: string]: number});
+
+    return { totalIncome, totalExpenses, netBalance, expenseByCategory };
+  }, [watchedValues]);
+
+  const pieChartData = useMemo(() => {
+    return Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
+  }, [expenseByCategory]);
+  
+  const formatCurrency = (value: number) =>
+    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
         <CardTitle className="text-2xl">Budget Calculator</CardTitle>
         <CardDescription>
-          Coming Soon! Create and manage your personal budget.
+          Manage your monthly income and expenses to understand your cash flow.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-center items-center h-48">
-          <p className="text-muted-foreground">This feature is under construction.</p>
-        </div>
+        <Form {...form}>
+          <form className="space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Income Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center justify-between'>
+                    <span>Income</span>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => appendIncome({ description: '', amount: 0 })}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Income
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {incomeFields.map((field, index) => (
+                    <div key={field.id} className="flex gap-4 items-start">
+                      <FormField
+                        control={form.control}
+                        name={`incomes.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem className="flex-grow">
+                            <FormControl>
+                              <Input placeholder="Description" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`incomes.${index}.amount`}
+                        render={({ field }) => (
+                           <FormItem>
+                            <FormControl>
+                              <Input type="number" placeholder="Amount" {...field} className="w-32" />
+                            </FormControl>
+                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="button" variant="destructive" size="icon" onClick={() => removeIncome(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              {/* Expenses Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className='flex items-center justify-between'>
+                    <span>Expenses</span>
+                     <Button type="button" size="sm" variant="ghost" onClick={() => appendExpense({ description: '', amount: 0, category: 'Other' })}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {expenseFields.map((field, index) => (
+                    <div key={field.id} className="flex gap-4 items-start">
+                       <FormField
+                        control={form.control}
+                        name={`expenses.${index}.category`}
+                        render={({ field }) => (
+                           <FormItem className="w-40">
+                             <select {...field} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                {expenseCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                             </select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`expenses.${index}.description`}
+                        render={({ field }) => (
+                          <FormItem className="flex-grow">
+                            <FormControl>
+                              <Input placeholder="Description" {...field} />
+                            </FormControl>
+                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name={`expenses.${index}.amount`}
+                        render={({ field }) => (
+                           <FormItem>
+                            <FormControl>
+                              <Input type="number" placeholder="Amount" {...field} className="w-28" />
+                            </FormControl>
+                             <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button type="button" variant="destructive" size="icon" onClick={() => removeExpense(index)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+            
+            <Separator />
+
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+                <Card className="lg:col-span-2 bg-secondary/50">
+                    <CardHeader>
+                        <CardTitle>Budget Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4 text-center">
+                       <div>
+                            <p className="text-muted-foreground">Total Income</p>
+                            <p className="text-2xl font-bold text-accent">{formatCurrency(totalIncome)}</p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground">Total Expenses</p>
+                            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground">Net Balance</p>
+                            <p className={`text-3xl font-bold ${netBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                                {formatCurrency(netBalance)}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card className="lg:col-span-3">
+                    <CardHeader>
+                        <CardTitle>Expense Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                       <div className="h-[300px] w-full">
+                           <ResponsiveContainer>
+                                <PieChart>
+                                    <Tooltip content={<ChartTooltipContent />} />
+                                    <Legend />
+                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label>
+                                        {pieChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                </PieChart>
+                           </ResponsiveContainer>
+                       </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
