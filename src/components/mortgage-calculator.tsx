@@ -29,40 +29,50 @@ import {
 } from '@/lib/types';
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 
-const LoanCalculator = () => {
-  const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
+const MortgageCalculator = () => {
+  const [result, setResult] = useState<CalculationResult | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
-  const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>>({
-    resolver: zodResolver(LoanSchema.pick({ loanAmount: true, interestRate: true, loanTerm: true, extraPayment: true })),
+  const form = useForm<LoanFormValues>({
+    resolver: zodResolver(LoanSchema),
     defaultValues: {
-      loanAmount: 100000,
-      interestRate: 5.5,
-      loanTerm: 10,
+      loanAmount: 250000,
+      interestRate: 6.5,
+      loanTerm: 30,
       extraPayment: 0,
+      propertyTax: 3000,
+      homeInsurance: 1500,
+      hoaDues: 0,
     },
   });
 
-  const onSubmit = (values: Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>) => {
-    const { loanAmount, interestRate, loanTerm, extraPayment = 0 } = values;
+  const onSubmit = (values: LoanFormValues) => {
+    const { loanAmount, interestRate, loanTerm, extraPayment, propertyTax = 0, homeInsurance = 0, hoaDues = 0 } = values;
 
     const { schedule: calculatedSchedule, monthlyPayment: principalAndInterest } = generateAmortizationSchedule(loanAmount, interestRate, loanTerm, extraPayment);
-    
+
+    const monthlyTax = propertyTax / 12;
+    const monthlyInsurance = homeInsurance / 12;
+    const totalMonthlyPayment = principalAndInterest + monthlyTax + monthlyInsurance + hoaDues;
+
     const totalInterest = calculatedSchedule.reduce((acc, row) => acc + row.interest, 0);
     const totalPayment = loanAmount + totalInterest;
     
     const payoffDate = new Date();
     payoffDate.setMonth(payoffDate.getMonth() + calculatedSchedule.length);
 
-    const newResult: Partial<CalculationResult> = {
+    const newResult: CalculationResult = {
         principalAndInterest,
-        totalMonthlyPayment: principalAndInterest,
+        totalMonthlyPayment,
+        propertyTax: monthlyTax,
+        homeInsurance: monthlyInsurance,
+        hoaDues,
         totalInterest,
         totalPayment,
         payoffDate: format(payoffDate, 'MMMM yyyy'),
@@ -99,12 +109,19 @@ const LoanCalculator = () => {
     })));
   };
 
+  const pieChartData = result ? [
+    { name: 'Principal & Interest', value: result.principalAndInterest, fill: 'hsl(var(--primary))' },
+    { name: 'Property Tax', value: result.propertyTax, fill: 'hsl(var(--chart-2))' },
+    { name: 'Home Insurance', value: result.homeInsurance, fill: 'hsl(var(--chart-3))' },
+    { name: 'HOA Dues', value: result.hoaDues, fill: 'hsl(var(--chart-4))' },
+  ].filter(item => item.value > 0) : [];
+
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Simple Loan Calculator</CardTitle>
+        <CardTitle className="text-2xl">Advanced Mortgage Calculator</CardTitle>
         <CardDescription>
-          Enter your loan details to see a payment breakdown and amortization schedule.
+          Enter your loan details including taxes and insurance for a complete monthly payment estimate.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -118,7 +135,7 @@ const LoanCalculator = () => {
                   <FormItem>
                     <FormLabel>Loan Amount ($)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 100000" {...field} />
+                      <Input type="number" placeholder="e.g., 250000" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -131,7 +148,7 @@ const LoanCalculator = () => {
                   <FormItem>
                     <FormLabel>Interest Rate (%)</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="e.g., 5.5" {...field} />
+                      <Input type="number" step="0.01" placeholder="e.g., 3.5" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -144,7 +161,7 @@ const LoanCalculator = () => {
                   <FormItem>
                     <FormLabel>Loan Term (Years)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="e.g., 10" {...field} />
+                      <Input type="number" placeholder="e.g., 30" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -163,48 +180,106 @@ const LoanCalculator = () => {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="propertyTax"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Annual Property Tax ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 3000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="homeInsurance"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Annual Home Insurance ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 1500" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="hoaDues"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Monthly HOA Dues ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 200" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <Button type="submit" size="lg" className="w-full md:w-auto">Calculate</Button>
           </form>
         </Form>
 
-        {result && result.totalMonthlyPayment !== undefined && (
+        {result && (
           <div className="mt-8 space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-secondary/50">
-                    <CardHeader>
-                        <CardTitle>Monthly Payment</CardTitle>
-                    </CardHeader>
-                    <CardContent className='flex flex-col items-center justify-center'>
-                        <p className="text-4xl font-bold text-primary">
-                            ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </p>
-                    </CardContent>
-                </Card>
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+              <Card className="lg:col-span-2 bg-secondary/50">
+                <CardHeader>
+                  <CardTitle>Total Monthly Payment</CardTitle>
+                </CardHeader>
+                <CardContent className='flex flex-col items-center justify-center'>
+                  <p className="text-4xl font-bold text-primary">
+                    ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                   <div className="h-64 w-full">
+                      <ResponsiveContainer>
+                          <PieChart>
+                              <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
+                              </Pie>
+                              <Tooltip content={<ChartTooltipContent indicator="dot" />} />
+                          </PieChart>
+                      </ResponsiveContainer>
+                   </div>
+                </CardContent>
+              </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Loan Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Total Principal</span>
-                        <span className="font-semibold text-lg">${form.getValues('loanAmount').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Total Interest</span>
-                        <span className="font-semibold text-lg">${result.totalInterest?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-center pt-2">
-                        <span className="text-muted-foreground">Payoff Date</span>
-                        <span className="font-bold text-lg">{result.payoffDate}</span>
-                      </div>
-                    </CardContent>
-                </Card>
+              <Card className="lg:col-span-3">
+                 <CardHeader>
+                  <CardTitle>Payment Details</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Principal & Interest</span>
+                    <span className="font-semibold text-lg">${result.principalAndInterest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Property Tax</span>
+                    <span className="font-semibold text-lg">${result.propertyTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">Home Insurance</span>
+                    <span className="font-semibold text-lg">${result.homeInsurance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                   <Separator />
+                  <div className="flex justify-between items-center">
+                    <span className="text-muted-foreground">HOA Dues</span>
+                    <span className="font-semibold text-lg">${result.hoaDues.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </div>
+                   <Separator />
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-muted-foreground">Payoff Date</span>
+                    <span className="font-bold text-lg">{result.payoffDate}</span>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
-
 
             {result.interestSaved !== undefined && result.interestSaved > 0 && (
                 <Card className="bg-accent/20 border-accent">
@@ -227,7 +302,7 @@ const LoanCalculator = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Loan Principal vs. Interest</CardTitle>
-                <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan.</CardDescription>
+                <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan, excluding taxes, insurance, or HOA fees.</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="h-[400px] w-full">
@@ -253,4 +328,4 @@ const LoanCalculator = () => {
   );
 };
 
-export default LoanCalculator;
+export default MortgageCalculator;
