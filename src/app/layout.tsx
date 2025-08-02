@@ -5,8 +5,43 @@ import Footer from '@/components/footer';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'LoanSage - Smart Loan Calculator',
-  description: 'A sophisticated loan calculator to model, compare, and understand various loan scenarios with AI-powered suggestions.',
+  title: 'LoanSage - Free Smart Financial & Loan Calculator',
+  description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
+  keywords: ['loan calculator', 'mortgage calculator', 'interest calculator', 'retirement planner', 'investment calculator', 'financial planning', 'emi calculator', 'ai finance'],
+  authors: [{ name: 'LoanSage Team' }],
+  openGraph: {
+    title: 'LoanSage - Free Smart Financial & Loan Calculator',
+    description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
+    url: 'https://loansage.ai',
+    siteName: 'LoanSage',
+    images: [
+      {
+        url: 'https://cdn.jsdelivr.net/gh/joshuabrown-io/LoanSage/public/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'LoanSage - Free Smart Financial & Loan Calculator',
+    description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
+    images: ['https://cdn.jsdelivr.net/gh/joshuabrown-io/LoanSage/public/og-image.png'],
+  },
+  manifest: '/manifest.json',
 };
 
 export default function RootLayout({
