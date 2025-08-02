@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useFormStatus } from 'react';
 import { getSmartSuggestions } from '@/app/actions';
 import {
   Card,
@@ -39,7 +39,7 @@ function SubmitButton() {
 }
 
 const SmartSuggestions = () => {
-  const [state, formAction] = useFormState(getSmartSuggestions, initialState);
+  const [state, formAction] = useActionState(getSmartSuggestions, initialState);
   const { toast } = useToast();
 
   useEffect(() => {
