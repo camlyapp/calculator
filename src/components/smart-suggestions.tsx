@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useFormStatus } from 'react';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { getSmartSuggestions } from '@/app/actions';
 import {
   Card,
@@ -14,9 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
-import { Lightbulb, AlertTriangle, Loader2 } from 'lucide-react';
+import { Lightbulb, Loader2 } from 'lucide-react';
 import { Textarea } from './ui/textarea';
 import { useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -43,7 +43,7 @@ const SmartSuggestions = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (state?.message && !state.errors) {
+    if (state?.message && !state.errors && state.suggestions) {
         toast({
             title: "Success!",
             description: state.message,
