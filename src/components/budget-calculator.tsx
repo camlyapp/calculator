@@ -28,6 +28,8 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Label } from './ui/label';
 
 const itemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -43,6 +45,7 @@ const budgetSchema = z.object({
 });
 
 type BudgetFormValues = z.infer<typeof budgetSchema>;
+type Currency = 'USD' | 'INR';
 
 const expenseCategories = ['Housing', 'Food', 'Transportation', 'Utilities', 'Entertainment', 'Health', 'Other'];
 
@@ -59,6 +62,7 @@ const chartConfig = {
 
 const BudgetCalculator = () => {
   const [showResults, setShowResults] = useState(false);
+  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
@@ -104,8 +108,14 @@ const BudgetCalculator = () => {
     return Object.entries(expenseByCategory).map(([name, value]) => ({ name, value, fill: `var(--color-${name})` }));
   }, [expenseByCategory]);
   
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
 
   const onSubmit = () => {
     setShowResults(true);
@@ -114,10 +124,26 @@ const BudgetCalculator = () => {
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Budget Calculator</CardTitle>
-        <CardDescription>
-          Manage your monthly income and expenses to understand your cash flow.
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <CardTitle className="text-2xl">Budget Calculator</CardTitle>
+                <CardDescription>
+                Manage your monthly income and expenses to understand your cash flow.
+                </CardDescription>
+            </div>
+            <div className="mt-4 sm:mt-0">
+                <Label htmlFor="currency-select">Currency</Label>
+                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                    <SelectTrigger id="currency-select" className="w-[180px]">
+                        <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -295,3 +321,5 @@ const BudgetCalculator = () => {
 };
 
 export default BudgetCalculator;
+
+    
