@@ -31,7 +31,7 @@ import {
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
@@ -273,7 +273,7 @@ const MortgageCalculator = () => {
                         <ChartTooltip content={<ChartTooltipContent hideLabel />} />
                         <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                             {pieChartData.map((entry) => (
-                                <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                                <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
                             ))}
                         </Pie>
                       </PieChart>
