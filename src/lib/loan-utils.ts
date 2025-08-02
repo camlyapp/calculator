@@ -32,27 +32,22 @@ export const generateAmortizationSchedule = (
     const interest = balance * monthlyRate;
     let principalPortion = monthlyPayment - interest;
     
-    // Ensure principal portion is not negative in final payments
-    if (principalPortion > balance) {
-        principalPortion = balance;
-    }
-    
-    let actualExtraPayment = 0;
-    if (extraPayment > 0) {
-        // Extra payment should not exceed the remaining balance
-        actualExtraPayment = Math.min(extraPayment, balance - principalPortion);
-    }
+    // Total payment for the month including extra
+    const totalMonthlyWithExtra = monthlyPayment + extraPayment;
 
-    const totalPayment = principalPortion + interest + actualExtraPayment;
-    const principalPaid = principalPortion + actualExtraPayment;
-    
-    if (balance - principalPaid < 0.01) { // Handle floating point inaccuracies for the last payment
+    // The amount applied to principal is the monthly payment's principal portion plus the extra payment
+    let principalPaid = principalPortion + extraPayment;
+
+    // Check if the remaining balance is less than the total payment
+    if (balance < totalMonthlyWithExtra - interest) {
+        principalPaid = balance;
+        const finalPayment = balance + interest;
         schedule.push({
             month,
             interest,
-            principal: balance,
-            extraPayment: 0, // No extra payment on the final adjusted payment
-            totalPayment: balance + interest,
+            principal: principalPaid,
+            extraPayment: 0,
+            totalPayment: finalPayment,
             remainingBalance: 0,
         });
         balance = 0;
@@ -62,8 +57,8 @@ export const generateAmortizationSchedule = (
             month,
             interest,
             principal: principalPaid,
-            extraPayment: extraPayment, // show the intended extra payment for consistency
-            totalPayment: totalPayment,
+            extraPayment,
+            totalPayment: totalMonthlyWithExtra,
             remainingBalance: balance,
         });
     }
@@ -72,5 +67,3 @@ export const generateAmortizationSchedule = (
 
   return { schedule, monthlyPayment };
 };
-
-    

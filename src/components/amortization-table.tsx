@@ -24,6 +24,7 @@ const AmortizationTable = ({ data }: AmortizationTableProps) => {
   if (!data || data.length === 0) {
     return null;
   }
+  const showExtraPayment = data.some(row => row.extraPayment > 0);
 
   return (
     <Card>
@@ -41,7 +42,7 @@ const AmortizationTable = ({ data }: AmortizationTableProps) => {
                 <TableHead className="w-[100px]">Month</TableHead>
                 <TableHead>Principal</TableHead>
                 <TableHead>Interest</TableHead>
-                {data.some(row => row.extraPayment > 0) && <TableHead>Extra Payment</TableHead>}
+                {showExtraPayment && <TableHead>Extra Payment</TableHead>}
                 <TableHead>Total Payment</TableHead>
                 <TableHead>Remaining Balance</TableHead>
               </TableRow>
@@ -52,7 +53,7 @@ const AmortizationTable = ({ data }: AmortizationTableProps) => {
                   <TableCell>{row.month}</TableCell>
                   <TableCell>${row.principal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                   <TableCell>${row.interest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                  {data.some(r => r.extraPayment > 0) && <TableCell>${row.extraPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>}
+                  {showExtraPayment && <TableCell>${row.extraPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>}
                   <TableCell>${row.totalPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                   <TableCell>${row.remainingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
                 </TableRow>

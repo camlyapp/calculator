@@ -102,7 +102,7 @@ const LoanCalculator = () => {
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Simple Loan Calculator</CardTitle>
+        <CardTitle className="text-2xl">Advanced EMI Calculator</CardTitle>
         <CardDescription>
           Enter your loan details to see a payment breakdown and amortization schedule.
         </CardDescription>
@@ -259,5 +259,3 @@ const LoanCalculator = () => {
 };
 
 export default LoanCalculator;
-
-    
