@@ -4,6 +4,8 @@ import { suggestLoanOptimizations, type SuggestLoanOptimizationsInput, type Sugg
 import { analyzeRefinance, type AnalyzeRefinanceInput, type AnalyzeRefinanceOutput } from '@/ai/flows/analyze-refinance';
 import { convertCurrency, type ConvertCurrencyInput, type ConvertCurrencyOutput } from '@/ai/flows/convert-currency';
 import { calculateIndianTax, type CalculateIndianTaxInput, type CalculateIndianTaxOutput } from '@/ai/flows/calculate-indian-tax';
+import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEligibilityOutput } from '@/ai/flows/check-loan-eligibility';
+
 import { z } from 'zod';
 
 const SmartSuggestionsSchema = z.object({
@@ -146,5 +148,38 @@ export async function calculateIndianTaxAction(
     } catch(e) {
         console.error(e);
         return { error: 'An unexpected error occurred during tax calculation. Please try again later.' };
+    }
+}
+
+
+const LoanEligibilitySchema = z.object({
+  monthlyIncome: z.coerce.number().min(0, "Monthly income must be a positive number."),
+  monthlyExpenses: z.coerce.number().min(0, "Monthly expenses must be a positive number."),
+  loanAmount: z.coerce.number().min(1, "Loan amount must be greater than zero."),
+  loanTerm: z.coerce.number().min(1, "Loan term must be at least 1 year."),
+  creditScore: z.coerce.number().min(300, "Credit score must be at least 300.").max(850, "Credit score cannot exceed 850."),
+});
+
+export async function checkLoanEligibilityAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; result?: CheckLoanEligibilityOutput; errors?: any, error?: string }> {
+    const validatedFields = LoanEligibilitySchema.safeParse(Object.fromEntries(formData.entries()));
+    
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your inputs.',
+        };
+    }
+
+    const aiInput: CheckLoanEligibilityInput = validatedFields.data;
+
+    try {
+        const result = await checkLoanEligibility(aiInput);
+        return { result, message: "Your eligibility analysis is complete." };
+    } catch(e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred during eligibility check. Please try again later.' };
     }
 }

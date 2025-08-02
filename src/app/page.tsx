@@ -11,6 +11,7 @@ import IndianTaxCalculator from '@/components/indian-tax-calculator';
 import InvestmentCalculator from '@/components/investment-calculator';
 import LoanCalculator from '@/components/loan-calculator';
 import LoanComparison from '@/components/loan-comparison';
+import LoanEligibilityCalculator from '@/components/loan-eligibility-calculator';
 import MortgageCalculator from '@/components/mortgage-calculator';
 import RefinanceAnalysis from '@/components/refinance-analysis';
 import RetirementCalculator from '@/components/retirement-calculator';
@@ -48,6 +49,7 @@ export default function Home() {
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
             <TabsTrigger value="calculator">Advanced EMI Calculator</TabsTrigger>
             <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
+            <TabsTrigger value="eligibility">Loan Eligibility</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
             <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>
             <TabsTrigger value="refinance">Refinancing</TabsTrigger>
@@ -66,6 +68,9 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="mortgage-calculator">
             <MortgageCalculator currency={currency} />
+          </TabsContent>
+          <TabsContent value="eligibility">
+            <LoanEligibilityCalculator />
           </TabsContent>
           <TabsContent value="comparison">
             <LoanComparison />
