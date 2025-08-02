@@ -33,6 +33,12 @@ const DateCalculator = () => {
             });
         }
     };
+
+    useEffect(() => {
+        if(isMounted) {
+            calculateDifference();
+        }
+    }, [startDate, endDate, isMounted])
     
     if (!isMounted) {
         return null;
