@@ -1,6 +1,7 @@
 import BudgetCalculator from '@/components/budget-calculator';
 import CompoundInterestCalculator from '@/components/compound-interest-calculator';
 import CurrencyConverter from '@/components/currency-converter';
+import GstCalculator from '@/components/gst-calculator';
 import Header from '@/components/header';
 import IndianTaxCalculator from '@/components/indian-tax-calculator';
 import InvestmentCalculator from '@/components/investment-calculator';
@@ -20,7 +21,7 @@ export default function Home() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <Tabs defaultValue="calculator" className="w-full max-w-7xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
             <TabsTrigger value="calculator">Advanced EMI Calculator</TabsTrigger>
             <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
@@ -32,6 +33,7 @@ export default function Home() {
             <TabsTrigger value="savings">Savings</TabsTrigger>
             <TabsTrigger value="tax">US Tax</TabsTrigger>
             <TabsTrigger value="indian-tax">Indian Tax</TabsTrigger>
+            <TabsTrigger value="gst">GST</TabsTrigger>
             <TabsTrigger value="currency">Currency</TabsTrigger>
             <TabsTrigger value="budget">Budget</TabsTrigger>
           </TabsList>
@@ -67,6 +69,9 @@ export default function Home() {
           </TabsContent>
           <TabsContent value="indian-tax">
             <IndianTaxCalculator />
+           </TabsContent>
+           <TabsContent value="gst">
+            <GstCalculator />
            </TabsContent>
            <TabsContent value="currency">
             <CurrencyConverter />
