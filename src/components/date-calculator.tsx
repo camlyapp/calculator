@@ -9,13 +9,13 @@ import { Label } from '@/components/ui/label';
 import { intervalToDuration, format, isValid } from 'date-fns';
 
 const DateCalculator = () => {
-    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+    const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+    const [endDate, setEndDate] = useState<Date | undefined>(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
     const [result, setResult] = useState<{ years: number, months: number, days: number } | null>(null);
+    const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        setStartDate(new Date());
-        setEndDate(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
+        setIsMounted(true);
     }, []);
 
     const calculateDifference = () => {
@@ -34,6 +34,10 @@ const DateCalculator = () => {
         }
     };
     
+    if (!isMounted) {
+        return null;
+    }
+
     return (
         <Card className="w-full max-w-2xl shadow-2xl mt-6">
             <CardHeader>
@@ -49,8 +53,9 @@ const DateCalculator = () => {
                             selected={startDate}
                             onSelect={setStartDate}
                             className="rounded-md border"
+                            initialFocus
                         />
-                        <p className="text-sm text-muted-foreground">{startDate && isValid(startDate) ? format(startDate, 'PPP') : 'Loading...'}</p>
+                         <p className="text-sm text-muted-foreground">{startDate && isValid(startDate) ? format(startDate, 'PPP') : 'Invalid date'}</p>
                     </div>
                      <div className="space-y-2 flex flex-col items-center">
                         <Label>End Date</Label>
@@ -60,7 +65,7 @@ const DateCalculator = () => {
                             onSelect={setEndDate}
                             className="rounded-md border"
                         />
-                         <p className="text-sm text-muted-foreground">{endDate && isValid(endDate) ? format(endDate, 'PPP') : 'Loading...'}</p>
+                         <p className="text-sm text-muted-foreground">{endDate && isValid(endDate) ? format(endDate, 'PPP') : 'Invalid date'}</p>
                     </div>
                 </div>
 

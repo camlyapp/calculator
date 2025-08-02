@@ -7,10 +7,16 @@ import Header from '@/components/header';
 
 export default function PrivacyPolicy() {
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
+    setIsMounted(true);
     setLastUpdated(new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }));
   }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
@@ -22,7 +28,7 @@ export default function PrivacyPolicy() {
               <CardTitle className="text-3xl">Privacy Policy for LoanSage</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground prose prose-invert">
-                <p><strong>Last Updated: {lastUpdated || '...'}</strong></p>
+                <p><strong>Last Updated: {lastUpdated}</strong></p>
                 
                 <h2 className="text-xl font-semibold text-foreground pt-4">Introduction</h2>
                 <p>Welcome to LoanSage ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. By using our service, you agree to the collection and use of information in accordance with this policy.</p>

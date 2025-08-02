@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,11 @@ const TimeCalculator = () => {
     const [operation, setOperation] = useState<'add' | 'subtract'>('add');
     const [result, setResult] = useState('');
     const [error, setError] = useState('');
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     const calculate = () => {
         setError('');
@@ -52,6 +57,10 @@ const TimeCalculator = () => {
         }
     };
     
+    if (!isMounted) {
+        return null;
+    }
+
     return (
         <Card className="w-full max-w-2xl shadow-2xl mt-6">
             <CardHeader>
