@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import { CalculationResult, LoanFormValues, LoanSchema } from '@/lib/types';
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
+import DownloadResults from './download-results';
 
 interface LoanOptionProps {
   title: string;
@@ -115,6 +117,7 @@ const LoanOption = ({ title, onCalculate }: LoanOptionProps) => {
 const LoanComparison = () => {
   const [resultA, setResultA] = useState<Partial<CalculationResult> | null>(null);
   const [resultB, setResultB] = useState<Partial<CalculationResult> | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const formatCurrency = (value: number) =>
     `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -134,7 +137,7 @@ const LoanComparison = () => {
         </div>
 
         {(resultA || resultB) && (
-            <div className="mt-8">
+            <div ref={resultsRef} className="mt-8 pt-8">
                 <h3 className="text-xl font-bold mb-4 text-center">Comparison Results</h3>
                 <Card>
                     <CardContent className="p-6 space-y-4">
@@ -184,6 +187,11 @@ const LoanComparison = () => {
             </div>
         )}
       </CardContent>
+      {(resultA || resultB) && (
+        <CardFooter>
+          <DownloadResults fileName="loan_comparison" resultsRef={resultsRef} />
+        </CardFooter>
+      )}
     </Card>
   );
 };

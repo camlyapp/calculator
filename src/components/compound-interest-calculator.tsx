@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -25,6 +26,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import DownloadResults from './download-results';
 
 const compoundingFrequencies = {
   annually: 1,
@@ -53,6 +55,7 @@ interface CompoundInterestResult {
 
 const CompoundInterestCalculator = () => {
   const [result, setResult] = useState<CompoundInterestResult | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<CompoundInterestFormValues>({
     resolver: zodResolver(compoundInterestSchema),
@@ -232,7 +235,7 @@ const CompoundInterestCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <Card className="bg-secondary/50">
                 <CardHeader>
                     <CardTitle>Projected Growth</CardTitle>
@@ -304,6 +307,14 @@ const CompoundInterestCalculator = () => {
           </div>
         )}
       </CardContent>
+      {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="compound_interest_projection"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

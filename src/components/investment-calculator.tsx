@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
+import DownloadResults from './download-results';
 
 const investmentSchema = z.object({
   initialInvestment: z.coerce.number().min(0),
@@ -43,6 +45,7 @@ interface InvestmentResult {
 
 const InvestmentCalculator = () => {
   const [result, setResult] = useState<InvestmentResult | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<InvestmentFormValues>({
     resolver: zodResolver(investmentSchema),
@@ -159,7 +162,7 @@ const InvestmentCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <Card className="bg-secondary/50">
                 <CardHeader>
                     <CardTitle>Investment Projection</CardTitle>
@@ -232,6 +235,14 @@ const InvestmentCalculator = () => {
           </div>
         )}
       </CardContent>
+       {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="investment_projection"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

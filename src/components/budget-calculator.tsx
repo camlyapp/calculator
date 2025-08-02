@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -11,6 +11,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,7 @@ import { PlusCircle, Trash2 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Separator } from './ui/separator';
+import DownloadResults from './download-results';
 
 const itemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -56,6 +58,8 @@ const chartConfig = {
 
 
 const BudgetCalculator = () => {
+  const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -103,6 +107,10 @@ const BudgetCalculator = () => {
   const formatCurrency = (value: number) =>
     `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const onSubmit = () => {
+    setShowResults(true);
+  }
+
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -113,7 +121,7 @@ const BudgetCalculator = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form className="space-y-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Income Section */}
               <Card>
@@ -217,58 +225,71 @@ const BudgetCalculator = () => {
                 </CardContent>
               </Card>
             </div>
+            <Button type="submit" size="lg" className="w-full md:w-auto">Calculate Budget</Button>
             
-            <Separator />
-
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
-                <Card className="lg:col-span-2 bg-secondary/50">
-                    <CardHeader>
-                        <CardTitle>Budget Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4 text-center">
-                       <div>
-                            <p className="text-muted-foreground">Total Income</p>
-                            <p className="text-2xl font-bold text-accent">{formatCurrency(totalIncome)}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Total Expenses</p>
-                            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p>
-                        </div>
-                        <div>
-                            <p className="text-muted-foreground">Net Balance</p>
-                            <p className={`text-3xl font-bold ${netBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
-                                {formatCurrency(netBalance)}
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card className="lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>Expense Breakdown</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                       <div className="h-[300px] w-full">
-                           <ChartContainer config={chartConfig}>
-                                <ResponsiveContainer>
-                                    <PieChart>
-                                        <Tooltip content={<ChartTooltipContent />} />
-                                        <Legend />
-                                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label>
-                                            {pieChartData.map((entry) => (
-                                                <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
-                                            ))}
-                                        </Pie>
-                                    </PieChart>
-                               </ResponsiveContainer>
-                           </ChartContainer>
-                       </div>
-                    </CardContent>
-                </Card>
-            </div>
-
+             {showResults && (
+              <>
+                <Separator />
+                <div ref={resultsRef} className="space-y-8 pt-8">
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+                      <Card className="lg:col-span-2 bg-secondary/50">
+                          <CardHeader>
+                              <CardTitle>Budget Summary</CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-4 text-center">
+                            <div>
+                                  <p className="text-muted-foreground">Total Income</p>
+                                  <p className="text-2xl font-bold text-accent">{formatCurrency(totalIncome)}</p>
+                              </div>
+                              <div>
+                                  <p className="text-muted-foreground">Total Expenses</p>
+                                  <p className="text-2xl font-bold text-destructive">{formatCurrency(totalExpenses)}</p>
+                              </div>
+                              <div>
+                                  <p className="text-muted-foreground">Net Balance</p>
+                                  <p className={`text-3xl font-bold ${netBalance >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                                      {formatCurrency(netBalance)}
+                                  </p>
+                              </div>
+                          </CardContent>
+                      </Card>
+                      <Card className="lg:col-span-3">
+                          <CardHeader>
+                              <CardTitle>Expense Breakdown</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="h-[300px] w-full">
+                                <ChartContainer config={chartConfig}>
+                                    <ResponsiveContainer>
+                                        <PieChart>
+                                            <Tooltip content={<ChartTooltipContent />} />
+                                            <Legend />
+                                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label>
+                                                {pieChartData.map((entry) => (
+                                                    <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
+                                                ))}
+                                            </Pie>
+                                        </PieChart>
+                                  </ResponsiveContainer>
+                                </ChartContainer>
+                            </div>
+                          </CardContent>
+                      </Card>
+                  </div>
+                </div>
+              </>
+            )}
           </form>
         </Form>
       </CardContent>
+      {showResults && (
+        <CardFooter>
+            <DownloadResults
+                fileName="budget_analysis"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+       )}
     </Card>
   );
 };

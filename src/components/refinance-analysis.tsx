@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { analyzeRefinanceAction } from '@/app/actions';
 import {
@@ -17,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Calculator, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
+import DownloadResults from './download-results';
 
 const initialState = {
   message: undefined,
@@ -38,6 +39,7 @@ function SubmitButton() {
 const RefinanceAnalysis = () => {
   const [state, formAction] = useActionState(analyzeRefinanceAction, initialState);
   const { toast } = useToast();
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (state?.message && !state.errors && state.analysis) {
@@ -112,55 +114,62 @@ const RefinanceAnalysis = () => {
                     </div>
                 </div>
             </div>
+             <SubmitButton />
         </CardContent>
-        <CardFooter>
-            <SubmitButton />
-        </CardFooter>
+       
       </form>
 
       {state?.analysis && (
-        <div className="p-6 pt-0">
-            <Card className="bg-secondary/50">
-                <CardHeader>
-                    <CardTitle className="text-primary">Refinancing Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                    <div className="text-center p-4 rounded-lg bg-background">
-                        <h4 className="text-lg font-semibold">AI Recommendation</h4>
-                        <p className={`text-xl font-bold ${state.analysis.isRecommended ? 'text-accent' : 'text-destructive'}`}>
-                            {state.analysis.recommendation}
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <h4 className="font-semibold text-center text-muted-foreground">Monthly Payment</h4>
-                            <div className="grid grid-cols-2 text-center gap-2">
-                                <div>
-                                    <p className="text-sm">Current</p>
-                                    <p className="font-bold text-lg">{formatCurrency(state.analysis.currentMonthlyPayment)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm">New</p>
-                                    <p className="font-bold text-lg">{formatCurrency(state.analysis.newMonthlyPayment)}</p>
-                                </div>
-                            </div>
-                        </div>
-                         <div className="space-y-2">
-                            <h4 className="font-semibold text-center text-muted-foreground">Lifetime Savings</h4>
-                             <p className="text-center font-bold text-2xl text-accent">
-                                {formatCurrency(state.analysis.lifetimeSavings)}
+        <>
+            <div ref={resultsRef} className="p-6 pt-0">
+                <Card className="bg-secondary/50">
+                    <CardHeader>
+                        <CardTitle className="text-primary">Refinancing Breakdown</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div className="text-center p-4 rounded-lg bg-background">
+                            <h4 className="text-lg font-semibold">AI Recommendation</h4>
+                            <p className={`text-xl font-bold ${state.analysis.isRecommended ? 'text-accent' : 'text-destructive'}`}>
+                                {state.analysis.recommendation}
                             </p>
                         </div>
-                    </div>
-                    <Separator />
-                    <div>
-                        <h4 className="font-semibold mb-2">Detailed Analysis</h4>
-                        <p className="text-sm text-muted-foreground">{state.analysis.detailedAnalysis}</p>
-                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <h4 className="font-semibold text-center text-muted-foreground">Monthly Payment</h4>
+                                <div className="grid grid-cols-2 text-center gap-2">
+                                    <div>
+                                        <p className="text-sm">Current</p>
+                                        <p className="font-bold text-lg">{formatCurrency(state.analysis.currentMonthlyPayment)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm">New</p>
+                                        <p className="font-bold text-lg">{formatCurrency(state.analysis.newMonthlyPayment)}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <h4 className="font-semibold text-center text-muted-foreground">Lifetime Savings</h4>
+                                <p className="text-center font-bold text-2xl text-accent">
+                                    {formatCurrency(state.analysis.lifetimeSavings)}
+                                </p>
+                            </div>
+                        </div>
+                        <Separator />
+                        <div>
+                            <h4 className="font-semibold mb-2">Detailed Analysis</h4>
+                            <p className="text-sm text-muted-foreground">{state.analysis.detailedAnalysis}</p>
+                        </div>
 
-                </CardContent>
-            </Card>
-        </div>
+                    </CardContent>
+                </Card>
+            </div>
+            <CardFooter>
+                 <DownloadResults
+                    fileName="refinance_analysis"
+                    resultsRef={resultsRef}
+                />
+            </CardFooter>
+        </>
       )}
     </Card>
   );

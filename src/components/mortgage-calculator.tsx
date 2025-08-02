@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
+import DownloadResults from './download-results';
 
 const chartConfig = {
   "Principal & Interest": {
@@ -65,6 +67,7 @@ const MortgageCalculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<LoanFormValues>({
     resolver: zodResolver(LoanSchema),
@@ -252,7 +255,7 @@ const MortgageCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
               <Card className="lg:col-span-2 bg-secondary/50">
                 <CardHeader>
@@ -359,6 +362,14 @@ const MortgageCalculator = () => {
           </div>
         )}
       </CardContent>
+       {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="mortgage_analysis"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -23,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import DownloadResults from './download-results';
 
 const filingStatuses = ['single', 'marriedFilingJointly', 'marriedFilingSeparately', 'headOfHousehold'] as const;
 
@@ -92,6 +94,7 @@ interface TaxResult {
 
 const TaxCalculator = () => {
   const [result, setResult] = useState<TaxResult | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<TaxFormValues>({
     resolver: zodResolver(taxSchema),
@@ -196,7 +199,7 @@ const TaxCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <Card className="bg-secondary/50">
               <CardHeader>
                 <CardTitle>Tax Estimate</CardTitle>
@@ -247,6 +250,14 @@ const TaxCalculator = () => {
           </div>
         )}
       </CardContent>
+       {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="tax_estimate"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

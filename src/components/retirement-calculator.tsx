@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -23,6 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
+import DownloadResults from './download-results';
 
 const retirementSchema = z.object({
   currentAge: z.coerce.number().min(18, "Must be at least 18."),
@@ -52,6 +54,7 @@ interface RetirementResult {
 
 const RetirementCalculator = () => {
   const [result, setResult] = useState<RetirementResult | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<RetirementFormValues>({
     resolver: zodResolver(retirementSchema),
@@ -242,7 +245,7 @@ const RetirementCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <Card className="bg-secondary/50">
                 <CardHeader>
                     <CardTitle>Retirement Projection</CardTitle>
@@ -287,6 +290,14 @@ const RetirementCalculator = () => {
           </div>
         )}
       </CardContent>
+       {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="retirement_projection"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

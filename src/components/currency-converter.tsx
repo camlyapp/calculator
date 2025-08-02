@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   Card,
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowRightLeft, Loader2 } from 'lucide-react';
 import { convertCurrencyAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
+import DownloadResults from './download-results';
 
 const currencies = [
     { code: "USD", name: "United States Dollar" },
@@ -50,6 +51,7 @@ function SubmitButton() {
 const CurrencyConverter = () => {
     const [state, formAction] = useActionState(convertCurrencyAction, initialState);
     const { toast } = useToast();
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (state?.error) {
@@ -102,14 +104,12 @@ const CurrencyConverter = () => {
                             {state?.errors?.toCurrency && <p className="text-destructive text-sm mt-1">{state.errors.toCurrency[0]}</p>}
                         </div>
                     </div>
+                     <SubmitButton />
                 </CardContent>
-                <CardFooter>
-                    <SubmitButton />
-                </CardFooter>
             </form>
 
             {state?.conversion && (
-                 <CardContent>
+                 <CardContent ref={resultsRef}>
                     <div className="text-center p-6 bg-secondary/50 rounded-lg">
                         <p className="text-muted-foreground">Converted Amount</p>
                         <p className="text-4xl font-bold text-primary">
@@ -121,6 +121,14 @@ const CurrencyConverter = () => {
                     </div>
                 </CardContent>
             )}
+             {state?.conversion && (
+                <CardFooter>
+                    <DownloadResults
+                        fileName="currency_conversion"
+                        resultsRef={resultsRef}
+                    />
+                </CardFooter>
+             )}
 
         </Card>
     );

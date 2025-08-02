@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,6 +9,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -24,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
+import DownloadResults from './download-results';
 
 const savingsSchema = z.object({
   savingsGoal: z.coerce.number().min(1, "Savings goal must be greater than 0."),
@@ -43,6 +45,7 @@ interface SavingsResult {
 
 const SavingsCalculator = () => {
   const [result, setResult] = useState<SavingsResult | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<SavingsFormValues>({
     resolver: zodResolver(savingsSchema),
@@ -171,7 +174,7 @@ const SavingsCalculator = () => {
         </Form>
 
         {result && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <Card className="bg-secondary/50">
                 <CardHeader>
                     <CardTitle>Your Savings Plan</CardTitle>
@@ -214,6 +217,14 @@ const SavingsCalculator = () => {
           </div>
         )}
       </CardContent>
+      {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="savings_plan"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };

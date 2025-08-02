@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
@@ -33,6 +34,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
+import DownloadResults from './download-results';
 
 const chartConfig = {
   Principal: {
@@ -50,6 +52,7 @@ const LoanCalculator = () => {
   const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>>({
     resolver: zodResolver(LoanSchema.pick({ loanAmount: true, interestRate: true, loanTerm: true, extraPayment: true })),
@@ -181,7 +184,7 @@ const LoanCalculator = () => {
         </Form>
 
         {result && result.totalMonthlyPayment !== undefined && (
-          <div className="mt-8 space-y-8">
+          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <Card className="bg-secondary/50">
                     <CardHeader>
@@ -271,10 +274,16 @@ const LoanCalculator = () => {
           </div>
         )}
       </CardContent>
+      {result && (
+        <CardFooter>
+            <DownloadResults
+                fileName="loan_analysis"
+                resultsRef={resultsRef}
+            />
+        </CardFooter>
+      )}
     </Card>
   );
 };
 
 export default LoanCalculator;
-
-    
