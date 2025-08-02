@@ -1,6 +1,7 @@
 
 "use client";
 
+import CarbonFootprintCalculator from '@/components/carbon-footprint-calculator';
 import FuelEfficiencyCalculator from '@/components/fuel-efficiency-calculator';
 import GpaCalculator from '@/components/gpa-calculator';
 import Header from '@/components/header';
@@ -15,6 +16,7 @@ export default function OtherSpecializedCalculators() {
            <GpaCalculator />
            <LoanEligibilityCalculator />
            <FuelEfficiencyCalculator />
+           <CarbonFootprintCalculator />
         </div>
       </main>
     </>
