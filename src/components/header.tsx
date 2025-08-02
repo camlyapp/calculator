@@ -28,7 +28,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-3">
             <Landmark className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Camly
             </h1>
           </Link>
