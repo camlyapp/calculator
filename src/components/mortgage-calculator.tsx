@@ -30,9 +30,36 @@ import {
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
+
+const chartConfig = {
+  "Principal & Interest": {
+    label: "Principal & Interest",
+    color: "hsl(var(--primary))",
+  },
+  "Property Tax": {
+    label: "Property Tax",
+    color: "hsl(var(--chart-2))",
+  },
+  "Home Insurance": {
+    label: "Home Insurance",
+    color: "hsl(var(--chart-3))",
+  },
+  "HOA Dues": {
+    label: "HOA Dues",
+    color: "hsl(var(--chart-4))",
+  },
+  Principal: {
+    label: 'Principal',
+    color: 'hsl(var(--primary))',
+  },
+  Interest: {
+    label: 'Interest',
+    color: 'hsl(var(--accent))',
+  },
+};
 
 const MortgageCalculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -53,7 +80,7 @@ const MortgageCalculator = () => {
   });
 
   const onSubmit = (values: LoanFormValues) => {
-    const { loanAmount, interestRate, loanTerm, extraPayment, propertyTax = 0, homeInsurance = 0, hoaDues = 0 } = values;
+    const { loanAmount, interestRate, loanTerm, extraPayment = 0, propertyTax = 0, homeInsurance = 0, hoaDues = 0 } = values;
 
     const { schedule: calculatedSchedule, monthlyPayment: principalAndInterest } = generateAmortizationSchedule(loanAmount, interestRate, loanTerm, extraPayment);
 
@@ -98,7 +125,7 @@ const MortgageCalculator = () => {
         if (!yearlyData[year]) {
             yearlyData[year] = { Principal: 0, Interest: 0 };
         }
-        yearlyData[year].Principal += (row.principal - row.extraPayment);
+        yearlyData[year].Principal += (row.principal);
         yearlyData[year].Interest += row.interest;
     });
 
@@ -110,10 +137,10 @@ const MortgageCalculator = () => {
   };
 
   const pieChartData = result ? [
-    { name: 'Principal & Interest', value: result.principalAndInterest, fill: 'hsl(var(--primary))' },
-    { name: 'Property Tax', value: result.propertyTax, fill: 'hsl(var(--chart-2))' },
-    { name: 'Home Insurance', value: result.homeInsurance, fill: 'hsl(var(--chart-3))' },
-    { name: 'HOA Dues', value: result.hoaDues, fill: 'hsl(var(--chart-4))' },
+    { name: 'Principal & Interest', value: result.principalAndInterest, fill: 'var(--color-Principal & Interest)' },
+    { name: 'Property Tax', value: result.propertyTax, fill: 'var(--color-Property Tax)' },
+    { name: 'Home Insurance', value: result.homeInsurance, fill: 'var(--color-Home Insurance)' },
+    { name: 'HOA Dues', value: result.hoaDues, fill: 'var(--color-HOA Dues)' },
   ].filter(item => item.value > 0) : [];
 
   return (
@@ -235,16 +262,19 @@ const MortgageCalculator = () => {
                   <p className="text-4xl font-bold text-primary">
                     ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
-                   <div className="h-64 w-full">
-                      <ResponsiveContainer>
-                          <PieChart>
-                              <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                                {pieChartData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.fill} />)}
-                              </Pie>
-                              <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                          </PieChart>
-                      </ResponsiveContainer>
-                   </div>
+                    <ChartContainer
+                      config={chartConfig}
+                      className="mx-auto aspect-square h-[250px] w-full"
+                    >
+                      <PieChart>
+                        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                            {pieChartData.map((entry) => (
+                                <Cell key={`cell-${entry.name}`} fill={entry.fill} />
+                            ))}
+                        </Pie>
+                      </PieChart>
+                    </ChartContainer>
                 </CardContent>
               </Card>
 
@@ -305,18 +335,23 @@ const MortgageCalculator = () => {
                 <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan, excluding taxes, insurance, or HOA fees.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px] w-full">
-                    <ResponsiveContainer>
-                        <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                        <Bar dataKey="Principal" stackId="a" fill="hsl(var(--primary))" />
-                        <Bar dataKey="Interest" stackId="a" fill="hsl(var(--accent))" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+                    <BarChart accessibilityLayer data={chartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                        dataKey="name"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                    />
+                     <YAxis
+                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
+                     />
+                    <ChartTooltipContent indicator="dot" />
+                    <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
+                    <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
+                    </BarChart>
+                </ChartContainer>
               </CardContent>
             </Card>
 

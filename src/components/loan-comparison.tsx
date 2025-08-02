@@ -23,26 +23,26 @@ import { Input } from '@/components/ui/input';
 import { CalculationResult, LoanFormValues, LoanSchema } from '@/lib/types';
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import { Separator } from './ui/separator';
+import { format } from 'date-fns';
 
 interface LoanOptionProps {
   title: string;
-  onCalculate: (result: CalculationResult) => void;
+  onCalculate: (result: Partial<CalculationResult>) => void;
 }
 
 const LoanOption = ({ title, onCalculate }: LoanOptionProps) => {
-  const form = useForm<LoanFormValues>({
-    resolver: zodResolver(LoanSchema),
+  const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm'>>({
+    resolver: zodResolver(LoanSchema.pick({ loanAmount: true, interestRate: true, loanTerm: true})),
     defaultValues: {
       loanAmount: title === 'Loan A' ? 250000 : 250000,
       interestRate: title === 'Loan A' ? 6.5 : 6.0,
       loanTerm: title === 'Loan A' ? 30 : 15,
-      extraPayment: 0,
     },
   });
 
-  const onSubmit = (values: LoanFormValues) => {
-    const { loanAmount, interestRate, loanTerm, extraPayment } = values;
-    const { schedule, monthlyPayment } = generateAmortizationSchedule(loanAmount, interestRate, loanTerm, extraPayment);
+  const onSubmit = (values: Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm'>) => {
+    const { loanAmount, interestRate, loanTerm } = values;
+    const { schedule, monthlyPayment } = generateAmortizationSchedule(loanAmount, interestRate, loanTerm, 0);
     const totalInterest = schedule.reduce((acc, row) => acc + row.interest, 0);
     const totalPayment = loanAmount + totalInterest;
     
@@ -50,10 +50,10 @@ const LoanOption = ({ title, onCalculate }: LoanOptionProps) => {
     payoffDate.setMonth(payoffDate.getMonth() + schedule.length);
 
     onCalculate({
-      monthlyPayment,
+      principalAndInterest: monthlyPayment,
       totalInterest,
       totalPayment,
-      payoffDate: payoffDate.toLocaleDateString(),
+      payoffDate: format(payoffDate, 'PP'),
     });
   };
 
@@ -113,8 +113,8 @@ const LoanOption = ({ title, onCalculate }: LoanOptionProps) => {
 };
 
 const LoanComparison = () => {
-  const [resultA, setResultA] = useState<CalculationResult | null>(null);
-  const [resultB, setResultB] = useState<CalculationResult | null>(null);
+  const [resultA, setResultA] = useState<Partial<CalculationResult> | null>(null);
+  const [resultB, setResultB] = useState<Partial<CalculationResult> | null>(null);
 
   const formatCurrency = (value: number) =>
     `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -139,21 +139,21 @@ const LoanComparison = () => {
                 <Card>
                     <CardContent className="p-6 space-y-4">
                         <div className="grid grid-cols-3 items-center text-center">
-                            <p className="font-semibold text-lg">{resultA ? formatCurrency(resultA.monthlyPayment) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultA?.principalAndInterest ? formatCurrency(resultA.principalAndInterest) : '-'}</p>
                             <p className="text-muted-foreground">Monthly Payment</p>
-                            <p className="font-semibold text-lg">{resultB ? formatCurrency(resultB.monthlyPayment) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultB?.principalAndInterest ? formatCurrency(resultB.principalAndInterest) : '-'}</p>
                         </div>
                         <Separator />
                         <div className="grid grid-cols-3 items-center text-center">
-                            <p className="font-semibold text-lg">{resultA ? formatCurrency(resultA.totalInterest) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultA?.totalInterest ? formatCurrency(resultA.totalInterest) : '-'}</p>
                             <p className="text-muted-foreground">Total Interest</p>
-                            <p className="font-semibold text-lg">{resultB ? formatCurrency(resultB.totalInterest) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultB?.totalInterest ? formatCurrency(resultB.totalInterest) : '-'}</p>
                         </div>
                         <Separator />
                         <div className="grid grid-cols-3 items-center text-center">
-                            <p className="font-semibold text-lg">{resultA ? formatCurrency(resultA.totalPayment) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultA?.totalPayment ? formatCurrency(resultA.totalPayment) : '-'}</p>
                             <p className="text-muted-foreground">Total Paid</p>
-                            <p className="font-semibold text-lg">{resultB ? formatCurrency(resultB.totalPayment) : '-'}</p>
+                            <p className="font-semibold text-lg">{resultB?.totalPayment ? formatCurrency(resultB.totalPayment) : '-'}</p>
                         </div>
                         <Separator />
                         <div className="grid grid-cols-3 items-center text-center">
@@ -161,20 +161,20 @@ const LoanComparison = () => {
                             <p className="text-muted-foreground">Payoff Date</p>
                             <p className="font-semibold text-lg">{resultB ? resultB.payoffDate : '-'}</p>
                         </div>
-                         {resultA && resultB && (
+                         {resultA?.principalAndInterest && resultB?.principalAndInterest && (
                             <>
                             <Separator />
                             <div className="grid grid-cols-3 items-center text-center font-bold">
-                                {resultA.monthlyPayment < resultB.monthlyPayment ? (
-                                    <p className="text-accent">${(resultB.monthlyPayment - resultA.monthlyPayment).toFixed(2)}/mo less</p>
+                                {resultA.principalAndInterest < resultB.principalAndInterest ? (
+                                    <p className="text-accent">${(resultB.principalAndInterest - resultA.principalAndInterest).toFixed(2)}/mo less</p>
                                 ) : (
-                                    <p className="text-destructive">${(resultA.monthlyPayment - resultB.monthlyPayment).toFixed(2)}/mo more</p>
+                                    <p className="text-destructive">${(resultA.principalAndInterest - resultB.principalAndInterest).toFixed(2)}/mo more</p>
                                 )}
                                 <p className="text-muted-foreground">Difference</p>
-                                {resultB.monthlyPayment < resultA.monthlyPayment ? (
-                                     <p className="text-accent">${(resultA.monthlyPayment - resultB.monthlyPayment).toFixed(2)}/mo less</p>
+                                {resultB.principalAndInterest < resultA.principalAndInterest ? (
+                                     <p className="text-accent">${(resultA.principalAndInterest - resultB.principalAndInterest).toFixed(2)}/mo less</p>
                                 ) : (
-                                    <p className="text-destructive">${(resultB.monthlyPayment - resultA.monthlyPayment).toFixed(2)}/mo more</p>
+                                    <p className="text-destructive">${(resultB.principalAndInterest - resultA.principalAndInterest).toFixed(2)}/mo more</p>
                                 )}
                             </div>
                             </>
