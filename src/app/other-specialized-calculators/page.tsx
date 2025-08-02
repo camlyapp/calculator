@@ -3,6 +3,7 @@
 
 import BodySurfaceAreaCalculator from '@/components/body-surface-area-calculator';
 import CarbonFootprintCalculator from '@/components/carbon-footprint-calculator';
+import CookingConverter from '@/components/cooking-converter';
 import FuelEfficiencyCalculator from '@/components/fuel-efficiency-calculator';
 import GpaCalculator from '@/components/gpa-calculator';
 import Header from '@/components/header';
@@ -19,6 +20,7 @@ export default function OtherSpecializedCalculators() {
            <FuelEfficiencyCalculator />
            <CarbonFootprintCalculator />
            <BodySurfaceAreaCalculator />
+           <CookingConverter />
         </div>
       </main>
     </>
