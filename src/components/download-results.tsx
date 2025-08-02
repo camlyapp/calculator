@@ -104,12 +104,16 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
 
       if (format === 'pdf') {
         const imgData = canvas.toDataURL('image/png');
+        const margin = 20;
+        const pdfWidth = canvas.width + margin * 2;
+        const pdfHeight = canvas.height + margin * 2;
+        
         const pdf = new jsPDF({
           orientation: 'portrait',
           unit: 'px',
-          format: [canvas.width, canvas.height],
+          format: [pdfWidth, pdfHeight],
         });
-        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.addImage(imgData, 'PNG', margin, margin, canvas.width, canvas.height);
         pdf.save(`${fileName}.pdf`);
       } else {
         const image = canvas.toDataURL(`image/${format}`, 1.0);
