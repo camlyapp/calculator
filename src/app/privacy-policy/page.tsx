@@ -25,13 +25,13 @@ export default function PrivacyPolicy() {
         <div className="w-full max-w-4xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle className="text-3xl">Privacy Policy for LoanSage</CardTitle>
+              <CardTitle className="text-3xl">Privacy Policy for Camly</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4 text-muted-foreground prose prose-invert">
                 <p><strong>Last Updated: {lastUpdated}</strong></p>
                 
                 <h2 className="text-xl font-semibold text-foreground pt-4">Introduction</h2>
-                <p>Welcome to LoanSage ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. By using our service, you agree to the collection and use of information in accordance with this policy.</p>
+                <p>Welcome to Camly ("we," "our," or "us"). We are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our application. By using our service, you agree to the collection and use of information in accordance with this policy.</p>
 
                 <h2 className="text-xl font-semibold text-foreground pt-4">Information We Collect</h2>
                 <p>We may collect information about you in a variety of ways. The information we may collect via the Application includes:</p>

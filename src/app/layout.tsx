@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
@@ -5,15 +6,15 @@ import Footer from '@/components/footer';
 import { ThemeProvider } from '@/components/theme-provider';
 
 export const metadata: Metadata = {
-  title: 'LoanSage - Free Smart Financial & Loan Calculator',
+  title: 'Camly - Free Smart Financial & Loan Calculator',
   description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
   keywords: ['loan calculator', 'mortgage calculator', 'interest calculator', 'retirement planner', 'investment calculator', 'financial planning', 'emi calculator', 'ai finance'],
-  authors: [{ name: 'LoanSage Team' }],
+  authors: [{ name: 'Camly Team' }],
   openGraph: {
-    title: 'LoanSage - Free Smart Financial & Loan Calculator',
+    title: 'Camly - Free Smart Financial & Loan Calculator',
     description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
     url: 'https://loansage.ai',
-    siteName: 'LoanSage',
+    siteName: 'Camly',
     images: [
       {
         url: 'https://cdn.jsdelivr.net/gh/joshuabrown-io/LoanSage/public/og-image.png',
@@ -37,7 +38,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'LoanSage - Free Smart Financial & Loan Calculator',
+    title: 'Camly - Free Smart Financial & Loan Calculator',
     description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
     images: ['https://cdn.jsdelivr.net/gh/joshuabrown-io/LoanSage/public/og-image.png'],
   },

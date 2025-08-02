@@ -68,8 +68,8 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
         
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
             await navigator.share({
-                title: 'Loan Calculation Results',
-                text: 'Check out my financial calculation from LoanSage!',
+                title: 'Calculation Results',
+                text: 'Check out my financial calculation from Camly!',
                 files: [file],
             });
         } else {

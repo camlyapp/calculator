@@ -10,7 +10,7 @@ const Footer = () => {
           <Link href="/" className="flex items-center space-x-3">
             <Landmark className="h-8 w-8 text-primary" />
             <span className="text-xl font-bold text-foreground">
-              LoanSage
+              Camly
             </span>
           </Link>
 
@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
           
           <div className="text-center">
-             <p className="text-sm text-muted-foreground mt-4">&copy; {new Date().getFullYear()} LoanSage. All Rights Reserved.</p>
+             <p className="text-sm text-muted-foreground mt-4">&copy; {new Date().getFullYear()} Camly. All Rights Reserved.</p>
              <p className="text-xs text-muted-foreground/80 mt-1">Disclaimer: This tool is for informational purposes only. Consult with a financial professional before making any decisions.</p>
           </div>
         </div>

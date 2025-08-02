@@ -29,7 +29,7 @@ const Header = () => {
           <Link href="/" className="flex items-center space-x-3">
             <Landmark className="h-8 w-8 text-primary" />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-              LoanSage
+              Camly
             </h1>
           </Link>
           
