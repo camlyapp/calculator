@@ -28,7 +28,7 @@ const Footer = () => {
                 Date & Time
             </Link>
              <Link href="/other-specialized-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Other
+                Other Calculators
             </Link>
           </nav>
 
