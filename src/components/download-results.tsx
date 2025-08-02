@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useRef, useState } from 'react';
@@ -22,17 +23,41 @@ interface DownloadResultsProps {
 const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  
+  const generateCanvas = async () => {
+    if (!resultsRef.current) throw new Error("Result container not found.");
+
+    const elementToCapture = resultsRef.current;
+    const timestampElement = document.createElement('div');
+    const now = new Date();
+    timestampElement.innerText = `Generated on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
+    timestampElement.style.padding = '10px';
+    timestampElement.style.marginTop = '20px';
+    timestampElement.style.textAlign = 'center';
+    timestampElement.style.fontSize = '12px';
+    timestampElement.style.color = 'gray';
+
+    elementToCapture.appendChild(timestampElement);
+
+    try {
+        const canvas = await html2canvas(elementToCapture, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: null,
+        });
+        return canvas;
+    } finally {
+        elementToCapture.removeChild(timestampElement);
+    }
+  };
 
   const handleShare = async () => {
     if (!resultsRef.current) return;
     setIsProcessing(true);
 
     try {
-        const canvas = await html2canvas(resultsRef.current, {
-            useCORS: true,
-            scale: 2,
-            backgroundColor: null,
-        });
+        const canvas = await generateCanvas();
+        if (!canvas) throw new Error("Could not generate canvas.");
 
         const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
         if (!blob) {
@@ -74,11 +99,8 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
     setIsProcessing(true);
 
     try {
-      const canvas = await html2canvas(resultsRef.current, {
-        useCORS: true,
-        scale: 2,
-        backgroundColor: null, 
-      });
+      const canvas = await generateCanvas();
+       if (!canvas) throw new Error("Could not generate canvas.");
 
       if (format === 'pdf') {
         const imgData = canvas.toDataURL('image/png');
