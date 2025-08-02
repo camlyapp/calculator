@@ -11,10 +11,11 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
 const navLinks = [
-    { href: '/', label: 'Financial Calculators' },
+    { href: '/', label: 'Financial' },
     { href: '/math-science-calculators', label: 'Math & Science' },
     { href: '/date-time-calculators', label: 'Date & Time' },
-    { href: '/other-specialized-calculators', label: 'Other Calculators' },
+    { href: '/personal-health-calculators', label: 'Personal & Health' },
+    { href: '/other-specialized-calculators', label: 'Other' },
 ];
 
 const Header = () => {
@@ -41,25 +42,24 @@ const Header = () => {
                         <span className="sr-only">Open menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="right">
+                <SheetContent side="right" className="sm:max-w-xs">
                     <SheetHeader>
                         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                     </SheetHeader>
                      <nav className="flex flex-col space-y-4 mt-8">
                         {navLinks.map((link) => (
-                             <Link key={link.href} href={link.href} passHref>
-                                <SheetClose asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className={cn(
-                                            "w-full justify-start text-lg",
-                                            pathname === link.href && "text-primary bg-accent"
-                                        )}
-                                    >
-                                        {link.label}
-                                    </Button>
-                                </SheetClose>
-                             </Link>
+                            <SheetClose asChild key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className={cn(
+                                        "w-full justify-start text-lg p-2 rounded-md",
+                                        "hover:bg-accent hover:text-accent-foreground transition-colors",
+                                        pathname === link.href ? "text-primary bg-accent font-semibold" : "text-muted-foreground"
+                                    )}
+                                >
+                                    {link.label}
+                                </Link>
+                            </SheetClose>
                         ))}
                     </nav>
                 </SheetContent>

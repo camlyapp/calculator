@@ -16,7 +16,7 @@ const Footer = () => {
 
           <nav className="flex flex-wrap justify-center gap-x-6 gap-y-2">
              <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Home
+                Financial
             </Link>
              <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
@@ -27,8 +27,11 @@ const Footer = () => {
              <Link href="/date-time-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Date & Time
             </Link>
+              <Link href="/personal-health-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Personal & Health
+            </Link>
              <Link href="/other-specialized-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Other Calculators
+                Other
             </Link>
           </nav>
 
