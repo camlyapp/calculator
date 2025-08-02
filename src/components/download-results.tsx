@@ -9,8 +9,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from './ui/dropdown-menu';
-import { Download, FileImage, FileText, Loader2 } from 'lucide-react';
+import { Download, FileImage, FileText, Loader2, Share2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface DownloadResultsProps {
   resultsRef: React.RefObject<HTMLDivElement>;
@@ -18,11 +20,58 @@ interface DownloadResultsProps {
 }
 
 const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
-  const [isDownloading, setIsDownloading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    if (!resultsRef.current) return;
+    setIsProcessing(true);
+
+    try {
+        const canvas = await html2canvas(resultsRef.current, {
+            useCORS: true,
+            scale: 2,
+            backgroundColor: null,
+        });
+
+        const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) {
+            throw new Error("Could not create blob from canvas");
+        }
+
+        const file = new File([blob], `${fileName}.png`, { type: 'image/png' });
+        
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+                title: 'Loan Calculation Results',
+                text: 'Check out my financial calculation from LoanSage!',
+                files: [file],
+            });
+        } else {
+            toast({
+                title: "Share Not Supported",
+                description: "Your browser doesn't support sharing files. Try downloading the result instead, or use a mobile device.",
+                variant: 'destructive'
+            });
+        }
+    } catch (error: any) {
+        console.error('Error sharing:', error);
+        if (error.name !== 'AbortError') { // Don't show error if user cancels share
+            toast({
+                title: "Sharing Failed",
+                description: "Something went wrong while trying to share the results.",
+                variant: 'destructive'
+            });
+        }
+    } finally {
+        setIsProcessing(false);
+    }
+  };
+
 
   const handleDownload = async (format: 'png' | 'jpeg' | 'pdf') => {
     if (!resultsRef.current) return;
-    setIsDownloading(true);
+    setIsProcessing(true);
 
     try {
       const canvas = await html2canvas(resultsRef.current, {
@@ -51,25 +100,34 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
       }
     } catch (error) {
       console.error('Error generating download:', error);
-      // You might want to show a toast notification here
+      toast({
+        title: "Download Failed",
+        description: "An error occurred while generating the download.",
+        variant: "destructive",
+      });
     } finally {
-      setIsDownloading(false);
+      setIsProcessing(false);
     }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" disabled={isDownloading}>
-          {isDownloading ? (
+        <Button variant="outline" disabled={isProcessing}>
+          {isProcessing ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <Download className="mr-2 h-4 w-4" />
           )}
-          Download Results
+          Share / Download
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <DropdownMenuItem onClick={handleShare}>
+            <Share2 className="mr-2 h-4 w-4" />
+            Share Results
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => handleDownload('png')}>
           <FileImage className="mr-2 h-4 w-4" />
           Download as PNG
