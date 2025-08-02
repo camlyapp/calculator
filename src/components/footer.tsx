@@ -1,3 +1,4 @@
+
 import { Landmark, Twitter, Github, Linkedin } from 'lucide-react';
 import Link from 'next/link';
 
@@ -20,6 +21,9 @@ const Footer = () => {
                 </Link>
                 <Link href="/math-science-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Math & Science Calculators
+                </Link>
+                 <Link href="/date-time-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Date & Time Calculators
                 </Link>
              </div>
              <p className="text-sm text-muted-foreground mt-4">&copy; {new Date().getFullYear()} LoanSage. All Rights Reserved.</p>
