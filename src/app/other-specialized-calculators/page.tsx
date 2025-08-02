@@ -1,6 +1,7 @@
 
 "use client";
 
+import FuelEfficiencyCalculator from '@/components/fuel-efficiency-calculator';
 import GpaCalculator from '@/components/gpa-calculator';
 import Header from '@/components/header';
 import LoanEligibilityCalculator from '@/components/loan-eligibility-calculator';
@@ -13,6 +14,7 @@ export default function OtherSpecializedCalculators() {
         <div className="w-full max-w-5xl mx-auto space-y-8">
            <GpaCalculator />
            <LoanEligibilityCalculator />
+           <FuelEfficiencyCalculator />
         </div>
       </main>
     </>
