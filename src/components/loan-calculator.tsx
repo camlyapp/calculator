@@ -36,8 +36,6 @@ import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/compone
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
-import { Label } from './ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const chartConfig = {
   Principal: {
@@ -52,11 +50,14 @@ const chartConfig = {
 
 type Currency = 'USD' | 'INR';
 
-const LoanCalculator = () => {
+interface LoanCalculatorProps {
+    currency: Currency;
+}
+
+const LoanCalculator = ({ currency }: LoanCalculatorProps) => {
   const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>>({
@@ -145,18 +146,6 @@ const LoanCalculator = () => {
               <CardDescription>
                 Enter your loan details to see a payment breakdown and amortization schedule.
               </CardDescription>
-            </div>
-            <div className="mt-4 sm:mt-0">
-                <Label htmlFor="currency-select">Currency</Label>
-                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-                    <SelectTrigger id="currency-select" className="w-[180px]">
-                        <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="INR">INR (₹)</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
         </div>
       </CardHeader>

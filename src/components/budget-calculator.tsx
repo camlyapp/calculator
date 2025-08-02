@@ -28,8 +28,6 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Label } from './ui/label';
 
 const itemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -59,10 +57,12 @@ const chartConfig = {
     Other: { label: "Other", color: "hsl(var(--accent))" },
 } satisfies ChartConfig;
 
+interface BudgetCalculatorProps {
+    currency: Currency;
+}
 
-const BudgetCalculator = () => {
+const BudgetCalculator = ({ currency }: BudgetCalculatorProps) => {
   const [showResults, setShowResults] = useState(false);
-  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
@@ -109,7 +109,7 @@ const BudgetCalculator = () => {
   }, [expenseByCategory]);
   
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
@@ -130,18 +130,6 @@ const BudgetCalculator = () => {
                 <CardDescription>
                 Manage your monthly income and expenses to understand your cash flow.
                 </CardDescription>
-            </div>
-            <div className="mt-4 sm:mt-0">
-                <Label htmlFor="currency-select">Currency</Label>
-                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-                    <SelectTrigger id="currency-select" className="w-[180px]">
-                        <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="INR">INR (₹)</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
         </div>
       </CardHeader>
@@ -321,5 +309,3 @@ const BudgetCalculator = () => {
 };
 
 export default BudgetCalculator;
-
-    

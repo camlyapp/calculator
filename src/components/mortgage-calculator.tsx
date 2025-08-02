@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -31,11 +32,10 @@ import {
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
 
 const chartConfig = {
@@ -67,11 +67,14 @@ const chartConfig = {
 
 type Currency = 'USD' | 'INR';
 
-const MortgageCalculator = () => {
+interface MortgageCalculatorProps {
+    currency: Currency;
+}
+
+const MortgageCalculator = ({ currency }: MortgageCalculatorProps) => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
-  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<LoanFormValues>({
@@ -176,18 +179,6 @@ const MortgageCalculator = () => {
               <CardDescription>
                 Enter your loan details including taxes and insurance for a complete monthly payment estimate.
               </CardDescription>
-            </div>
-            <div className="mt-4 sm:mt-0">
-                <Label htmlFor="currency-select">Currency</Label>
-                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-                    <SelectTrigger id="currency-select" className="w-[180px]">
-                        <SelectValue placeholder="Select currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="USD">USD ($)</SelectItem>
-                        <SelectItem value="INR">INR (₹)</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
         </div>
       </CardHeader>
@@ -307,7 +298,7 @@ const MortgageCalculator = () => {
                       className="mx-auto aspect-square h-[250px] w-full"
                     >
                       <PieChart>
-                        <ChartTooltip content={<ChartTooltipContent hideLabel formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />} />
+                        <ChartTooltipContent hideLabel formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
                         <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                             {pieChartData.map((entry) => (
                                 <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
