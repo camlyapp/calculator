@@ -2,6 +2,7 @@ import BudgetCalculator from '@/components/budget-calculator';
 import CompoundInterestCalculator from '@/components/compound-interest-calculator';
 import CurrencyConverter from '@/components/currency-converter';
 import Header from '@/components/header';
+import IndianTaxCalculator from '@/components/indian-tax-calculator';
 import InvestmentCalculator from '@/components/investment-calculator';
 import LoanCalculator from '@/components/loan-calculator';
 import LoanComparison from '@/components/loan-comparison';
@@ -29,7 +30,8 @@ export default function Home() {
             <TabsTrigger value="retirement">Retirement</TabsTrigger>
             <TabsTrigger value="compound-interest">Compound Interest</TabsTrigger>
             <TabsTrigger value="savings">Savings</TabsTrigger>
-            <TabsTrigger value="tax">Tax</TabsTrigger>
+            <TabsTrigger value="tax">US Tax</TabsTrigger>
+            <TabsTrigger value="indian-tax">Indian Tax</TabsTrigger>
             <TabsTrigger value="currency">Currency</TabsTrigger>
             <TabsTrigger value="budget">Budget</TabsTrigger>
           </TabsList>
@@ -63,6 +65,9 @@ export default function Home() {
            <TabsContent value="tax">
             <TaxCalculator />
           </TabsContent>
+          <TabsContent value="indian-tax">
+            <IndianTaxCalculator />
+           </TabsContent>
            <TabsContent value="currency">
             <CurrencyConverter />
           </TabsContent>

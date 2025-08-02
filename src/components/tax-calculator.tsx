@@ -148,7 +148,7 @@ const TaxCalculator = () => {
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Federal Income Tax Calculator (2024)</CardTitle>
+        <CardTitle className="text-2xl">US Federal Income Tax Calculator (2024)</CardTitle>
         <CardDescription>
           Estimate your U.S. federal income tax liability. This is for informational purposes only.
         </CardDescription>
