@@ -74,30 +74,39 @@ const calculateIndianTaxFlow = ai.defineFlow(
     }
     
     let incomeTax = 0;
-    let remainingIncome = taxableIncome;
     const breakdown: { bracket: string, tax: number }[] = [];
 
+    let remainingTaxableIncome = taxableIncome;
     for (const slab of taxSlabs) {
-        if (remainingIncome <= 0) break;
-        const incomeInSlab = Math.min(remainingIncome, slab.to - slab.from + (slab.to === Infinity ? Infinity : 1));
-        const taxForSlab = incomeInSlab * slab.rate;
+        if (remainingTaxableIncome <= 0) break;
+
+        const slabRange = slab.to - slab.from + (slab.to === Infinity ? 0 : 1);
+        const incomeInSlab = Math.min(remainingTaxableIncome, slabRange);
         
+        if (incomeInSlab <= 0) continue;
+
+        const taxForSlab = incomeInSlab * slab.rate;
         incomeTax += taxForSlab;
-        remainingIncome -= incomeInSlab;
 
         if (taxForSlab > 0) {
+            const from = slab.from.toLocaleString('en-IN');
+            const to = slab.to === Infinity ? 'Above' : slab.to.toLocaleString('en-IN');
             breakdown.push({
-                bracket: `₹${slab.from.toLocaleString('en-IN')} - ₹${slab.to === Infinity ? 'Above' : slab.to.toLocaleString('en-IN')} @ ${(slab.rate * 100)}%`,
+                bracket: `₹${from} - ₹${to} @ ${(slab.rate * 100)}%`,
                 tax: taxForSlab,
             });
         }
+        remainingTaxableIncome -= incomeInSlab;
     }
     
     // Rebate under Section 87A
     if (taxRegime === 'new' && taxableIncome <= 700000) {
         incomeTax = 0;
+        breakdown.length = 0; // Clear breakdown if tax is zero
     } else if (taxRegime === 'old' && taxableIncome <= 500000) {
-        incomeTax = Math.max(0, incomeTax - 12500);
+        // Old regime rebate is up to 12,500. If tax is less, rebate is the tax amount.
+        const rebate = Math.min(incomeTax, 12500);
+        incomeTax -= rebate;
     }
     
     const cess = incomeTax * CESS_RATE;

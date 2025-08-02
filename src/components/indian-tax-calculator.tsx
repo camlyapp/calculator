@@ -19,6 +19,7 @@ import DownloadResults from './download-results';
 import { calculateIndianTaxAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Separator } from './ui/separator';
 
 const initialState = {
   message: undefined,
@@ -77,7 +78,7 @@ const IndianTaxCalculator = () => {
                     </div>
                     <div>
                         <Label htmlFor="deductions">Total Deductions (Old Regime, e.g., 80C) (₹)</Label>
-                        <Input id="deductions" name="deductions" type="number" placeholder="e.g., 150000" defaultValue="150000" required />
+                        <Input id="deductions" name="deductions" type="number" placeholder="e.g., 150000" defaultValue="150000" />
                         {state?.errors?.deductions && <p className="text-destructive text-sm mt-1">{state.errors.deductions[0]}</p>}
                     </div>
                  </div>
@@ -126,20 +127,30 @@ const IndianTaxCalculator = () => {
                 </CardHeader>
                 <CardContent>
                     <Table>
-                    <TableBody>
-                        <TableRow>
-                            <TableCell>Income Tax</TableCell>
-                            <TableCell className="text-right">{formatCurrency(result.incomeTax)}</TableCell>
-                        </TableRow>
-                        <TableRow>
-                            <TableCell>Health & Education Cess (4%)</TableCell>
-                            <TableCell className="text-right">{formatCurrency(result.cess)}</TableCell>
-                        </TableRow>
-                        <TableRow className="font-bold text-lg bg-muted/50">
-                            <TableCell>Total Tax Liability</TableCell>
-                            <TableCell className="text-right">{formatCurrency(result.totalTax)}</TableCell>
-                        </TableRow>
-                    </TableBody>
+                        <TableBody>
+                            {result.breakdown.length > 0 && (
+                                <>
+                                {result.breakdown.map((item, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>Tax on {item.bracket}</TableCell>
+                                        <TableCell className="text-right">{formatCurrency(item.tax)}</TableCell>
+                                    </TableRow>
+                                ))}
+                                <TableRow>
+                                     <TableCell>Subtotal (Income Tax)</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(result.incomeTax)}</TableCell>
+                                </TableRow>
+                                </>
+                            )}
+                            <TableRow>
+                                <TableCell>Health & Education Cess (4%)</TableCell>
+                                <TableCell className="text-right">{formatCurrency(result.cess)}</TableCell>
+                            </TableRow>
+                            <TableRow className="font-bold text-lg bg-muted/50">
+                                <TableCell>Total Tax Liability</TableCell>
+                                <TableCell className="text-right">{formatCurrency(result.totalTax)}</TableCell>
+                            </TableRow>
+                        </TableBody>
                     </Table>
                 </CardContent>
                 </Card>
