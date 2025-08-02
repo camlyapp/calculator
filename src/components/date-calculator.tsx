@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { intervalToDuration, format } from 'date-fns';
+import { intervalToDuration, format, isValid } from 'date-fns';
 
 const DateCalculator = () => {
     const [startDate, setStartDate] = useState<Date | undefined>(undefined);
@@ -49,9 +49,8 @@ const DateCalculator = () => {
                             selected={startDate}
                             onSelect={setStartDate}
                             className="rounded-md border"
-                            disabled={!startDate}
                         />
-                        <p className="text-sm text-muted-foreground">{startDate ? format(startDate, 'PPP') : 'Loading...'}</p>
+                        <p className="text-sm text-muted-foreground">{startDate && isValid(startDate) ? format(startDate, 'PPP') : 'Loading...'}</p>
                     </div>
                      <div className="space-y-2 flex flex-col items-center">
                         <Label>End Date</Label>
@@ -60,9 +59,8 @@ const DateCalculator = () => {
                             selected={endDate}
                             onSelect={setEndDate}
                             className="rounded-md border"
-                            disabled={!endDate}
                         />
-                         <p className="text-sm text-muted-foreground">{endDate ? format(endDate, 'PPP') : 'Loading...'}</p>
+                         <p className="text-sm text-muted-foreground">{endDate && isValid(endDate) ? format(endDate, 'PPP') : 'Loading...'}</p>
                     </div>
                 </div>
 
