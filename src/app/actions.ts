@@ -1,6 +1,7 @@
 'use server';
 
 import { suggestLoanOptimizations, type SuggestLoanOptimizationsInput, type SuggestLoanOptimizationsOutput } from '@/ai/flows/suggest-loan-optimizations';
+import { analyzeRefinance, type AnalyzeRefinanceInput, type AnalyzeRefinanceOutput } from '@/ai/flows/analyze-refinance';
 import { z } from 'zod';
 
 const SmartSuggestionsSchema = z.object({
@@ -41,5 +42,45 @@ export async function getSmartSuggestions(
     } catch (e) {
         console.error(e);
         return { error: 'An unexpected error occurred while fetching AI suggestions. Please try again later.' };
+    }
+}
+
+const RefinanceAnalysisSchema = z.object({
+    currentLoanAmount: z.coerce.number().min(1),
+    currentInterestRate: z.coerce.number().min(0),
+    currentLoanTerm: z.coerce.number().min(1),
+    loanAge: z.coerce.number().min(0),
+    newInterestRate: z.coerce.number().min(0),
+    newLoanTerm: z.coerce.number().min(1),
+    refinanceCosts: z.coerce.number().min(0),
+});
+
+export async function analyzeRefinanceAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; analysis?: AnalyzeRefinanceOutput; errors?: any, error?: string }> {
+    const validatedFields = RefinanceAnalysisSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your inputs.',
+        };
+    }
+
+    const { currentInterestRate, newInterestRate, ...rest } = validatedFields.data;
+
+    const aiInput: AnalyzeRefinanceInput = {
+        ...rest,
+        currentInterestRate: currentInterestRate / 100,
+        newInterestRate: newInterestRate / 100,
+    };
+
+    try {
+        const result = await analyzeRefinance(aiInput);
+        return { analysis: result, message: "Your refinancing analysis is ready." };
+    } catch(e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred while analyzing the refinance option. Please try again later.' };
     }
 }
