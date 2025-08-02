@@ -62,7 +62,7 @@ const LoanCalculator = () => {
 
     const newResult: Partial<CalculationResult> = {
         principalAndInterest,
-        totalMonthlyPayment: principalAndInterest,
+        totalMonthlyPayment: principalAndInterest + (extraPayment || 0),
         totalInterest,
         totalPayment,
         payoffDate: format(payoffDate, 'MMMM yyyy'),
@@ -88,7 +88,7 @@ const LoanCalculator = () => {
         if (!yearlyData[year]) {
             yearlyData[year] = { Principal: 0, Interest: 0 };
         }
-        yearlyData[year].Principal += (row.principal - row.extraPayment);
+        yearlyData[year].Principal += (row.principal);
         yearlyData[year].Interest += row.interest;
     });
 
@@ -179,6 +179,11 @@ const LoanCalculator = () => {
                         <p className="text-4xl font-bold text-primary">
                             ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </p>
+                        {form.getValues('extraPayment') > 0 && (
+                             <p className="text-sm text-muted-foreground mt-2">
+                                (${result.principalAndInterest?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} base + ${form.getValues('extraPayment').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} extra)
+                             </p>
+                        )}
                     </CardContent>
                 </Card>
 
@@ -254,3 +259,5 @@ const LoanCalculator = () => {
 };
 
 export default LoanCalculator;
+
+    
