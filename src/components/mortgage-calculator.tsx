@@ -31,10 +31,12 @@ import {
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, PieChart, Pie, Cell } from 'recharts';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Label } from './ui/label';
 
 const chartConfig = {
   "Principal & Interest": {
@@ -63,10 +65,13 @@ const chartConfig = {
   },
 };
 
+type Currency = 'USD' | 'INR';
+
 const MortgageCalculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<LoanFormValues>({
@@ -139,6 +144,22 @@ const MortgageCalculator = () => {
     })));
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
+  const formatCurrencyAxis = (value: number) => {
+      const symbol = currency === 'INR' ? '₹' : '$';
+      if (value >= 1000000) return `${symbol}${(value / 1000000).toFixed(1)}M`;
+      if (value >= 1000) return `${symbol}${(value / 1000).toFixed(0)}K`;
+      return `${symbol}${value}`;
+  }
+
   const pieChartData = result ? [
     { name: 'Principal & Interest', value: result.principalAndInterest, fill: 'var(--color-Principal & Interest)' },
     { name: 'Property Tax', value: result.propertyTax, fill: 'var(--color-Property Tax)' },
@@ -149,10 +170,26 @@ const MortgageCalculator = () => {
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Advanced Mortgage Calculator</CardTitle>
-        <CardDescription>
-          Enter your loan details including taxes and insurance for a complete monthly payment estimate.
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-2xl">Advanced Mortgage Calculator</CardTitle>
+              <CardDescription>
+                Enter your loan details including taxes and insurance for a complete monthly payment estimate.
+              </CardDescription>
+            </div>
+            <div className="mt-4 sm:mt-0">
+                <Label htmlFor="currency-select">Currency</Label>
+                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                    <SelectTrigger id="currency-select" className="w-[180px]">
+                        <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -163,7 +200,7 @@ const MortgageCalculator = () => {
                 name="loanAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loan Amount ($)</FormLabel>
+                    <FormLabel>Loan Amount</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 250000" {...field} />
                     </FormControl>
@@ -202,7 +239,7 @@ const MortgageCalculator = () => {
                 name="extraPayment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Extra Monthly Payment ($)</FormLabel>
+                    <FormLabel>Extra Monthly Payment</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 100" {...field} />
                     </FormControl>
@@ -215,7 +252,7 @@ const MortgageCalculator = () => {
                 name="propertyTax"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Annual Property Tax ($)</FormLabel>
+                    <FormLabel>Annual Property Tax</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 3000" {...field} />
                     </FormControl>
@@ -228,7 +265,7 @@ const MortgageCalculator = () => {
                 name="homeInsurance"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Annual Home Insurance ($)</FormLabel>
+                    <FormLabel>Annual Home Insurance</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 1500" {...field} />
                     </FormControl>
@@ -241,7 +278,7 @@ const MortgageCalculator = () => {
                 name="hoaDues"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Monthly HOA Dues ($)</FormLabel>
+                    <FormLabel>Monthly HOA Dues</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 200" {...field} />
                     </FormControl>
@@ -263,14 +300,14 @@ const MortgageCalculator = () => {
                 </CardHeader>
                 <CardContent className='flex flex-col items-center justify-center'>
                   <p className="text-4xl font-bold text-primary">
-                    ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {formatCurrency(result.totalMonthlyPayment)}
                   </p>
                     <ChartContainer
                       config={chartConfig}
                       className="mx-auto aspect-square h-[250px] w-full"
                     >
                       <PieChart>
-                        <ChartTooltip content={<ChartTooltipContent hideLabel />} />
+                        <ChartTooltip content={<ChartTooltipContent hideLabel formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />} />
                         <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                             {pieChartData.map((entry) => (
                                 <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
@@ -288,22 +325,22 @@ const MortgageCalculator = () => {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Principal & Interest</span>
-                    <span className="font-semibold text-lg">${result.principalAndInterest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="font-semibold text-lg">{formatCurrency(result.principalAndInterest)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Property Tax</span>
-                    <span className="font-semibold text-lg">${result.propertyTax.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="font-semibold text-lg">{formatCurrency(result.propertyTax)}</span>
                   </div>
                   <Separator />
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Home Insurance</span>
-                    <span className="font-semibold text-lg">${result.homeInsurance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="font-semibold text-lg">{formatCurrency(result.homeInsurance)}</span>
                   </div>
                    <Separator />
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">HOA Dues</span>
-                    <span className="font-semibold text-lg">${result.hoaDues.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <span className="font-semibold text-lg">{formatCurrency(result.hoaDues)}</span>
                   </div>
                    <Separator />
                   <div className="flex justify-between items-center pt-2">
@@ -322,7 +359,7 @@ const MortgageCalculator = () => {
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
                         <div>
                             <p className="font-semibold">Interest Saved</p>
-                            <p className="text-2xl font-bold text-accent">${result.interestSaved.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
                         </div>
                          <div>
                             <p className="font-semibold">Payoff Time Saved</p>
@@ -348,9 +385,9 @@ const MortgageCalculator = () => {
                         axisLine={false}
                     />
                      <YAxis
-                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
+                        tickFormatter={formatCurrencyAxis}
                      />
-                    <ChartTooltipContent indicator="dot" />
+                    <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
                     <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
                     <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
                     </BarChart>
@@ -358,7 +395,7 @@ const MortgageCalculator = () => {
               </CardContent>
             </Card>
 
-            <AmortizationTable data={amortizationSchedule} />
+            <AmortizationTable data={amortizationSchedule} currency={currency} />
           </div>
         )}
       </CardContent>
