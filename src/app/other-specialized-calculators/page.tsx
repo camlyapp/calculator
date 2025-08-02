@@ -3,15 +3,16 @@
 
 import GpaCalculator from '@/components/gpa-calculator';
 import Header from '@/components/header';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import LoanEligibilityCalculator from '@/components/loan-eligibility-calculator';
 
 export default function OtherSpecializedCalculators() {
   return (
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <div className="w-full max-w-4xl mx-auto">
+        <div className="w-full max-w-5xl mx-auto space-y-8">
            <GpaCalculator />
+           <LoanEligibilityCalculator />
         </div>
       </main>
     </>
