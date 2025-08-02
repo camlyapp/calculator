@@ -3,6 +3,7 @@
 import { suggestLoanOptimizations, type SuggestLoanOptimizationsInput, type SuggestLoanOptimizationsOutput } from '@/ai/flows/suggest-loan-optimizations';
 import { analyzeRefinance, type AnalyzeRefinanceInput, type AnalyzeRefinanceOutput } from '@/ai/flows/analyze-refinance';
 import { convertCurrency, type ConvertCurrencyInput, type ConvertCurrencyOutput } from '@/ai/flows/convert-currency';
+import { calculateIndianTax, type CalculateIndianTaxInput, type CalculateIndianTaxOutput } from '@/ai/flows/calculate-indian-tax';
 import { z } from 'zod';
 
 const SmartSuggestionsSchema = z.object({
@@ -115,5 +116,35 @@ export async function convertCurrencyAction(
     } catch(e) {
         console.error(e);
         return { error: 'An unexpected error occurred during currency conversion. Please try again later.' };
+    }
+}
+
+const IndianTaxSchema = z.object({
+  grossIncome: z.coerce.number().min(0, "Income must be a positive number."),
+  deductions: z.coerce.number().min(0, "Deductions cannot be negative.").default(0),
+  taxRegime: z.enum(['new', 'old']),
+});
+
+export async function calculateIndianTaxAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; result?: CalculateIndianTaxOutput; errors?: any, error?: string }> {
+    const validatedFields = IndianTaxSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your inputs.',
+        };
+    }
+
+    const aiInput: CalculateIndianTaxInput = validatedFields.data;
+
+    try {
+        const result = await calculateIndianTax(aiInput);
+        return { result, message: "Tax calculation successful." };
+    } catch(e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred during tax calculation. Please try again later.' };
     }
 }
