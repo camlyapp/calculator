@@ -13,7 +13,7 @@ export default function Home() {
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <Tabs defaultValue="calculator" className="w-full max-w-7xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mx-auto max-w-4xl h-auto">
-            <TabsTrigger value="calculator">EMI Calculator</TabsTrigger>
+            <TabsTrigger value="calculator">Loan Calculator</TabsTrigger>
             <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
             <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>
