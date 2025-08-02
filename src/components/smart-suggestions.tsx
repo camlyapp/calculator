@@ -68,7 +68,7 @@ const SmartSuggestions = () => {
       </CardHeader>
       <form action={formAction}>
         <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                     <Label htmlFor="loanAmount">Loan Amount ($)</Label>
                     <Input id="loanAmount" name="loanAmount" type="number" defaultValue="100000" required/>

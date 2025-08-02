@@ -5,7 +5,6 @@ import MortgageCalculator from '@/components/mortgage-calculator';
 import RefinanceAnalysis from '@/components/refinance-analysis';
 import SmartSuggestions from '@/components/smart-suggestions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Toaster } from '@/components/ui/toaster';
 
 export default function Home() {
   return (
@@ -13,12 +12,12 @@ export default function Home() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <Tabs defaultValue="calculator" className="w-full max-w-7xl mx-auto">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-5 mx-auto max-w-4xl">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-5 mx-auto max-w-4xl h-auto">
             <TabsTrigger value="calculator">Loan Calculator</TabsTrigger>
-            <TabsTrigger value="mortgage-calculator">Mortgage Calculator</TabsTrigger>
-            <TabsTrigger value="comparison">Loan Comparison</TabsTrigger>
+            <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
+            <TabsTrigger value="comparison">Comparison</TabsTrigger>
             <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>
-            <TabsTrigger value="refinance">Refinancing Analysis</TabsTrigger>
+            <TabsTrigger value="refinance">Refinancing</TabsTrigger>
           </TabsList>
           <TabsContent value="calculator">
             <LoanCalculator />
@@ -37,7 +36,6 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </main>
-      <Toaster />
     </div>
   );
 }
