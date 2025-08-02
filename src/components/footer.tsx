@@ -25,6 +25,9 @@ const Footer = () => {
                  <Link href="/date-time-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                     Date & Time Calculators
                 </Link>
+                 <Link href="/other-specialized-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Other Specialized Calculators
+                </Link>
              </div>
              <p className="text-sm text-muted-foreground mt-4">&copy; {new Date().getFullYear()} LoanSage. All Rights Reserved.</p>
              <p className="text-xs text-muted-foreground/80 mt-1">Disclaimer: This tool is for informational purposes only. Consult with a financial professional before making any decisions.</p>
