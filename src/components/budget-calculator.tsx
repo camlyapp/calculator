@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -23,7 +24,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Separator } from './ui/separator';
 
 const itemSchema = z.object({
@@ -42,15 +43,17 @@ const budgetSchema = z.object({
 type BudgetFormValues = z.infer<typeof budgetSchema>;
 
 const expenseCategories = ['Housing', 'Food', 'Transportation', 'Utilities', 'Entertainment', 'Health', 'Other'];
-const COLORS = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-2))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-5))',
-    'hsl(var(--primary))',
-    'hsl(var(--accent))',
-];
+
+const chartConfig = {
+    Housing: { label: "Housing", color: "hsl(var(--chart-1))" },
+    Food: { label: "Food", color: "hsl(var(--chart-2))" },
+    Transportation: { label: "Transportation", color: "hsl(var(--chart-3))" },
+    Utilities: { label: "Utilities", color: "hsl(var(--chart-4))" },
+    Entertainment: { label: "Entertainment", color: "hsl(var(--chart-5))" },
+    Health: { label: "Health", color: "hsl(var(--primary))" },
+    Other: { label: "Other", color: "hsl(var(--accent))" },
+} satisfies ChartConfig;
+
 
 const BudgetCalculator = () => {
   const form = useForm<BudgetFormValues>({
@@ -94,7 +97,7 @@ const BudgetCalculator = () => {
   }, [watchedValues]);
 
   const pieChartData = useMemo(() => {
-    return Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
+    return Object.entries(expenseByCategory).map(([name, value]) => ({ name, value, fill: `var(--color-${name})` }));
   }, [expenseByCategory]);
   
   const formatCurrency = (value: number) =>
@@ -245,17 +248,19 @@ const BudgetCalculator = () => {
                     </CardHeader>
                     <CardContent>
                        <div className="h-[300px] w-full">
-                           <ResponsiveContainer>
-                                <PieChart>
-                                    <Tooltip content={<ChartTooltipContent />} />
-                                    <Legend />
-                                    <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label>
-                                        {pieChartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                        ))}
-                                    </Pie>
-                                </PieChart>
-                           </ResponsiveContainer>
+                           <ChartContainer config={chartConfig}>
+                                <ResponsiveContainer>
+                                    <PieChart>
+                                        <Tooltip content={<ChartTooltipContent />} />
+                                        <Legend />
+                                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} labelLine={false} label>
+                                            {pieChartData.map((entry) => (
+                                                <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
+                                            ))}
+                                        </Pie>
+                                    </PieChart>
+                               </ResponsiveContainer>
+                           </ChartContainer>
                        </div>
                     </CardContent>
                 </Card>
