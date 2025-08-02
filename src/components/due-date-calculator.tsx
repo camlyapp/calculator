@@ -23,11 +23,13 @@ const DueDateCalculator = () => {
     const [daysAtUltrasound, setDaysAtUltrasound] = useState('0');
 
     const [result, setResult] = useState<{
-        dueDate: string;
+        dueDate: Date;
         gestationalAge: string;
         trimester: number;
-        conceptionDate: string;
+        conceptionDate: Date;
         methodUsed: string;
+        daysUntilDue: number;
+        milestones: { name: string; date: string; }[];
     } | null>(null);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -39,7 +41,7 @@ const DueDateCalculator = () => {
         if (!isMounted) return;
 
         let dueDate: Date | undefined;
-        let conceptionDateEst: Date | undefined;
+        let lmpFromConception: Date | undefined;
         let methodUsed = '';
 
         const dateForCalc = calculationMethod === 'ultrasound' ? ultrasoundDate : selectedDate;
@@ -51,43 +53,36 @@ const DueDateCalculator = () => {
         
         switch (calculationMethod) {
             case 'lmp':
-                // Naegele's rule: LMP + 280 days (40 weeks)
-                dueDate = addDays(dateForCalc, 280);
-                conceptionDateEst = addDays(dateForCalc, 14);
+                lmpFromConception = dateForCalc;
                 methodUsed = "Last Menstrual Period (Naegele's Rule)";
                 break;
             case 'conception':
-                dueDate = addDays(dateForCalc, 266);
-                conceptionDateEst = dateForCalc;
+                lmpFromConception = subDays(dateForCalc, 14);
                 methodUsed = "Date of Conception";
                 break;
             case 'ivf_day3':
-                // Transfer date + 266 days - 3 days
-                dueDate = addDays(dateForCalc, 263);
-                conceptionDateEst = subDays(dateForCalc, 3);
+                lmpFromConception = subDays(dateForCalc, 17); // 14 days for ovulation + 3 days embryo
                 methodUsed = "IVF Transfer (3-Day Embryo)";
                 break;
              case 'ivf_day5':
-                // Transfer date + 266 days - 5 days
-                dueDate = addDays(dateForCalc, 261);
-                conceptionDateEst = subDays(dateForCalc, 5);
+                lmpFromConception = subDays(dateForCalc, 19); // 14 days for ovulation + 5 days embryo
                 methodUsed = "IVF Transfer (5-Day Embryo)";
                 break;
             case 'ultrasound':
                 const weeks = parseInt(weeksAtUltrasound) || 0;
                 const days = parseInt(daysAtUltrasound) || 0;
                 const totalDaysGestationAtUltrasound = weeks * 7 + days;
-                // Find estimated LMP from ultrasound
-                const estLmp = subDays(dateForCalc, totalDaysGestationAtUltrasound);
-                dueDate = addDays(estLmp, 280);
-                conceptionDateEst = addDays(estLmp, 14);
+                lmpFromConception = subDays(dateForCalc, totalDaysGestationAtUltrasound);
                 methodUsed = "Ultrasound Date";
                 break;
         }
+        
+        dueDate = addDays(lmpFromConception, 280);
+        const conceptionDate = addDays(lmpFromConception, 14);
 
-        if (dueDate && conceptionDateEst && isValid(dueDate) && isValid(conceptionDateEst)) {
+        if (dueDate && conceptionDate && isValid(dueDate) && isValid(conceptionDate)) {
             const today = new Date();
-            const gestationalDays = differenceInDays(today, conceptionDateEst) + 14;
+            const gestationalDays = differenceInDays(today, lmpFromConception);
 
             if (gestationalDays < 0 || gestationalDays > 300) {
                 setResult(null);
@@ -101,12 +96,20 @@ const DueDateCalculator = () => {
             if (weeks >= 28) trimester = 3;
             else if (weeks >= 14) trimester = 2;
             
+            const milestones = [
+                { name: "End of 1st Trimester", date: format(addDays(lmpFromConception, 14 * 7), 'PPP')},
+                { name: "End of 2nd Trimester", date: format(addDays(lmpFromConception, 28 * 7), 'PPP')},
+                { name: "Estimated Viability", date: format(addDays(lmpFromConception, 24 * 7), 'PPP')},
+            ];
+
             setResult({
-                dueDate: format(dueDate, 'PPP'),
+                dueDate,
                 gestationalAge: `${weeks} weeks, ${days} days`,
                 trimester,
-                conceptionDate: format(conceptionDateEst, 'PPP'),
+                conceptionDate,
                 methodUsed,
+                daysUntilDue: differenceInDays(dueDate, today),
+                milestones,
             });
         } else {
             setResult(null);
@@ -136,7 +139,7 @@ const DueDateCalculator = () => {
         <Card className="w-full shadow-lg">
             <CardHeader>
                 <CardTitle className="text-2xl">Pregnancy Due Date Calculator</CardTitle>
-                <CardDescription>Estimate your due date with various methods and rules.</CardDescription>
+                <CardDescription>Estimate your due date with various methods and get key pregnancy milestones.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-8">
@@ -194,15 +197,23 @@ const DueDateCalculator = () => {
                     </div>
                     
                     {result && (
-                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t">
-                            <div className="text-center space-y-8">
-                                <div>
-                                    <Label className="text-lg text-muted-foreground">Estimated Due Date</Label>
-                                    <p className="text-4xl font-bold text-primary">{result.dueDate}</p>
-                                    <p className="text-xs text-muted-foreground">Based on {result.methodUsed}</p>
-                                </div>
-                                <Separator />
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t space-y-6">
+                            <Card>
+                                <CardHeader className="text-center">
+                                    <CardTitle className="text-primary">Estimated Due Date</CardTitle>
+                                </CardHeader>
+                                <CardContent className="text-center">
+                                    <p className="text-4xl font-bold">{format(result.dueDate, 'PPP')}</p>
+                                    <p className="text-lg text-accent">{result.daysUntilDue} days to go!</p>
+                                    <p className="text-xs text-muted-foreground mt-2">Based on {result.methodUsed}</p>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Current Status</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
                                      <div className="p-4 bg-muted rounded-lg">
                                         <p className="text-sm text-muted-foreground">Gestational Age</p>
                                         <p className="font-bold text-lg">{result.gestationalAge}</p>
@@ -211,13 +222,26 @@ const DueDateCalculator = () => {
                                         <p className="text-sm text-muted-foreground">Current Trimester</p>
                                         <p className="font-bold text-lg">{result.trimester}</p>
                                     </div>
-                                </div>
-                                
-                                <div className="p-4 bg-accent/20 rounded-lg">
-                                    <Label className="text-accent-foreground">Estimated Conception Date</Label>
-                                    <p className="text-xl font-bold text-accent">{result.conceptionDate}</p>
-                                </div>
-                            </div>
+                                      <div className="p-4 bg-muted rounded-lg col-span-full">
+                                        <p className="text-sm text-muted-foreground">Estimated Conception Date</p>
+                                        <p className="font-bold text-lg">{format(result.conceptionDate, 'PPP')}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Key Milestones</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                    {result.milestones.map(m => (
+                                        <div key={m.name} className="flex justify-between text-sm p-2 bg-muted rounded-lg">
+                                            <span>{m.name}</span>
+                                            <span className="font-semibold">{m.date}</span>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
                 </div>
