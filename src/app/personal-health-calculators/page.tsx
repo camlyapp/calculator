@@ -10,6 +10,7 @@ import Header from '@/components/header';
 import HeartRateCalculator from '@/components/heart-rate-calculator';
 import IdealWeightCalculator from '@/components/ideal-weight-calculator';
 import OvulationCalculator from '@/components/ovulation-calculator';
+import BodyFatCalculator from '@/components/body-fat-calculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function PersonalHealthCalculators() {
@@ -18,12 +19,13 @@ export default function PersonalHealthCalculators() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
         <Tabs defaultValue="age" className="w-full max-w-5xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 h-auto">
                 <TabsTrigger value="age">Age</TabsTrigger>
                 <TabsTrigger value="due-date">Due Date</TabsTrigger>
                 <TabsTrigger value="ovulation">Ovulation</TabsTrigger>
                 <TabsTrigger value="bmi">BMI</TabsTrigger>
                 <TabsTrigger value="bmr">BMR</TabsTrigger>
+                <TabsTrigger value="body-fat">Body Fat</TabsTrigger>
                 <TabsTrigger value="calorie">Calorie</TabsTrigger>
                 <TabsTrigger value="heart-rate">Heart Rate</TabsTrigger>
                 <TabsTrigger value="ideal-weight">Ideal Weight</TabsTrigger>
@@ -42,6 +44,9 @@ export default function PersonalHealthCalculators() {
             </TabsContent>
             <TabsContent value="bmr">
                 <BmrCalculator />
+            </TabsContent>
+            <TabsContent value="body-fat">
+                <BodyFatCalculator />
             </TabsContent>
             <TabsContent value="calorie">
                 <CalorieCalculator />
