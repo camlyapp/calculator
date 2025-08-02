@@ -1,4 +1,5 @@
 import { Landmark } from 'lucide-react';
+import { ThemeToggle } from './theme-toggle';
 
 const Header = () => {
   return (
@@ -11,6 +12,7 @@ const Header = () => {
               LoanSage
             </h1>
           </div>
+          <ThemeToggle />
         </div>
       </div>
     </header>
