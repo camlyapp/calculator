@@ -6,6 +6,7 @@ import GraphingCalculator from '@/components/graphing-calculator';
 import FractionCalculator from '@/components/fraction-calculator';
 import PercentageCalculator from '@/components/percentage-calculator';
 import AlgebraCalculator from '@/components/algebra-calculator';
+import GeometryCalculator from '@/components/geometry-calculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function MathScienceCalculators() {
@@ -14,13 +15,14 @@ export default function MathScienceCalculators() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
         <Tabs defaultValue="basic" className="w-full max-w-2xl mx-auto">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 h-auto">
             <TabsTrigger value="basic">Basic</TabsTrigger>
             <TabsTrigger value="scientific">Scientific</TabsTrigger>
             <TabsTrigger value="graphing">Graphing</TabsTrigger>
             <TabsTrigger value="fraction">Fraction</TabsTrigger>
             <TabsTrigger value="percentage">Percentage</TabsTrigger>
             <TabsTrigger value="algebra">Algebra</TabsTrigger>
+            <TabsTrigger value="geometry">Geometry</TabsTrigger>
           </TabsList>
           <TabsContent value="basic">
             <div className="flex justify-center">
@@ -48,6 +50,11 @@ export default function MathScienceCalculators() {
           <TabsContent value="algebra">
             <div className="flex justify-center">
               <AlgebraCalculator />
+            </div>
+          </TabsContent>
+          <TabsContent value="geometry">
+            <div className="flex justify-center">
+              <GeometryCalculator />
             </div>
           </TabsContent>
         </Tabs>
