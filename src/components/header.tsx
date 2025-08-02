@@ -42,7 +42,7 @@ const Header = () => {
                         <span className="sr-only">Open menu</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="sm:max-w-xs">
+                <SheetContent side="right" className="w-auto">
                     <SheetHeader>
                         <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                     </SheetHeader>
