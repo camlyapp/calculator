@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import DownloadResults from './download-results';
+import { Separator } from './ui/separator';
 
 const gstSchema = z.object({
   amount: z.coerce.number().min(0, "Amount must be a positive number."),
@@ -37,6 +38,8 @@ type GstFormValues = z.infer<typeof gstSchema>;
 interface GstResult {
     baseAmount: number;
     gstAmount: number;
+    cgst: number;
+    sgst: number;
     totalAmount: number;
 }
 
@@ -71,7 +74,10 @@ const GstCalculator = () => {
         gstAmount = totalAmount - baseAmount;
     }
 
-    setResult({ baseAmount, gstAmount, totalAmount });
+    const cgst = gstAmount / 2;
+    const sgst = gstAmount / 2;
+
+    setResult({ baseAmount, gstAmount, cgst, sgst, totalAmount });
   };
   
   const formatCurrency = (value: number) =>
@@ -172,18 +178,31 @@ const GstCalculator = () => {
               <CardHeader>
                 <CardTitle>GST Calculation Results</CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div>
-                  <p className="text-muted-foreground">{amountType === 'exclusive' ? 'Base Amount' : 'Pre-GST Amount'}</p>
-                  <p className="text-3xl font-bold">{formatCurrency(result.baseAmount)}</p>
+              <CardContent className="space-y-4">
+                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p className="text-muted-foreground">{amountType === 'exclusive' ? 'Base Amount' : 'Pre-GST Amount'}</p>
+                        <p className="text-3xl font-bold">{formatCurrency(result.baseAmount)}</p>
+                    </div>
+                     <div>
+                        <p className="text-muted-foreground">Total GST</p>
+                        <p className="text-3xl font-bold text-accent">{formatCurrency(result.gstAmount)}</p>
+                    </div>
+                     <div>
+                        <p className="text-muted-foreground">{amountType === 'exclusive' ? 'Total Amount' : 'Post-GST Amount'}</p>
+                        <p className="text-3xl font-bold text-primary">{formatCurrency(result.totalAmount)}</p>
+                    </div>
                 </div>
-                <div>
-                  <p className="text-muted-foreground">GST Amount</p>
-                  <p className="text-3xl font-bold text-accent">{formatCurrency(result.gstAmount)}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">{amountType === 'exclusive' ? 'Total Amount' : 'Post-GST Amount'}</p>
-                  <p className="text-3xl font-bold text-primary">{formatCurrency(result.totalAmount)}</p>
+                <Separator />
+                <div className="grid grid-cols-2 gap-4 text-center">
+                     <div>
+                        <p className="text-muted-foreground">CGST</p>
+                        <p className="text-2xl font-bold">{formatCurrency(result.cgst)}</p>
+                    </div>
+                     <div>
+                        <p className="text-muted-foreground">SGST</p>
+                        <p className="text-2xl font-bold">{formatCurrency(result.sgst)}</p>
+                    </div>
                 </div>
               </CardContent>
             </Card>
