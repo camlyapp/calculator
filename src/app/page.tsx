@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -46,7 +45,7 @@ export default function Home() {
             </div>
           </div>
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
-            <TabsTrigger value="calculator">Advanced EMI Calculator</TabsTrigger>
+            <TabsTrigger value="calculator">EMI Calculator</TabsTrigger>
             <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
             <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>

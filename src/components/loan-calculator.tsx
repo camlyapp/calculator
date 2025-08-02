@@ -142,7 +142,7 @@ const LoanCalculator = ({ currency }: LoanCalculatorProps) => {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-2xl">Advanced EMI Calculator</CardTitle>
+              <CardTitle className="text-2xl">EMI Calculator</CardTitle>
               <CardDescription>
                 Enter your loan details to see a payment breakdown and amortization schedule.
               </CardDescription>
