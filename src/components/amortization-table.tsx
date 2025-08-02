@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -18,13 +19,23 @@ import { AmortizationRow } from '@/lib/types';
 
 interface AmortizationTableProps {
   data: AmortizationRow[];
+  currency: 'USD' | 'INR';
 }
 
-const AmortizationTable = ({ data }: AmortizationTableProps) => {
+const AmortizationTable = ({ data, currency }: AmortizationTableProps) => {
   if (!data || data.length === 0) {
     return null;
   }
   const showExtraPayment = data.some(row => row.extraPayment > 0);
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
 
   return (
     <Card>
@@ -51,11 +62,11 @@ const AmortizationTable = ({ data }: AmortizationTableProps) => {
               {data.map((row) => (
                 <TableRow key={row.month}>
                   <TableCell>{row.month}</TableCell>
-                  <TableCell>${row.principal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                  <TableCell>${row.interest.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                  {showExtraPayment && <TableCell>${row.extraPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>}
-                  <TableCell>${row.totalPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                  <TableCell>${row.remainingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
+                  <TableCell>{formatCurrency(row.principal)}</TableCell>
+                  <TableCell>{formatCurrency(row.interest)}</TableCell>
+                  {showExtraPayment && <TableCell>{formatCurrency(row.extraPayment)}</TableCell>}
+                  <TableCell>{formatCurrency(row.totalPayment)}</TableCell>
+                  <TableCell>{formatCurrency(row.remainingBalance)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

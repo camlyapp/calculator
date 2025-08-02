@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -35,6 +36,8 @@ import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/compone
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { Label } from './ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const chartConfig = {
   Principal: {
@@ -47,11 +50,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
+type Currency = 'USD' | 'INR';
 
 const LoanCalculator = () => {
   const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [currency, setCurrency] = useState<Currency>('USD');
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>>({
@@ -114,13 +119,46 @@ const LoanCalculator = () => {
     })));
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
+
+  const formatCurrencyAxis = (value: number) => {
+      const symbol = currency === 'INR' ? '₹' : '$';
+      if (value >= 1000000) return `${symbol}${(value / 1000000).toFixed(1)}M`;
+      if (value >= 1000) return `${symbol}${(value / 1000).toFixed(0)}K`;
+      return `${symbol}${value}`;
+  }
+
+
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl">Advanced EMI Calculator</CardTitle>
-        <CardDescription>
-          Enter your loan details to see a payment breakdown and amortization schedule.
-        </CardDescription>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-2xl">Advanced EMI Calculator</CardTitle>
+              <CardDescription>
+                Enter your loan details to see a payment breakdown and amortization schedule.
+              </CardDescription>
+            </div>
+            <div className="mt-4 sm:mt-0">
+                <Label htmlFor="currency-select">Currency</Label>
+                 <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                    <SelectTrigger id="currency-select" className="w-[180px]">
+                        <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="USD">USD ($)</SelectItem>
+                        <SelectItem value="INR">INR (₹)</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -131,7 +169,7 @@ const LoanCalculator = () => {
                 name="loanAmount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loan Amount ($)</FormLabel>
+                    <FormLabel>Loan Amount</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 100000" {...field} />
                     </FormControl>
@@ -170,7 +208,7 @@ const LoanCalculator = () => {
                 name="extraPayment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Extra Monthly Payment ($)</FormLabel>
+                    <FormLabel>Extra Monthly Payment</FormLabel>
                     <FormControl>
                       <Input type="number" placeholder="e.g., 100" {...field} />
                     </FormControl>
@@ -192,11 +230,11 @@ const LoanCalculator = () => {
                     </CardHeader>
                     <CardContent className='flex flex-col items-center justify-center'>
                         <p className="text-4xl font-bold text-primary">
-                            ${result.totalMonthlyPayment.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {formatCurrency(result.totalMonthlyPayment)}
                         </p>
-                        {form.getValues('extraPayment') > 0 && (
+                        {form.getValues('extraPayment') > 0 && result.principalAndInterest && (
                              <p className="text-sm text-muted-foreground mt-2">
-                                (${result.principalAndInterest?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} base + ${form.getValues('extraPayment').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} extra)
+                                ({formatCurrency(result.principalAndInterest)} base + {formatCurrency(form.getValues('extraPayment'))} extra)
                              </p>
                         )}
                     </CardContent>
@@ -209,12 +247,12 @@ const LoanCalculator = () => {
                     <CardContent className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total Principal</span>
-                        <span className="font-semibold text-lg">${form.getValues('loanAmount').toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="font-semibold text-lg">{formatCurrency(form.getValues('loanAmount'))}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Total Interest</span>
-                        <span className="font-semibold text-lg">${result.totalInterest?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <span className="font-semibold text-lg">{formatCurrency(result.totalInterest!)}</span>
                       </div>
                       <Separator />
                       <div className="flex justify-between items-center pt-2">
@@ -234,7 +272,7 @@ const LoanCalculator = () => {
                     <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
                         <div>
                             <p className="font-semibold">Interest Saved</p>
-                            <p className="text-2xl font-bold text-accent">${result.interestSaved.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                            <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
                         </div>
                          <div>
                             <p className="font-semibold">Payoff Time Saved</p>
@@ -260,9 +298,9 @@ const LoanCalculator = () => {
                       axisLine={false}
                     />
                      <YAxis
-                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
+                        tickFormatter={formatCurrencyAxis}
                      />
-                    <ChartTooltipContent indicator="dot" />
+                    <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
                     <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
                     <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
                   </BarChart>
@@ -270,7 +308,7 @@ const LoanCalculator = () => {
               </CardContent>
             </Card>
 
-            <AmortizationTable data={amortizationSchedule} />
+            <AmortizationTable data={amortizationSchedule} currency={currency} />
           </div>
         )}
       </CardContent>
