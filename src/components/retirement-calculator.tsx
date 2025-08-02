@@ -47,7 +47,7 @@ interface RetirementResult {
   requiredNestEgg: number;
   projectedSavings: number;
   shortfallOrSurplus: number;
-  yearlyData: { year: number; balance: number; }[];
+  yearlyData: { year: number; age: number; balance: number; }[];
 }
 
 const RetirementCalculator = () => {
@@ -94,14 +94,16 @@ const RetirementCalculator = () => {
     const monthlyPreRetirementRate = preRetirementAnnualRate / 100 / 12;
     
     let projectedSavings = currentSavings;
-    const yearlyData: { year: number; balance: number; }[] = [{ year: 0, balance: currentSavings }];
+    const yearlyData: { year: number; age: number; balance: number; }[] = [{ year: currentAge, age: currentAge, balance: currentSavings }];
 
     for (let i = 1; i <= monthsToRetirement; i++) {
         projectedSavings += monthlyContribution;
         projectedSavings *= (1 + monthlyPreRetirementRate);
         if (i % 12 === 0) {
+            const age = currentAge + Math.ceil(i/12);
             yearlyData.push({
-                year: Math.ceil(i/12),
+                year: age,
+                age: age,
                 balance: parseFloat(projectedSavings.toFixed(2))
             });
         }
@@ -130,14 +132,110 @@ const RetirementCalculator = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <FormField control={form.control} name="currentAge" render={({ field }) => ( <FormItem> <FormLabel>Current Age</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="retirementAge" render={({ field }) => ( <FormItem> <FormLabel>Retirement Age</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="currentSavings" render={({ field }) => ( <FormItem> <FormLabel>Current Savings ($)</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="monthlyContribution" render={({ field }) => ( <FormItem> <FormLabel>Monthly Contribution ($)</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="preRetirementAnnualRate" render={({ field }) => ( <FormItem> <FormLabel>Pre-Retirement Return (%)</FormLabel> <FormControl> <Input type="number" step="0.1" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="postRetirementAnnualRate" render={({ field }) => ( <FormItem> <FormLabel>Post-Retirement Return (%)</FormLabel> <FormControl> <Input type="number" step="0.1" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="desiredMonthlyIncome" render={({ field }) => ( <FormItem> <FormLabel>Desired Monthly Income ($)</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
-                <FormField control={form.control} name="lifeExpectancy" render={({ field }) => ( <FormItem> <FormLabel>Life Expectancy (Age)</FormLabel> <FormControl> <Input type="number" {...field} /> </FormControl> <FormMessage /> </FormItem> )} />
+                <FormField
+                    control={form.control}
+                    name="currentAge"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Current Age</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="retirementAge"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Retirement Age</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="currentSavings"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Current Savings ($)</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="monthlyContribution"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Monthly Contribution ($)</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="preRetirementAnnualRate"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Pre-Retirement Return (%)</FormLabel>
+                        <FormControl>
+                        <Input type="number" step="0.1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="postRetirementAnnualRate"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Post-Retirement Return (%)</FormLabel>
+                        <FormControl>
+                        <Input type="number" step="0.1" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="desiredMonthlyIncome"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Desired Monthly Income ($)</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="lifeExpectancy"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Life Expectancy (Age)</FormLabel>
+                        <FormControl>
+                        <Input type="number" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
             </div>
             <Button type="submit" size="lg" className="w-full md:w-auto">Calculate</Button>
           </form>
@@ -176,7 +274,7 @@ const RetirementCalculator = () => {
                     <ResponsiveContainer>
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="year" name="Years from Now" />
+                        <XAxis dataKey="age" name="Age" />
                         <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
                         <Tooltip content={<ChartTooltipContent />} />
                         <Legend />
