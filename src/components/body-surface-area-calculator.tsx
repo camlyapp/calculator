@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Separator } from './ui/separator';
+import { FormItem } from './ui/form';
 
 // Du Bois formula: BSA (m²) = 0.007184 × W(kg)^0.425 × H(cm)^0.725
 const duBoisFormula = (weightKg: number, heightCm: number): number => {
