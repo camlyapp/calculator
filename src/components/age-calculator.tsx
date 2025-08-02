@@ -6,6 +6,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { intervalToDuration, format, isValid, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
+import { Separator } from './ui/separator';
+
+const getZodiacSign = (date: Date) => {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+
+    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
+    if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Pisces";
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Aries";
+    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Taurus";
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gemini";
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Cancer";
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leo";
+    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgo";
+    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Scorpio";
+    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittarius";
+    return "Capricorn"; // Default
+};
+
 
 const AgeCalculator = () => {
     const [birthDate, setBirthDate] = useState<Date | undefined>(new Date('1990-01-01'));
@@ -13,6 +33,7 @@ const AgeCalculator = () => {
         age: { years: number, months: number, days: number };
         summary: { years: number, months: number, weeks: number, days: number, hours: number, minutes: number };
         nextBirthday: { days: number, month: string };
+        birthDetails: { dayOfWeek: string, zodiacSign: string };
     } | null>(null);
     const [isMounted, setIsMounted] = useState(false);
 
@@ -49,6 +70,10 @@ const AgeCalculator = () => {
                 nextBirthday: {
                     days: daysToNextBirthday,
                     month: format(nextBirthdayDate, 'MMMM do')
+                },
+                birthDetails: {
+                    dayOfWeek: format(birthDate, 'EEEE'),
+                    zodiacSign: getZodiacSign(birthDate),
                 }
             });
         } else {
@@ -106,37 +131,52 @@ const AgeCalculator = () => {
                             </div>
                         </div>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Age Summary</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid grid-cols-2 md:grid-cols-3 gap-4 text-center">
-                                <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.years.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Years</p>
-                                </div>
-                                 <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.months.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Months</p>
-                                </div>
-                                 <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.weeks.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Weeks</p>
-                                </div>
-                                 <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.days.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Days</p>
-                                </div>
-                                <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.hours.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Hours</p>
-                                </div>
-                                <div className="p-2 bg-muted rounded-lg">
-                                    <p className="font-bold text-lg">{result.summary.minutes.toLocaleString()}</p>
-                                    <p className="text-sm text-muted-foreground">Minutes</p>
-                                </div>
-                            </CardContent>
-                        </Card>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                             <Card>
+                                <CardHeader>
+                                    <CardTitle>Birth Details</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-4 text-center">
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="text-sm text-muted-foreground">Born on a</p>
+                                        <p className="font-bold text-lg">{result.birthDetails.dayOfWeek}</p>
+                                    </div>
+                                    <div className="p-2 bg-muted rounded-lg">
+                                         <p className="text-sm text-muted-foreground">Your Zodiac Sign</p>
+                                        <p className="font-bold text-lg">{result.birthDetails.zodiacSign}</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Age Summary</CardTitle>
+                                </CardHeader>
+                                <CardContent className="grid grid-cols-2 gap-4 text-center">
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="font-bold text-lg">{result.summary.months.toLocaleString()}</p>
+                                        <p className="text-sm text-muted-foreground">Months</p>
+                                    </div>
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="font-bold text-lg">{result.summary.weeks.toLocaleString()}</p>
+                                        <p className="text-sm text-muted-foreground">Weeks</p>
+                                    </div>
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="font-bold text-lg">{result.summary.days.toLocaleString()}</p>
+                                        <p className="text-sm text-muted-foreground">Days</p>
+                                    </div>
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="font-bold text-lg">{result.summary.hours.toLocaleString()}</p>
+                                        <p className="text-sm text-muted-foreground">Hours</p>
+                                    </div>
+                                    <div className="p-2 bg-muted rounded-lg col-span-2">
+                                        <p className="font-bold text-lg">{result.summary.minutes.toLocaleString()}</p>
+                                        <p className="text-sm text-muted-foreground">Minutes</p>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                        
                          <div className="text-center bg-accent/20 p-4 rounded-lg">
                              <Label className="text-lg text-accent-foreground">Next Birthday</Label>
                              <p className="text-2xl font-bold text-accent">{result.nextBirthday.days} days until {result.nextBirthday.month}</p>
