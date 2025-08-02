@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -9,9 +9,14 @@ import { Label } from '@/components/ui/label';
 import { intervalToDuration, format } from 'date-fns';
 
 const DateCalculator = () => {
-    const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-    const [endDate, setEndDate] = useState<Date | undefined>(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
+    const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+    const [endDate, setEndDate] = useState<Date | undefined>(undefined);
     const [result, setResult] = useState<{ years: number, months: number, days: number } | null>(null);
+
+    useEffect(() => {
+        setStartDate(new Date());
+        setEndDate(new Date(new Date().setFullYear(new Date().getFullYear() + 1)));
+    }, []);
 
     const calculateDifference = () => {
         if (startDate && endDate) {
@@ -44,8 +49,9 @@ const DateCalculator = () => {
                             selected={startDate}
                             onSelect={setStartDate}
                             className="rounded-md border"
+                            disabled={!startDate}
                         />
-                        <p className="text-sm text-muted-foreground">{startDate ? format(startDate, 'PPP') : 'No date selected'}</p>
+                        <p className="text-sm text-muted-foreground">{startDate ? format(startDate, 'PPP') : 'Loading...'}</p>
                     </div>
                      <div className="space-y-2 flex flex-col items-center">
                         <Label>End Date</Label>
@@ -54,8 +60,9 @@ const DateCalculator = () => {
                             selected={endDate}
                             onSelect={setEndDate}
                             className="rounded-md border"
+                            disabled={!endDate}
                         />
-                         <p className="text-sm text-muted-foreground">{endDate ? format(endDate, 'PPP') : 'No date selected'}</p>
+                         <p className="text-sm text-muted-foreground">{endDate ? format(endDate, 'PPP') : 'Loading...'}</p>
                     </div>
                 </div>
 
