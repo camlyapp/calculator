@@ -30,9 +30,21 @@ import {
 import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import AmortizationTable from './amortization-table';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
+
+const chartConfig = {
+  Principal: {
+    label: 'Principal',
+    color: 'hsl(var(--primary))',
+  },
+  Interest: {
+    label: 'Interest',
+    color: 'hsl(var(--accent))',
+  },
+} satisfies ChartConfig;
+
 
 const LoanCalculator = () => {
   const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
@@ -235,18 +247,23 @@ const LoanCalculator = () => {
                 <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px] w-full">
-                    <ResponsiveContainer>
-                        <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent indicator="dot" />} />
-                        <Bar dataKey="Principal" stackId="a" fill="hsl(var(--primary))" />
-                        <Bar dataKey="Interest" stackId="a" fill="hsl(var(--accent))" />
-                        </BarChart>
-                    </ResponsiveContainer>
-                </div>
+                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+                  <BarChart accessibilityLayer data={chartData}>
+                    <CartesianGrid vertical={false} />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      tickMargin={10}
+                      axisLine={false}
+                    />
+                     <YAxis
+                        tickFormatter={(value) => `$${Number(value).toLocaleString()}`}
+                     />
+                    <ChartTooltipContent indicator="dot" />
+                    <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
+                    <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
+                  </BarChart>
+                </ChartContainer>
               </CardContent>
             </Card>
 
@@ -259,3 +276,5 @@ const LoanCalculator = () => {
 };
 
 export default LoanCalculator;
+
+    
