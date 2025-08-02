@@ -43,28 +43,44 @@ export async function convertCurrency(input: ConvertCurrencyInput): Promise<Conv
   return convertCurrencyFlow(input);
 }
 
+
+const getExchangeRate = ai.defineTool(
+    {
+        name: 'getExchangeRate',
+        description: 'Get the exchange rate between two currencies.',
+        inputSchema: z.object({
+            fromCurrency: z.enum(currencyCodes),
+            toCurrency: z.enum(currencyCodes),
+        }),
+        outputSchema: z.number(),
+    },
+    async ({ fromCurrency, toCurrency }) => {
+        if (fromCurrency === toCurrency) {
+            return 1;
+        }
+        const fromRate = MOCK_RATES_TO_USD[fromCurrency];
+        const toRate = MOCK_RATES_TO_USD[toCurrency];
+        return fromRate / toRate;
+    }
+);
+
+
 const convertCurrencyFlow = ai.defineFlow(
   {
     name: 'convertCurrencyFlow',
     inputSchema: ConvertCurrencyInputSchema,
     outputSchema: ConvertCurrencyOutputSchema,
+    tools: [getExchangeRate]
   },
   async (input) => {
     const { amount, fromCurrency, toCurrency } = input;
-
+    
     if (fromCurrency === toCurrency) {
-      return { convertedAmount: amount, exchangeRate: 1 };
+        return { convertedAmount: amount, exchangeRate: 1 };
     }
-
-    const fromRate = MOCK_RATES_TO_USD[fromCurrency];
-    const toRate = MOCK_RATES_TO_USD[toCurrency];
-
-    // Convert the amount to USD first, then to the target currency.
-    const amountInUSD = amount * fromRate;
-    const convertedAmount = amountInUSD / toRate;
-
-    // The direct exchange rate from 'from' to 'to'.
-    const exchangeRate = fromRate / toRate;
+    
+    const exchangeRate = await getExchangeRate({ fromCurrency, toCurrency });
+    const convertedAmount = amount * exchangeRate;
 
     return {
       convertedAmount,
