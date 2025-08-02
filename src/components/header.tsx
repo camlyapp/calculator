@@ -5,7 +5,7 @@ import { Landmark, Menu } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from './ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -62,16 +62,17 @@ const Header = () => {
                      <nav className="flex flex-col space-y-4 mt-8">
                         {navLinks.map((link) => (
                              <Link key={link.href} href={link.href} passHref>
-                                <Button
-                                    variant="ghost"
-                                    className={cn(
-                                        "w-full justify-start text-lg",
-                                        pathname === link.href && "text-primary bg-accent"
-                                    )}
-                                    onClick={() => setSheetOpen(false)}
-                                >
-                                    {link.label}
-                                </Button>
+                                <SheetClose asChild>
+                                    <Button
+                                        variant="ghost"
+                                        className={cn(
+                                            "w-full justify-start text-lg",
+                                            pathname === link.href && "text-primary bg-accent"
+                                        )}
+                                    >
+                                        {link.label}
+                                    </Button>
+                                </SheetClose>
                              </Link>
                         ))}
                     </nav>
