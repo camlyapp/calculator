@@ -2,6 +2,7 @@
 
 import { suggestLoanOptimizations, type SuggestLoanOptimizationsInput, type SuggestLoanOptimizationsOutput } from '@/ai/flows/suggest-loan-optimizations';
 import { analyzeRefinance, type AnalyzeRefinanceInput, type AnalyzeRefinanceOutput } from '@/ai/flows/analyze-refinance';
+import { convertCurrency, type ConvertCurrencyInput, type ConvertCurrencyOutput } from '@/ai/flows/convert-currency';
 import { z } from 'zod';
 
 const SmartSuggestionsSchema = z.object({
@@ -82,5 +83,37 @@ export async function analyzeRefinanceAction(
     } catch(e) {
         console.error(e);
         return { error: 'An unexpected error occurred while analyzing the refinance option. Please try again later.' };
+    }
+}
+
+const currencyCodes = ["USD", "EUR", "GBP", "JPY", "INR", "AUD", "CAD", "CHF", "CNY"] as const;
+
+const CurrencyConverterSchema = z.object({
+  amount: z.coerce.number().min(0),
+  fromCurrency: z.enum(currencyCodes),
+  toCurrency: z.enum(currencyCodes),
+});
+
+export async function convertCurrencyAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; conversion?: ConvertCurrencyOutput; errors?: any, error?: string }> {
+    const validatedFields = CurrencyConverterSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your inputs.',
+        };
+    }
+
+    const aiInput: ConvertCurrencyInput = validatedFields.data;
+
+    try {
+        const result = await convertCurrency(aiInput);
+        return { conversion: result, message: "Conversion successful." };
+    } catch(e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred during currency conversion. Please try again later.' };
     }
 }
