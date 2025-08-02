@@ -14,7 +14,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { AmortizationRow } from '@/lib/types';
 
 interface AmortizationTableProps {
@@ -46,9 +45,9 @@ const AmortizationTable = ({ data, currency }: AmortizationTableProps) => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[500px] rounded-md border">
+        <div className="max-h-[500px] overflow-auto rounded-md border">
           <Table>
-            <TableHeader className="sticky top-0 bg-muted">
+            <TableHeader className="sticky top-0 bg-muted z-10">
               <TableRow>
                 <TableHead className="w-[100px]">Month</TableHead>
                 <TableHead>Principal</TableHead>
@@ -71,7 +70,7 @@ const AmortizationTable = ({ data, currency }: AmortizationTableProps) => {
               ))}
             </TableBody>
           </Table>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
