@@ -17,19 +17,21 @@ export default function MathScienceCalculators() {
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="basic" className="w-full max-w-2xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-10 h-auto">
-            <TabsTrigger value="basic">Basic</TabsTrigger>
-            <TabsTrigger value="scientific">Scientific</TabsTrigger>
-            <TabsTrigger value="graphing">Graphing</TabsTrigger>
-            <TabsTrigger value="fraction">Fraction</TabsTrigger>
-            <TabsTrigger value="percentage">Percentage</TabsTrigger>
-            <TabsTrigger value="algebra">Algebra</TabsTrigger>
-            <TabsTrigger value="geometry">Geometry</TabsTrigger>
-            <TabsTrigger value="unit">Unit Converter</TabsTrigger>
-            <TabsTrigger value="physics">Physics</TabsTrigger>
-            <TabsTrigger value="chemistry">Chemistry</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="basic" className="w-full max-w-4xl mx-auto">
+          <div className="flex justify-center">
+            <TabsList className="flex flex-wrap justify-center h-auto">
+                <TabsTrigger value="basic">Basic</TabsTrigger>
+                <TabsTrigger value="scientific">Scientific</TabsTrigger>
+                <TabsTrigger value="graphing">Graphing</TabsTrigger>
+                <TabsTrigger value="fraction">Fraction</TabsTrigger>
+                <TabsTrigger value="percentage">Percentage</TabsTrigger>
+                <TabsTrigger value="algebra">Algebra</TabsTrigger>
+                <TabsTrigger value="geometry">Geometry</TabsTrigger>
+                <TabsTrigger value="unit">Unit Converter</TabsTrigger>
+                <TabsTrigger value="physics">Physics</TabsTrigger>
+                <TabsTrigger value="chemistry">Chemistry</TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="basic">
             <div className="flex justify-center">
               <BasicCalculator />
