@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { Label } from './ui/label';
 
 const gradePoints: { [key: string]: number } = {
   'A+': 4.0, 'A': 4.0, 'A-': 3.7,
