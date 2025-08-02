@@ -14,14 +14,16 @@ export default function DateTimeCalculators() {
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="date-difference" className="w-full max-w-2xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto">
-            <TabsTrigger value="date-difference">Date Difference</TabsTrigger>
-            <TabsTrigger value="add-subtract-days">Add/Subtract Days</TabsTrigger>
-            <TabsTrigger value="time-calculator">Add/Subtract Time</TabsTrigger>
-            <TabsTrigger value="workdays">Workdays</TabsTrigger>
-            <TabsTrigger value="countdown">Countdown</TabsTrigger>
-          </TabsList>
+        <Tabs defaultValue="date-difference" className="w-full max-w-4xl mx-auto">
+          <div className="flex justify-center">
+            <TabsList className="flex flex-wrap justify-center h-auto">
+              <TabsTrigger value="date-difference">Date Difference</TabsTrigger>
+              <TabsTrigger value="add-subtract-days">Add/Subtract Days</TabsTrigger>
+              <TabsTrigger value="time-calculator">Add/Subtract Time</TabsTrigger>
+              <TabsTrigger value="workdays">Workdays</TabsTrigger>
+              <TabsTrigger value="countdown">Countdown</TabsTrigger>
+            </TabsList>
+          </div>
           <TabsContent value="date-difference">
             <DateCalculator />
           </TabsContent>
