@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -25,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const retirementSchema = z.object({
   currentAge: z.coerce.number().min(18, "Must be at least 18."),
@@ -55,6 +57,7 @@ interface RetirementResult {
 const RetirementCalculator = () => {
   const [result, setResult] = useState<RetirementResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<RetirementFormValues>({
     resolver: zodResolver(retirementSchema),
@@ -120,9 +123,6 @@ const RetirementCalculator = () => {
     });
   };
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -166,7 +166,7 @@ const RetirementCalculator = () => {
                     name="currentSavings"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Current Savings ($)</FormLabel>
+                        <FormLabel>Current Savings</FormLabel>
                         <FormControl>
                         <Input type="number" {...field} />
                         </FormControl>
@@ -179,7 +179,7 @@ const RetirementCalculator = () => {
                     name="monthlyContribution"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Monthly Contribution ($)</FormLabel>
+                        <FormLabel>Monthly Contribution</FormLabel>
                         <FormControl>
                         <Input type="number" {...field} />
                         </FormControl>
@@ -218,7 +218,7 @@ const RetirementCalculator = () => {
                     name="desiredMonthlyIncome"
                     render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Desired Monthly Income ($)</FormLabel>
+                        <FormLabel>Desired Monthly Income</FormLabel>
                         <FormControl>
                         <Input type="number" {...field} />
                         </FormControl>
@@ -278,8 +278,8 @@ const RetirementCalculator = () => {
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="age" name="Age" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent />} />
+                        <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)}/>
                         <Legend />
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" name="Projected Savings" />
                         </LineChart>

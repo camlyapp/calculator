@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -27,6 +28,7 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, L
 import { ChartTooltipContent } from '@/components/ui/chart';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const compoundingFrequencies = {
   annually: 1,
@@ -56,6 +58,7 @@ interface CompoundInterestResult {
 const CompoundInterestCalculator = () => {
   const [result, setResult] = useState<CompoundInterestResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<CompoundInterestFormValues>({
     resolver: zodResolver(compoundInterestSchema),
@@ -138,9 +141,6 @@ const CompoundInterestCalculator = () => {
     setResult({ finalBalance: finalBalanceRecalc, totalPrincipal, totalInterest, yearlyData });
   };
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -158,7 +158,7 @@ const CompoundInterestCalculator = () => {
                 name="initialPrincipal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Principal ($)</FormLabel>
+                    <FormLabel>Initial Principal</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -171,7 +171,7 @@ const CompoundInterestCalculator = () => {
                 name="monthlyContribution"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Monthly Contribution ($)</FormLabel>
+                    <FormLabel>Monthly Contribution</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -266,8 +266,8 @@ const CompoundInterestCalculator = () => {
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="year" name="Year" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent />} />
+                        <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)} />
                         <Legend />
                         <Line type="monotone" dataKey="principal" stroke="hsl(var(--primary))" name="Total Principal" />
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--accent))" name="Future Value" />
@@ -320,5 +320,3 @@ const CompoundInterestCalculator = () => {
 };
 
 export default CompoundInterestCalculator;
-
-    

@@ -6,11 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/context/currency-context';
 
 const DiscountCalculator = () => {
     const [originalPrice, setOriginalPrice] = useState('100');
     const [discount, setDiscount] = useState('25');
     const [result, setResult] = useState<{ finalPrice: string, amountSaved: string } | null>(null);
+    const { formatCurrency } = useCurrency();
 
     const calculate = () => {
         const price = parseFloat(originalPrice);
@@ -25,14 +27,14 @@ const DiscountCalculator = () => {
         const finalPrice = price - amountSaved;
 
         setResult({
-            finalPrice: finalPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-            amountSaved: amountSaved.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            finalPrice: formatCurrency(finalPrice),
+            amountSaved: formatCurrency(amountSaved),
         });
     };
 
     useEffect(() => {
         calculate();
-    }, [originalPrice, discount]);
+    }, [originalPrice, discount, formatCurrency]);
 
     return (
         <Card className="w-full max-w-lg shadow-2xl mt-6">
@@ -44,7 +46,7 @@ const DiscountCalculator = () => {
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="original-price">Original Price ($)</Label>
+                            <Label htmlFor="original-price">Original Price</Label>
                             <Input
                                 id="original-price"
                                 value={originalPrice}

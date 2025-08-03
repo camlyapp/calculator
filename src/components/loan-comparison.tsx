@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -26,6 +27,7 @@ import { generateAmortizationSchedule } from '@/lib/loan-utils';
 import { Separator } from './ui/separator';
 import { format } from 'date-fns';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 interface LoanOptionProps {
   title: string;
@@ -72,7 +74,7 @@ const LoanOption = ({ title, onCalculate }: LoanOptionProps) => {
               name="loanAmount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Loan Amount ($)</FormLabel>
+                  <FormLabel>Loan Amount</FormLabel>
                   <FormControl>
                     <Input type="number" {...field} />
                   </FormControl>
@@ -118,9 +120,7 @@ const LoanComparison = () => {
   const [resultA, setResultA] = useState<Partial<CalculationResult> | null>(null);
   const [resultB, setResultB] = useState<Partial<CalculationResult> | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
-
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const { formatCurrency } = useCurrency();
 
   return (
     <Card className="w-full mt-6 shadow-lg">
@@ -169,15 +169,15 @@ const LoanComparison = () => {
                             <Separator />
                             <div className="grid grid-cols-3 items-center text-center font-bold">
                                 {resultA.principalAndInterest < resultB.principalAndInterest ? (
-                                    <p className="text-accent">${(resultB.principalAndInterest - resultA.principalAndInterest).toFixed(2)}/mo less</p>
+                                    <p className="text-accent">{formatCurrency(resultB.principalAndInterest - resultA.principalAndInterest)}/mo less</p>
                                 ) : (
-                                    <p className="text-destructive">${(resultA.principalAndInterest - resultB.principalAndInterest).toFixed(2)}/mo more</p>
+                                    <p className="text-destructive">{formatCurrency(resultA.principalAndInterest - resultB.principalAndInterest)}/mo more</p>
                                 )}
                                 <p className="text-muted-foreground">Difference</p>
                                 {resultB.principalAndInterest < resultA.principalAndInterest ? (
-                                     <p className="text-accent">${(resultA.principalAndInterest - resultB.principalAndInterest).toFixed(2)}/mo less</p>
+                                     <p className="text-accent">{formatCurrency(resultA.principalAndInterest - resultB.principalAndInterest)}/mo less</p>
                                 ) : (
-                                    <p className="text-destructive">${(resultB.principalAndInterest - resultA.principalAndInterest).toFixed(2)}/mo more</p>
+                                    <p className="text-destructive">{formatCurrency(resultB.principalAndInterest - resultA.principalAndInterest)}/mo more</p>
                                 )}
                             </div>
                             </>

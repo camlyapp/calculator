@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useEffect, useRef } from 'react';
@@ -18,6 +19,7 @@ import { Calculator, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const initialState = {
   message: undefined,
@@ -40,6 +42,7 @@ const RefinanceAnalysis = () => {
   const [state, formAction] = useActionState(analyzeRefinanceAction, initialState);
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   useEffect(() => {
     if (state?.message && !state.errors && state.analysis) {
@@ -57,9 +60,6 @@ const RefinanceAnalysis = () => {
     }
   }, [state, toast]);
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -74,7 +74,7 @@ const RefinanceAnalysis = () => {
                 <div className="space-y-4 p-4 border rounded-lg">
                     <h3 className="font-semibold text-lg text-primary">Current Loan</h3>
                     <div>
-                        <Label htmlFor="currentLoanAmount">Original Loan Amount ($)</Label>
+                        <Label htmlFor="currentLoanAmount">Original Loan Amount</Label>
                         <Input id="currentLoanAmount" name="currentLoanAmount" type="number" defaultValue="250000" required/>
                         {state?.errors?.currentLoanAmount && <p className="text-destructive text-sm mt-1">{state.errors.currentLoanAmount[0]}</p>}
                     </div>
@@ -108,7 +108,7 @@ const RefinanceAnalysis = () => {
                         {state?.errors?.newLoanTerm && <p className="text-destructive text-sm mt-1">{state.errors.newLoanTerm[0]}</p>}
                     </div>
                      <div>
-                        <Label htmlFor="refinanceCosts">Closing Costs ($)</Label>
+                        <Label htmlFor="refinanceCosts">Closing Costs</Label>
                         <Input id="refinanceCosts" name="refinanceCosts" type="number" defaultValue="3000" required/>
                         {state?.errors?.refinanceCosts && <p className="text-destructive text-sm mt-1">{state.errors.refinanceCosts[0]}</p>}
                     </div>

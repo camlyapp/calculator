@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useEffect, useRef } from 'react';
@@ -18,6 +19,7 @@ import { Activity, CheckCircle2, HelpCircle, Loader2, ThumbsDown, ThumbsUp, XCir
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const initialState = {
   message: undefined,
@@ -53,6 +55,7 @@ const LoanEligibilityCalculator = () => {
   const [state, formAction] = useActionState(checkLoanEligibilityAction, initialState);
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   useEffect(() => {
     if (state?.message && !state.errors && state.result) {
@@ -70,8 +73,6 @@ const LoanEligibilityCalculator = () => {
     }
   }, [state, toast]);
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 
   return (
     <Card className="w-full mt-6 shadow-lg">
@@ -85,12 +86,12 @@ const LoanEligibilityCalculator = () => {
         <CardContent className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
-                    <Label htmlFor="monthlyIncome">Monthly Income ($)</Label>
+                    <Label htmlFor="monthlyIncome">Monthly Income</Label>
                     <Input id="monthlyIncome" name="monthlyIncome" type="number" defaultValue="5000" required/>
                     {state?.errors?.monthlyIncome && <p className="text-destructive text-sm mt-1">{state.errors.monthlyIncome[0]}</p>}
                 </div>
                  <div>
-                    <Label htmlFor="monthlyExpenses">Monthly Expenses ($)</Label>
+                    <Label htmlFor="monthlyExpenses">Monthly Expenses</Label>
                     <Input id="monthlyExpenses" name="monthlyExpenses" type="number" defaultValue="2000" required/>
                     {state?.errors?.monthlyExpenses && <p className="text-destructive text-sm mt-1">{state.errors.monthlyExpenses[0]}</p>}
                 </div>
@@ -100,7 +101,7 @@ const LoanEligibilityCalculator = () => {
                     {state?.errors?.creditScore && <p className="text-destructive text-sm mt-1">{state.errors.creditScore[0]}</p>}
                 </div>
                 <div>
-                    <Label htmlFor="loanAmount">Desired Loan Amount ($)</Label>
+                    <Label htmlFor="loanAmount">Desired Loan Amount</Label>
                     <Input id="loanAmount" name="loanAmount" type="number" defaultValue="20000" required/>
                      {state?.errors?.loanAmount && <p className="text-destructive text-sm mt-1">{state.errors.loanAmount[0]}</p>}
                 </div>

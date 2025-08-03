@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useActionState, useEffect, useRef } from 'react';
@@ -20,6 +21,7 @@ import { calculateIndianTaxAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Separator } from './ui/separator';
+import { useCurrency } from '@/context/currency-context';
 
 const initialState = {
   message: undefined,
@@ -43,6 +45,7 @@ const IndianTaxCalculator = () => {
   const [state, formAction] = useActionState(calculateIndianTaxAction, initialState);
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
   
   useEffect(() => {
     if (state?.error) {
@@ -53,9 +56,6 @@ const IndianTaxCalculator = () => {
         })
     }
   }, [state, toast]);
-
-  const formatCurrency = (value: number) =>
-    `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const result = state?.result;
 
@@ -72,12 +72,12 @@ const IndianTaxCalculator = () => {
             <div className="space-y-6">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <Label htmlFor="grossIncome">Annual Gross Income (₹)</Label>
+                        <Label htmlFor="grossIncome">Annual Gross Income</Label>
                         <Input id="grossIncome" name="grossIncome" type="number" placeholder="e.g., 1000000" defaultValue="1000000" required />
                          {state?.errors?.grossIncome && <p className="text-destructive text-sm mt-1">{state.errors.grossIncome[0]}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="deductions">Total Deductions (Old Regime, e.g., 80C) (₹)</Label>
+                        <Label htmlFor="deductions">Total Deductions (Old Regime, e.g., 80C)</Label>
                         <Input id="deductions" name="deductions" type="number" placeholder="e.g., 150000" defaultValue="150000" />
                         {state?.errors?.deductions && <p className="text-destructive text-sm mt-1">{state.errors.deductions[0]}</p>}
                     </div>

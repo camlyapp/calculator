@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -25,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const filingStatuses = ['single', 'marriedFilingJointly', 'marriedFilingSeparately', 'headOfHousehold'] as const;
 
@@ -95,6 +97,7 @@ interface TaxResult {
 const TaxCalculator = () => {
   const [result, setResult] = useState<TaxResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<TaxFormValues>({
     resolver: zodResolver(taxSchema),
@@ -129,7 +132,7 @@ const TaxCalculator = () => {
       remainingIncome -= incomeInBracket;
 
       bracketBreakdown.push({
-        bracket: `${(bracket.rate * 100)}% on income from $${bracket.from.toLocaleString()} to $${bracket.to === Infinity ? 'Infinity' : bracket.to.toLocaleString()}`,
+        bracket: `${(bracket.rate * 100)}% on income from ${formatCurrency(bracket.from)} to ${bracket.to === Infinity ? 'Infinity' : formatCurrency(bracket.to)}`,
         tax: taxForBracket,
       });
     }
@@ -141,9 +144,6 @@ const TaxCalculator = () => {
       bracketBreakdown: bracketBreakdown.filter(b => b.tax > 0),
     });
   };
-  
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (
     <Card className="w-full mt-6 shadow-lg">
@@ -162,7 +162,7 @@ const TaxCalculator = () => {
                 name="grossIncome"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Annual Gross Income ($)</FormLabel>
+                    <FormLabel>Annual Gross Income</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>

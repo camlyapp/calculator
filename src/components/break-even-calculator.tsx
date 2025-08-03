@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/context/currency-context';
 
 interface Result {
     breakEvenUnits: string;
@@ -18,6 +19,7 @@ const BreakEvenCalculator = () => {
     const [sellingPrice, setSellingPrice] = useState('50');
     const [result, setResult] = useState<Result | null>(null);
     const [error, setError] = useState('');
+    const { formatCurrency } = useCurrency();
 
     const calculate = () => {
         const fc = parseFloat(fixedCosts);
@@ -44,13 +46,13 @@ const BreakEvenCalculator = () => {
 
         setResult({
             breakEvenUnits: breakEvenUnits.toLocaleString('en-US', { maximumFractionDigits: 2 }),
-            breakEvenRevenue: breakEvenRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            breakEvenRevenue: formatCurrency(breakEvenRevenue),
         });
     };
 
     useEffect(() => {
         calculate();
-    }, [fixedCosts, variableCost, sellingPrice]);
+    }, [fixedCosts, variableCost, sellingPrice, formatCurrency]);
 
     return (
         <Card className="w-full max-w-lg shadow-2xl mt-6">
@@ -62,7 +64,7 @@ const BreakEvenCalculator = () => {
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="fixed-costs">Total Fixed Costs ($)</Label>
+                            <Label htmlFor="fixed-costs">Total Fixed Costs</Label>
                             <Input
                                 id="fixed-costs"
                                 value={fixedCosts}
@@ -71,7 +73,7 @@ const BreakEvenCalculator = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="variable-cost">Variable Cost / Unit ($)</Label>
+                            <Label htmlFor="variable-cost">Variable Cost / Unit</Label>
                             <Input
                                 id="variable-cost"
                                 value={variableCost}
@@ -80,7 +82,7 @@ const BreakEvenCalculator = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="selling-price">Selling Price / Unit ($)</Label>
+                            <Label htmlFor="selling-price">Selling Price / Unit</Label>
                             <Input
                                 id="selling-price"
                                 value={sellingPrice}

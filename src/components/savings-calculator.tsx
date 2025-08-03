@@ -26,6 +26,7 @@ import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const savingsSchema = z.object({
   savingsGoal: z.coerce.number().min(1, "Savings goal must be greater than 0."),
@@ -46,6 +47,7 @@ interface SavingsResult {
 const SavingsCalculator = () => {
   const [result, setResult] = useState<SavingsResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<SavingsFormValues>({
     resolver: zodResolver(savingsSchema),
@@ -101,9 +103,6 @@ const SavingsCalculator = () => {
     });
   };
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -121,7 +120,7 @@ const SavingsCalculator = () => {
                 name="savingsGoal"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Savings Goal ($)</FormLabel>
+                    <FormLabel>Savings Goal</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -134,7 +133,7 @@ const SavingsCalculator = () => {
                 name="initialSavings"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Savings ($)</FormLabel>
+                    <FormLabel>Initial Savings</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -205,8 +204,8 @@ const SavingsCalculator = () => {
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="year" name="Year" unit="yr" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent />} />
+                        <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)} />
                         <Legend />
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" name="Projected Savings" />
                         </LineChart>

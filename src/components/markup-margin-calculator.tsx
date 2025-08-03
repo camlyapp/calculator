@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { useCurrency } from '@/context/currency-context';
 
 interface Result {
     profit: string;
@@ -17,6 +18,7 @@ const MarkupMarginCalculator = () => {
     const [cost, setCost] = useState('100');
     const [revenue, setRevenue] = useState('150');
     const [result, setResult] = useState<Result | null>(null);
+    const { formatCurrency } = useCurrency();
 
     const calculate = () => {
         const costValue = parseFloat(cost);
@@ -33,7 +35,7 @@ const MarkupMarginCalculator = () => {
         const markup = costValue > 0 ? (profit / costValue) * 100 : 0;
 
         setResult({
-            profit: profit.toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
+            profit: formatCurrency(profit),
             margin: `${margin.toFixed(2)}%`,
             markup: `${markup.toFixed(2)}%`,
         });
@@ -41,7 +43,7 @@ const MarkupMarginCalculator = () => {
 
     useEffect(() => {
         calculate();
-    }, [cost, revenue]);
+    }, [cost, revenue, formatCurrency]);
 
     return (
         <Card className="w-full max-w-lg shadow-2xl mt-6">
@@ -53,7 +55,7 @@ const MarkupMarginCalculator = () => {
                 <div className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="cost-price">Cost ($)</Label>
+                            <Label htmlFor="cost-price">Cost</Label>
                             <Input
                                 id="cost-price"
                                 value={cost}
@@ -63,7 +65,7 @@ const MarkupMarginCalculator = () => {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="revenue-price">Revenue ($)</Label>
+                            <Label htmlFor="revenue-price">Revenue</Label>
                             <Input
                                 id="revenue-price"
                                 value={revenue}

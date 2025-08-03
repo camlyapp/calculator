@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef } from 'react';
@@ -26,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartTooltipContent } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const investmentSchema = z.object({
   initialInvestment: z.coerce.number().min(0),
@@ -46,6 +48,7 @@ interface InvestmentResult {
 const InvestmentCalculator = () => {
   const [result, setResult] = useState<InvestmentResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<InvestmentFormValues>({
     resolver: zodResolver(investmentSchema),
@@ -89,9 +92,6 @@ const InvestmentCalculator = () => {
     setResult({ finalBalance, totalPrincipal, totalInterest, yearlyData });
   };
 
-  const formatCurrency = (value: number) =>
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
   return (
     <Card className="w-full mt-6 shadow-lg">
       <CardHeader>
@@ -109,7 +109,7 @@ const InvestmentCalculator = () => {
                 name="initialInvestment"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Initial Investment ($)</FormLabel>
+                    <FormLabel>Initial Investment</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -122,7 +122,7 @@ const InvestmentCalculator = () => {
                 name="monthlyContribution"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Monthly Contribution ($)</FormLabel>
+                    <FormLabel>Monthly Contribution</FormLabel>
                     <FormControl>
                       <Input type="number" {...field} />
                     </FormControl>
@@ -193,8 +193,8 @@ const InvestmentCalculator = () => {
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis dataKey="year" name="Year" />
-                        <YAxis tickFormatter={(value) => `$${Number(value).toLocaleString()}`} />
-                        <Tooltip content={<ChartTooltipContent />} />
+                        <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)}/>
                         <Legend />
                         <Line type="monotone" dataKey="principal" stroke="hsl(var(--primary))" name="Total Principal" />
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--accent))" name="Total Balance" />
