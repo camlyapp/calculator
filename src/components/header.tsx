@@ -1,14 +1,14 @@
 
 "use client";
 
-import { Menu, Download } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from './ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 const navLinks = [
@@ -22,39 +22,6 @@ const navLinks = [
 const Header = () => {
   const pathname = usePathname();
   const [isSheetOpen, setSheetOpen] = useState(false);
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
-      setInstallPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (!installPrompt) {
-      return;
-    }
-    // Show the install prompt
-    await installPrompt.prompt();
-    // Wait for the user to respond to the prompt
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-    // We can only use the prompt once, so clear it.
-    setInstallPrompt(null);
-  };
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
@@ -68,12 +35,6 @@ const Header = () => {
           </Link>
           
           <div className="flex items-center gap-2">
-             {installPrompt && (
-                <Button variant="outline" size="icon" onClick={handleInstallClick} aria-label="Install App">
-                    <Download className="h-5 w-5" />
-                    <span className="sr-only">Install App</span>
-                </Button>
-            )}
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>

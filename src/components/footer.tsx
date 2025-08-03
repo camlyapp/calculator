@@ -1,9 +1,43 @@
 
-import { Twitter, Github, Linkedin } from 'lucide-react';
+"use client";
+
+import { Twitter, Github, Linkedin, Download } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useState, useEffect } from 'react';
 
 const Footer = () => {
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (!installPrompt) {
+      return;
+    }
+    await installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    setInstallPrompt(null);
+  };
+
+
   return (
     <footer className="bg-card shadow-inner mt-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -31,6 +65,11 @@ const Footer = () => {
              <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Terms of Service
             </Link>
+             {installPrompt && (
+              <a href="#" onClick={handleInstallClick} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
+                <Download className="h-4 w-4" /> Install App
+              </a>
+            )}
           </nav>
 
           <div className="flex space-x-4">
