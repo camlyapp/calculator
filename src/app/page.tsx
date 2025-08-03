@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
+import SipCalculator from '@/components/sip-calculator';
 
 type Currency = 'USD' | 'INR';
 
@@ -31,6 +32,7 @@ const calculatorTabs = [
     { value: 'suggestions', label: 'AI Suggestions' },
     { value: 'refinance', label: 'Refinancing' },
     { value: 'investment', label: 'Investment' },
+    { value: 'sip-calculator', label: 'SIP Calculator' },
     { value: 'retirement', label: 'Retirement' },
     { value: 'compound-interest', label: 'Compound Interest' },
     { value: 'savings', label: 'Savings' },
@@ -81,7 +83,7 @@ export default function Home() {
                     </SelectContent>
                 </Select>
             </div>
-            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 mx-auto max-w-6xl h-auto">
+            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 mx-auto max-w-7xl h-auto">
               {calculatorTabs.map(tab => (
                 <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
               ))}
@@ -103,6 +105,9 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="investment">
               <InvestmentCalculator />
+            </TabsContent>
+             <TabsContent value="sip-calculator">
+              <SipCalculator currency={currency} />
             </TabsContent>
             <TabsContent value="retirement">
               <RetirementCalculator />
