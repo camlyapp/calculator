@@ -29,7 +29,7 @@ const calculatorTabs = [
 ];
 
 export default function PersonalHealthCalculators() {
-  const [activeTab, setActiveTab] = useState('age');
+  const [activeTab, setActiveTab] = useState('due-date');
 
   return (
     <>
