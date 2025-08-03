@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
 import DiscountCalculator from '@/components/discount-calculator';
+import MarkupMarginCalculator from '@/components/markup-margin-calculator';
 
 const calculatorTabs = [
     { value: 'basic', label: 'Basic' },
@@ -26,6 +27,7 @@ const calculatorTabs = [
     { value: 'fraction', label: 'Fraction' },
     { value: 'percentage', label: 'Percentage' },
     { value: 'discount', label: 'Discount' },
+    { value: 'markup-margin', label: 'Markup & Margin' },
     { value: 'algebra', label: 'Algebra' },
     { value: 'geometry', label: 'Geometry' },
     { value: 'unit', label: 'Unit Converter' },
@@ -89,6 +91,11 @@ export default function MathScienceCalculators() {
             <TabsContent value="discount">
               <div className="flex justify-center">
                 <DiscountCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="markup-margin">
+              <div className="flex justify-center">
+                <MarkupMarginCalculator />
               </div>
             </TabsContent>
             <TabsContent value="algebra">
