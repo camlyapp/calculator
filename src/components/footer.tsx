@@ -19,20 +19,17 @@ const Footer = () => {
              <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Financial
             </Link>
+             <Link href="/about-us" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                About Us
+            </Link>
+            <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Contact
+            </Link>
              <Link href="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                 Privacy Policy
             </Link>
-             <Link href="/math-science-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Math & Science
-            </Link>
-             <Link href="/date-time-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Date & Time
-            </Link>
-              <Link href="/personal-health-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Personal & Health
-            </Link>
-             <Link href="/other-specialized-calculators" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Other
+             <Link href="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                Terms of Service
             </Link>
           </nav>
 
