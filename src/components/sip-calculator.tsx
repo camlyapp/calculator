@@ -25,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
 
 const sipSchema = z.object({
@@ -50,6 +50,18 @@ type Currency = 'USD' | 'INR';
 interface SipCalculatorProps {
     currency: Currency;
 }
+
+const chartConfig = {
+  invested: {
+    label: "Total Invested",
+    color: "hsl(var(--primary))",
+  },
+  balance: {
+    label: "Total Value",
+    color: "hsl(var(--accent))",
+  },
+} satisfies ChartConfig;
+
 
 const SipCalculator = ({ currency }: SipCalculatorProps) => {
   const [result, setResult] = useState<SipResult | null>(null);
@@ -220,7 +232,7 @@ const SipCalculator = ({ currency }: SipCalculatorProps) => {
                 <CardTitle>Investment Growth Chart</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px] w-full">
+                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
                     <ResponsiveContainer>
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -232,7 +244,7 @@ const SipCalculator = ({ currency }: SipCalculatorProps) => {
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--accent))" name="Total Value" />
                         </LineChart>
                     </ResponsiveContainer>
-                </div>
+                </ChartContainer>
               </CardContent>
             </Card>
 
