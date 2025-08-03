@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { addDays, subDays, format, isValid, eachDayOfInterval, getMonth, getYear } from 'date-fns';
 import { Button } from './ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
 interface CyclePrediction {
     ovulationDate: Date;
@@ -67,13 +68,7 @@ const OvulationCalculator = () => {
         setPredictions(newPredictions);
     };
 
-    useEffect(() => {
-        if (isMounted) {
-            calculateOvulation();
-        }
-    }, [lastPeriodDate, cycleLength, lutealPhaseLength, isMounted]);
-
-    const { fertileDays, ovulationDays, periodDays } = useMemo(() => {
+    const useMemoResult = useMemo(() => {
         const fertile: Date[] = [];
         const ovulation: Date[] = [];
         const period: Date[] = [];
@@ -87,6 +82,14 @@ const OvulationCalculator = () => {
         return { fertileDays: fertile, ovulationDays: ovulation, periodDays: period };
     }, [predictions]);
 
+    const { fertileDays, ovulationDays, periodDays } = useMemoResult;
+    
+    useEffect(() => {
+        if (isMounted) {
+            calculateOvulation();
+        }
+    }, [lastPeriodDate, cycleLength, lutealPhaseLength, isMounted]);
+
     if (!isMounted) {
         return null;
     }
@@ -96,6 +99,34 @@ const OvulationCalculator = () => {
     }
 
     const currentPrediction = predictions.find(p => getMonth(p.ovulationDate) === getMonth(currentMonth) && getYear(p.ovulationDate) === getYear(currentMonth)) || predictions[0];
+    
+    const DatePicker = ({date, setDate}: {date?: Date, setDate: (d?: Date) => void}) => (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={"outline"}
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    captionLayout="dropdown-buttons"
+                    fromYear={new Date().getFullYear() - 1}
+                    toYear={new Date().getFullYear() + 1}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+    );
 
     return (
         <Card className="w-full shadow-lg">
@@ -110,12 +141,7 @@ const OvulationCalculator = () => {
                     <div className='flex-1 space-y-6 w-full md:w-auto md:max-w-sm'>
                         <div className="space-y-2">
                             <Label>First Day of Your Last Period</Label>
-                            <Calendar
-                                mode="single"
-                                selected={lastPeriodDate}
-                                onSelect={setLastPeriodDate}
-                                className="rounded-md border mx-auto"
-                            />
+                            <DatePicker date={lastPeriodDate} setDate={setLastPeriodDate} />
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="cycle-length">Average Cycle Length (Days)</Label>
