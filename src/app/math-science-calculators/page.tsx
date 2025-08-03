@@ -17,6 +17,7 @@ import ChemistryCalculator from '@/components/chemistry-calculator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
+import DiscountCalculator from '@/components/discount-calculator';
 
 const calculatorTabs = [
     { value: 'basic', label: 'Basic' },
@@ -24,6 +25,7 @@ const calculatorTabs = [
     { value: 'graphing', label: 'Graphing' },
     { value: 'fraction', label: 'Fraction' },
     { value: 'percentage', label: 'Percentage' },
+    { value: 'discount', label: 'Discount' },
     { value: 'algebra', label: 'Algebra' },
     { value: 'geometry', label: 'Geometry' },
     { value: 'unit', label: 'Unit Converter' },
@@ -82,6 +84,11 @@ export default function MathScienceCalculators() {
              <TabsContent value="percentage">
               <div className="flex justify-center">
                 <PercentageCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="discount">
+              <div className="flex justify-center">
+                <DiscountCalculator />
               </div>
             </TabsContent>
             <TabsContent value="algebra">
