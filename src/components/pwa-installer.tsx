@@ -1,18 +1,18 @@
 
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { usePwaInstall } from '@/hooks/use-pwa-install';
 
 const PwaInstaller = () => {
     const { setInstallPrompt } = usePwaInstall();
 
-    useEffect(() => {
-        const handleBeforeInstallPrompt = (event: Event) => {
-            event.preventDefault();
-            setInstallPrompt(event);
-        };
+    const handleBeforeInstallPrompt = useCallback((event: Event) => {
+        event.preventDefault();
+        setInstallPrompt(event);
+    }, [setInstallPrompt]);
 
+    useEffect(() => {
         window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
         if ('serviceWorker' in navigator) {
@@ -25,7 +25,7 @@ const PwaInstaller = () => {
         return () => {
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
         };
-    }, [setInstallPrompt]);
+    }, [handleBeforeInstallPrompt]);
 
     return null; // This component does not render anything
 };
