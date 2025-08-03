@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { addDays, subDays, format, isValid, eachDayOfInterval, getMonth, getYear } from 'date-fns';
+import { addDays, subDays, format, isValid, differenceInDays } from 'date-fns';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -323,7 +323,6 @@ const DueDateCalculator = () => {
         else if (tab === 'clinical') setCalculationMethod('ultrasound_ga');
     };
 
-
     return (
         <Card className="w-full shadow-lg">
             <CardHeader>
@@ -382,69 +381,47 @@ const DueDateCalculator = () => {
                     
                     {result ? (
                         <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t w-full space-y-6">
-                            <Card>
-                                <CardHeader className="text-center pb-2">
-                                    <CardTitle className="text-primary">Key Dates for This Cycle</CardTitle>
+                            <Card className="bg-secondary/50">
+                                <CardHeader className="pb-2">
+                                    <CardTitle className='text-center'>Your Pregnancy Timeline</CardTitle>
                                 </CardHeader>
-                                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
-                                    <div className="p-2 bg-muted rounded-lg">
-                                        <p className="text-sm text-muted-foreground">Fertile Window</p>
-                                        <p className="font-bold text-sm">{format(result.dueDate, 'MMM d')} - {format(result.dueDate, 'MMM d')}</p>
+                                <CardContent className="space-y-4">
+                                    <div className="text-center p-4 rounded-lg bg-background">
+                                        <p className="text-sm text-muted-foreground">Estimated Due Date</p>
+                                        <p className="text-2xl font-bold text-primary">{format(result.dueDate, 'PPP')}</p>
+                                        <p className="text-sm text-muted-foreground">({result.daysUntilDue} days to go)</p>
                                     </div>
-                                     <div className="p-2 bg-muted rounded-lg">
-                                        <p className="text-sm text-muted-foreground">Est. Ovulation</p>
-                                        <p className="font-bold text-accent text-sm">{format(result.dueDate, 'PPP')}</p>
-                                    </div>
-                                    <div className="p-2 bg-muted rounded-lg">
-                                        <p className="text-sm text-muted-foreground">Next Period</p>
-                                        <p className="font-bold text-sm">{format(result.dueDate, 'PPP')}</p>
+                                    <div className="grid grid-cols-2 text-center gap-4">
+                                        <div>
+                                            <p className="text-sm text-muted-foreground">Current Gestation</p>
+                                            <p className="font-bold text-lg">{result.gestationalAge}</p>
+                                        </div>
+                                         <div>
+                                            <p className="text-sm text-muted-foreground">Trimester</p>
+                                            <p className="font-bold text-lg">{result.trimester}</p>
+                                        </div>
+                                         <div className="col-span-2">
+                                            <p className="text-sm text-muted-foreground">Estimated Conception Date</p>
+                                            <p className="font-bold text-lg">{format(result.conceptionDate, 'PPP')}</p>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
-                            
-                            <div className="p-4 border rounded-lg">
-                                 <div className="flex justify-center items-center mb-4">
-                                    <Button variant="ghost" size="icon" onClick={() => changeMonth(-1)}>
-                                        <ChevronLeft />
-                                    </Button>
-                                    <h3 className="text-lg font-semibold w-48 text-center">
-                                        {format(result.dueDate, 'MMMM yyyy')}
-                                    </h3>
-                                    <Button variant="ghost" size="icon" onClick={() => changeMonth(1)}>
-                                        <ChevronRight />
-                                    </Button>
-                                </div>
-                                <Calendar
-                                    month={currentMonth}
-                                    onMonthChange={setCurrentMonth}
-                                    modifiers={{ 
-                                        fertile: fertileDays, 
-                                        ovulation: ovulationDays,
-                                        period: periodDays,
-                                    }}
-                                    modifiersClassNames={{
-                                        fertile: 'bg-green-100 dark:bg-green-900/50 rounded-full',
-                                        ovulation: 'bg-accent text-accent-foreground rounded-full font-bold',
-                                        period: 'bg-red-100 dark:bg-red-900/50 rounded-none'
-                                    }}
-                                    className="rounded-md mx-auto"
-                                />
-                                <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-green-100 dark:bg-green-900/50 rounded-full"/>
-                                        <span>Fertile Window</span>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-accent rounded-full"/>
-                                        <span>Ovulation Day</span>
-                                    </div>
-                                     <div className="flex items-center gap-2">
-                                        <div className="w-4 h-4 bg-red-100 dark:bg-red-900/50"/>
-                                        <span>Period</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
+
+                             <Card>
+                                <CardHeader className="pb-2">
+                                    <CardTitle>Key Milestones</CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                    {result.milestones.map(m => (
+                                        <div key={m.name} className="flex justify-between text-sm p-2 bg-muted rounded-md">
+                                            <span>{m.name}</span>
+                                            <span className="font-semibold">{m.date}</span>
+                                        </div>
+                                    ))}
+                                </CardContent>
+                            </Card>
+                        </div>
                     ) : (
                          <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t flex items-center justify-center">
                             <p className="text-muted-foreground">Please provide valid inputs to see your results.</p>
