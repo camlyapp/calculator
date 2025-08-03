@@ -28,14 +28,14 @@ export default function Contact() {
                             <Mail className="h-6 w-6 text-primary" />
                             <div>
                                 <h4 className="font-semibold">Email</h4>
-                                <a href="mailto:contact@loansage.ai" className="text-muted-foreground hover:text-primary">contact@loansage.ai</a>
+                                <a href="mailto:camlysales@gmail.com" className="text-muted-foreground hover:text-primary">camlysales@gmail.com</a>
                             </div>
                         </div>
                          <div className="flex items-center gap-4">
                             <Phone className="h-6 w-6 text-primary" />
                             <div>
                                 <h4 className="font-semibold">Phone</h4>
-                                <p className="text-muted-foreground">(555) 123-4567</p>
+                                <p className="text-muted-foreground">8434828368</p>
                             </div>
                         </div>
                     </div>
