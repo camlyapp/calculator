@@ -10,12 +10,16 @@ import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-type CalculationMethod = 'lmp' | 'conception' | 'ivf_day3' | 'ivf_day5' | 'ultrasound';
+type CalculationMethod = 'lmp' | 'conception' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound';
 
 const DueDateCalculator = () => {
     const [calculationMethod, setCalculationMethod] = useState<CalculationMethod>('lmp');
     const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+    const [cycleLength, setCycleLength] = useState('28');
     
     // State for ultrasound method
     const [ultrasoundDate, setUltrasoundDate] = useState<Date | undefined>(new Date());
@@ -43,6 +47,7 @@ const DueDateCalculator = () => {
         let dueDate: Date | undefined;
         let lmpFromConception: Date | undefined;
         let methodUsed = '';
+        const avgCycleLength = parseInt(cycleLength) || 28;
 
         const dateForCalc = calculationMethod === 'ultrasound' ? ultrasoundDate : selectedDate;
 
@@ -53,38 +58,49 @@ const DueDateCalculator = () => {
         
         switch (calculationMethod) {
             case 'lmp':
-                lmpFromConception = dateForCalc;
-                methodUsed = "Last Menstrual Period (Naegele's Rule)";
+                // Using Parikh's Formula for more accuracy with varied cycle lengths
+                dueDate = addDays(dateForCalc, 280 + (avgCycleLength - 28));
+                lmpFromConception = subDays(dueDate, 280);
+                methodUsed = `Last Menstrual Period (Cycle: ${avgCycleLength} days)`;
                 break;
             case 'conception':
                 lmpFromConception = subDays(dateForCalc, 14);
                 methodUsed = "Date of Conception";
                 break;
+            case 'ivf_retrieval':
+                lmpFromConception = subDays(dateForCalc, 14);
+                methodUsed = "IVF (Egg Retrieval Date)";
+                break;
             case 'ivf_day3':
-                lmpFromConception = subDays(dateForCalc, 17); // 14 days for ovulation + 3 days embryo
+                lmpFromConception = subDays(dateForCalc, 17); // 14 days ovulation + 3 days embryo
                 methodUsed = "IVF Transfer (3-Day Embryo)";
                 break;
              case 'ivf_day5':
-                lmpFromConception = subDays(dateForCalc, 19); // 14 days for ovulation + 5 days embryo
+                lmpFromConception = subDays(dateForCalc, 19); // 14 days ovulation + 5 days embryo
                 methodUsed = "IVF Transfer (5-Day Embryo)";
                 break;
             case 'ultrasound':
                 const weeks = parseInt(weeksAtUltrasound) || 0;
                 const days = parseInt(daysAtUltrasound) || 0;
                 const totalDaysGestationAtUltrasound = weeks * 7 + days;
-                lmpFromConception = subDays(dateForCalc, totalDaysGestationAtUltrasound);
-                methodUsed = "Ultrasound Date";
+                // Calculate LMP from ultrasound data
+                const estLmp = subDays(dateForCalc, totalDaysGestationAtUltrasound);
+                dueDate = addDays(estLmp, 280);
+                lmpFromConception = subDays(dueDate, 280);
+                methodUsed = `Ultrasound (${weeks}w ${days}d)`;
                 break;
         }
         
-        dueDate = addDays(lmpFromConception, 280);
-        const conceptionDate = addDays(lmpFromConception, 14);
-
-        if (dueDate && conceptionDate && isValid(dueDate) && isValid(conceptionDate)) {
+        if (!dueDate && lmpFromConception) {
+            dueDate = addDays(lmpFromConception, 280);
+        }
+        
+        if (dueDate && lmpFromConception && isValid(dueDate)) {
+            const conceptionDate = addDays(lmpFromConception, 14);
             const today = new Date();
             const gestationalDays = differenceInDays(today, lmpFromConception);
 
-            if (gestationalDays < 0 || gestationalDays > 300) {
+            if (gestationalDays < 0 || gestationalDays > 300) { // Plausible range
                 setResult(null);
                 return;
             }
@@ -97,9 +113,12 @@ const DueDateCalculator = () => {
             else if (weeks >= 14) trimester = 2;
             
             const milestones = [
-                { name: "End of 1st Trimester", date: format(addDays(lmpFromConception, 14 * 7), 'PPP')},
-                { name: "End of 2nd Trimester", date: format(addDays(lmpFromConception, 28 * 7), 'PPP')},
+                { name: "Fetal Heartbeat Detectable", date: format(addDays(lmpFromConception, 6 * 7), 'PPP')},
+                { name: "End of 1st Trimester", date: format(addDays(lmpFromConception, 14 * 7 -1), 'PPP')},
+                { name: "Start of 2nd Trimester", date: format(addDays(lmpFromConception, 14 * 7), 'PPP')},
                 { name: "Estimated Viability", date: format(addDays(lmpFromConception, 24 * 7), 'PPP')},
+                { name: "End of 2nd Trimester", date: format(addDays(lmpFromConception, 28 * 7 - 1), 'PPP')},
+                { name: "Start of 3rd Trimester", date: format(addDays(lmpFromConception, 28 * 7), 'PPP')},
             ];
 
             setResult({
@@ -118,7 +137,7 @@ const DueDateCalculator = () => {
     
     useEffect(() => {
        calculateDueDate();
-    }, [selectedDate, calculationMethod, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, isMounted]);
+    }, [selectedDate, calculationMethod, cycleLength, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, isMounted]);
 
     if (!isMounted) {
         return null;
@@ -128,12 +147,38 @@ const DueDateCalculator = () => {
         switch(calculationMethod) {
             case 'lmp': return "First Day of Last Period";
             case 'conception': return "Date of Conception";
+            case 'ivf_retrieval': return "Date of Egg Retrieval";
             case 'ivf_day3':
             case 'ivf_day5':
                 return "Date of Embryo Transfer";
-            default: return "";
+            default: return "Date";
         }
     }
+
+    const DatePicker = ({date, setDate}: {date?: Date, setDate: (d?: Date) => void}) => (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={"outline"}
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+    );
 
     return (
         <Card className="w-full shadow-lg">
@@ -153,32 +198,32 @@ const DueDateCalculator = () => {
                                 <SelectContent>
                                     <SelectItem value="lmp">Last Menstrual Period</SelectItem>
                                     <SelectItem value="conception">Date of Conception</SelectItem>
-                                    <SelectItem value="ivf_day3">IVF Transfer (3-Day)</SelectItem>
-                                    <SelectItem value="ivf_day5">IVF Transfer (5-Day)</SelectItem>
+                                    <SelectItem value="ivf_retrieval">IVF: Egg Retrieval Date</SelectItem>
+                                    <SelectItem value="ivf_day3">IVF: 3-Day Transfer</SelectItem>
+                                    <SelectItem value="ivf_day5">IVF: 5-Day Transfer</SelectItem>
                                     <SelectItem value="ultrasound">Ultrasound</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         {calculationMethod !== 'ultrasound' ? (
-                             <div className="space-y-2 flex flex-col items-center">
-                                <Label>{getLabelForDate()}</Label>
-                                <Calendar
-                                    mode="single"
-                                    selected={selectedDate}
-                                    onSelect={setSelectedDate}
-                                    className="rounded-md border"
-                                />
+                            <div className='space-y-4'>
+                                <div className="space-y-2">
+                                    <Label>{getLabelForDate()}</Label>
+                                    <DatePicker date={selectedDate} setDate={setSelectedDate} />
+                                </div>
+                                {calculationMethod === 'lmp' && (
+                                     <div className="space-y-2">
+                                        <Label htmlFor="cycle-length">Average Cycle Length (Days)</Label>
+                                        <Input id="cycle-length" value={cycleLength} onChange={e => setCycleLength(e.target.value)} type="number" />
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="space-y-4 p-4 border rounded-lg">
-                                <div className="space-y-2 flex flex-col items-center">
+                                <p className="text-sm font-semibold text-primary">Ultrasound Details</p>
+                                <div className="space-y-2">
                                     <Label>Date of Ultrasound</Label>
-                                    <Calendar
-                                        mode="single"
-                                        selected={ultrasoundDate}
-                                        onSelect={setUltrasoundDate}
-                                        className="rounded-md border"
-                                    />
+                                    <DatePicker date={ultrasoundDate} setDate={setUltrasoundDate} />
                                 </div>
                                 <div className="flex gap-4">
                                      <div className="space-y-2">
@@ -193,10 +238,10 @@ const DueDateCalculator = () => {
                             </div>
                         )}
                         
-                         <Button onClick={calculateDueDate} className="w-full">Calculate</Button>
+                         <Button onClick={calculateDueDate} className="w-full">Recalculate</Button>
                     </div>
                     
-                    {result && (
+                    {result ? (
                         <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t space-y-6">
                             <Card>
                                 <CardHeader className="text-center">
@@ -204,7 +249,7 @@ const DueDateCalculator = () => {
                                 </CardHeader>
                                 <CardContent className="text-center">
                                     <p className="text-4xl font-bold">{format(result.dueDate, 'PPP')}</p>
-                                    <p className="text-lg text-accent">{result.daysUntilDue} days to go!</p>
+                                    <p className="text-lg text-accent">{result.daysUntilDue > 0 ? `${result.daysUntilDue} days to go!` : 'The day is here!'}</p>
                                     <p className="text-xs text-muted-foreground mt-2">Based on {result.methodUsed}</p>
                                 </CardContent>
                             </Card>
@@ -242,6 +287,10 @@ const DueDateCalculator = () => {
                                     ))}
                                 </CardContent>
                             </Card>
+                        </div>
+                    ) : (
+                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t flex items-center justify-center">
+                            <p className="text-muted-foreground">Please provide valid inputs to see your results.</p>
                         </div>
                     )}
                 </div>
