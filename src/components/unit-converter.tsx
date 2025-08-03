@@ -195,7 +195,7 @@ const UnitConverter = () => {
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="length" className="w-full">
-                    <TabsList className="grid w-full grid-cols-4">
+                    <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
                         <TabsTrigger value="length">Length</TabsTrigger>
                         <TabsTrigger value="weight">Weight</TabsTrigger>
                         <TabsTrigger value="volume">Volume</TabsTrigger>
