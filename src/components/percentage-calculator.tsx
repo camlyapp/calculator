@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
 const PercentageCalculator = () => {
   // State for "X% of Y"
@@ -65,9 +64,15 @@ const PercentageCalculator = () => {
   
   useEffect(() => {
     calc1();
+  }, [p1, val1]);
+
+  useEffect(() => {
     calc2();
+  }, [val2x, val2y]);
+
+  useEffect(() => {
     calc3();
-  }, []);
+  }, [val3x, val3y]);
 
 
   return (
@@ -97,7 +102,6 @@ const PercentageCalculator = () => {
                   <Input value={val1} onChange={(e) => setVal1(e.target.value)} type="number" placeholder="e.g., 200" />
                 </div>
               </div>
-              <Button onClick={calc1} className="w-full">Calculate</Button>
               {res1 && (
                 <div className="text-center pt-4">
                   <Label>Result</Label>
@@ -120,7 +124,6 @@ const PercentageCalculator = () => {
                   <Input value={val2y} onChange={(e) => setVal2y(e.target.value)} type="number" placeholder="e.g., 200" />
                 </div>
               </div>
-              <Button onClick={calc2} className="w-full">Calculate</Button>
               {res2 && (
                 <div className="text-center pt-4">
                   <Label>Result (%)</Label>
@@ -143,7 +146,6 @@ const PercentageCalculator = () => {
                   <Input value={val3y} onChange={(e) => setVal3y(e.target.value)} type="number" placeholder="e.g., 125" />
                 </div>
               </div>
-              <Button onClick={calc3} className="w-full">Calculate</Button>
               {res3 && (
                 <div className="text-center pt-4">
                   <Label>Percentage Change</Label>
