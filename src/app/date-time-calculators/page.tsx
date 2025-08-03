@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from 'react';
 import Header from '@/components/header';
 import DateCalculator from '@/components/date-calculator';
 import TimeCalculator from '@/components/time-calculator';
@@ -8,20 +9,43 @@ import WorkdaysCalculator from '@/components/workdays-calculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CountdownCalculator from '@/components/countdown-calculator';
 import DateManipulationTab from '@/components/date-manipulation-tab';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+
+const calculatorTabs = [
+    { value: 'date-difference', label: 'Date Difference' },
+    { value: 'add-subtract-days', label: 'Add/Subtract Days' },
+    { value: 'time-calculator', label: 'Add/Subtract Time' },
+    { value: 'workdays', label: 'Workdays' },
+    { value: 'countdown', label: 'Countdown' },
+];
 
 export default function DateTimeCalculators() {
+  const [activeTab, setActiveTab] = useState('date-difference');
+
   return (
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="date-difference" className="w-full max-w-4xl mx-auto">
-          <div className="flex justify-center">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
+          <div className="sm:hidden mb-4">
+              <Label htmlFor="calculator-select-dt">Select a Calculator</Label>
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                  <SelectTrigger id="calculator-select-dt">
+                      <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {calculatorTabs.map(tab => (
+                          <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+          </div>
+          <div className="hidden sm:flex justify-center">
             <TabsList className="flex flex-wrap justify-center h-auto">
-              <TabsTrigger value="date-difference">Date Difference</TabsTrigger>
-              <TabsTrigger value="add-subtract-days">Add/Subtract Days</TabsTrigger>
-              <TabsTrigger value="time-calculator">Add/Subtract Time</TabsTrigger>
-              <TabsTrigger value="workdays">Workdays</TabsTrigger>
-              <TabsTrigger value="countdown">Countdown</TabsTrigger>
+              {calculatorTabs.map(tab => (
+                <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+              ))}
             </TabsList>
           </div>
           <TabsContent value="date-difference">
