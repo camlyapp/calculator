@@ -25,7 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
 import { useCurrency } from '@/context/currency-context';
 
@@ -44,6 +44,17 @@ interface InvestmentResult {
     totalInterest: number;
     yearlyData: { year: number; balance: number; principal: number; interest: number }[];
 }
+
+const chartConfig = {
+   principal: {
+    label: "Total Principal",
+    color: "hsl(var(--primary))",
+  },
+  balance: {
+    label: "Total Balance",
+    color: "hsl(var(--accent))",
+  },
+} satisfies ChartConfig;
 
 const InvestmentCalculator = () => {
   const [result, setResult] = useState<InvestmentResult | null>(null);
@@ -188,7 +199,7 @@ const InvestmentCalculator = () => {
                 <CardTitle>Investment Growth Chart</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px] w-full">
+                <ChartContainer config={chartConfig} className="h-[400px] w-full">
                     <ResponsiveContainer>
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -200,7 +211,7 @@ const InvestmentCalculator = () => {
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--accent))" name="Total Balance" />
                         </LineChart>
                     </ResponsiveContainer>
-                </div>
+                </ChartContainer>
               </CardContent>
             </Card>
 
