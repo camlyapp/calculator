@@ -41,8 +41,10 @@ const AllCalculators = () => {
                         const Icon = page.icon;
                         return (
                             <Link href={page.href} key={page.href}>
-                                <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors h-full flex flex-col items-center justify-center text-center">
-                                    <Icon className="h-4 w-4 text-primary mb-2" />
+                                <div className="p-4 rounded-lg border bg-gradient-to-br from-primary/20 to-accent/20 text-card-foreground shadow-sm hover:from-primary/30 hover:to-accent/30 transition-all h-full flex flex-col items-center justify-center text-center">
+                                    <div className="p-3 rounded-full bg-background/70 mb-2">
+                                        <Icon className="h-5 w-5 text-primary" />
+                                    </div>
                                     <h3 className="text-sm font-semibold">{page.label}</h3>
                                 </div>
                             </Link>
