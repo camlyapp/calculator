@@ -1,12 +1,11 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
 const atomicWeights: { [key: string]: number } = {
     'H': 1.008, 'He': 4.0026, 'Li': 6.94, 'Be': 9.0122, 'B': 10.81, 'C': 12.011, 'N': 14.007,
@@ -29,7 +28,7 @@ const MolarityCalculator = () => {
     const [volume, setVolume] = useState('1'); // Liters
     const [result, setResult] = useState('');
 
-    const calculate = () => {
+    useEffect(() => {
         const mol = parseFloat(moles);
         const vol = parseFloat(volume);
         if (isNaN(mol) || isNaN(vol) || vol <= 0) {
@@ -37,7 +36,7 @@ const MolarityCalculator = () => {
             return;
         }
         setResult(`${(mol / vol).toLocaleString()} M`);
-    };
+    }, [moles, volume]);
 
     return (
         <div className="space-y-4 pt-4">
@@ -51,7 +50,6 @@ const MolarityCalculator = () => {
                     <Input id="volume-solution" value={volume} onChange={(e) => setVolume(e.target.value)} type="number" />
                 </div>
             </div>
-            <Button onClick={calculate} className="w-full">Calculate Molarity</Button>
             {result && (
                 <div className="text-center pt-4">
                     <Label>Molarity</Label>
@@ -67,7 +65,7 @@ const MolecularWeightCalculator = () => {
     const [result, setResult] = useState('');
     const [error, setError] = useState('');
 
-    const calculate = () => {
+    useEffect(() => {
         setError('');
         setResult('');
         if (!formula) {
@@ -105,7 +103,7 @@ const MolecularWeightCalculator = () => {
         }
 
         setResult(`${totalWeight.toFixed(4)} g/mol`);
-    };
+    }, [formula]);
     
     return (
         <div className="space-y-4 pt-4">
@@ -119,9 +117,8 @@ const MolecularWeightCalculator = () => {
                     placeholder="e.g., C6H12O6" 
                 />
             </div>
-            <Button onClick={calculate} className="w-full">Calculate Molecular Weight</Button>
             {error && <p className="text-destructive text-center mt-4">{error}</p>}
-            {result && (
+            {result && !error && (
                 <div className="text-center pt-4">
                     <Label>Molecular Weight</Label>
                     <p className="text-2xl font-bold">{result}</p>
