@@ -22,6 +22,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
 import SipCalculator from '@/components/sip-calculator';
+import LumpsumCalculator from '@/components/lumpsum-calculator';
 
 type Currency = 'USD' | 'INR';
 
@@ -33,13 +34,13 @@ const calculatorTabs = [
     { value: 'refinance', label: 'Refinancing' },
     { value: 'investment', label: 'Investment' },
     { value: 'sip-calculator', label: 'SIP Calculator' },
+    { value: 'lumpsum-calculator', label: 'Lumpsum' },
     { value: 'retirement', label: 'Retirement' },
     { value: 'compound-interest', label: 'Compound Interest' },
     { value: 'savings', label: 'Savings' },
     { value: 'tax', label: 'US Tax' },
     { value: 'indian-tax', label: 'Indian Tax' },
     { value: 'gst', label: 'GST' },
-    { value: 'currency', label: 'Currency' },
     { value: 'budget', label: 'Budget' },
 ];
 
@@ -109,6 +110,9 @@ export default function Home() {
              <TabsContent value="sip-calculator">
               <SipCalculator currency={currency} />
             </TabsContent>
+            <TabsContent value="lumpsum-calculator">
+                <LumpsumCalculator currency={currency} />
+            </TabsContent>
             <TabsContent value="retirement">
               <RetirementCalculator />
             </TabsContent>
@@ -126,9 +130,6 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="gst">
               <GstCalculator />
-            </TabsContent>
-            <TabsContent value="currency">
-              <CurrencyConverter />
             </TabsContent>
             <TabsContent value="budget">
               <BudgetCalculator currency={currency} />
