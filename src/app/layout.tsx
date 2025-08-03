@@ -6,6 +6,7 @@ import Footer from '@/components/footer';
 import { ThemeProvider } from '@/components/theme-provider';
 import SeoContent from '@/components/seo-content';
 import { CurrencyProvider } from '@/context/currency-context';
+import PwaInstaller from '@/components/pwa-installer';
 
 export const metadata: Metadata = {
   title: 'Camly - Free Smart Financial & Loan Calculator',
@@ -75,6 +76,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <CurrencyProvider>
+            <PwaInstaller />
             {children}
             <SeoContent />
             <Footer />

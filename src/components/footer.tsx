@@ -4,39 +4,10 @@
 import { Twitter, Github, Linkedin, Download } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { usePwaInstall } from '@/hooks/use-pwa-install';
 
 const Footer = () => {
-  const [installPrompt, setInstallPrompt] = useState<any>(null);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    if (!installPrompt) {
-      return;
-    }
-    await installPrompt.prompt();
-    const { outcome } = await installPrompt.userChoice;
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
-    setInstallPrompt(null);
-  };
-
+  const { installPrompt, handleInstallClick } = usePwaInstall();
 
   return (
     <footer className="bg-card shadow-inner mt-auto">
