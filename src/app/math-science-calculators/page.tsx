@@ -23,23 +23,23 @@ import BreakEvenCalculator from '@/components/break-even-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
-    { value: 'basic', label: 'Basic' },
-    { value: 'scientific', label: 'Scientific' },
-    { value: 'graphing', label: 'Graphing' },
-    { value: 'fraction', label: 'Fraction' },
-    { value: 'percentage', label: 'Percentage' },
-    { value: 'discount', label: 'Discount' },
-    { value: 'markup-margin', label: 'Markup & Margin' },
-    { value: 'break-even', label: 'Break-Even' },
     { value: 'algebra', label: 'Algebra' },
-    { value: 'geometry', label: 'Geometry' },
-    { value: 'unit', label: 'Unit Converter' },
-    { value: 'physics', label: 'Physics' },
+    { value: 'basic', label: 'Basic' },
+    { value: 'break-even', label: 'Break-Even' },
     { value: 'chemistry', label: 'Chemistry' },
+    { value: 'discount', label: 'Discount' },
+    { value: 'fraction', label: 'Fraction' },
+    { value: 'geometry', label: 'Geometry' },
+    { value: 'graphing', label: 'Graphing' },
+    { value: 'markup-margin', label: 'Markup & Margin' },
+    { value: 'percentage', label: 'Percentage' },
+    { value: 'physics', label: 'Physics' },
+    { value: 'scientific', label: 'Scientific' },
+    { value: 'unit', label: 'Unit Converter' },
 ];
 
 export default function MathScienceCalculators() {
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = useState('algebra');
 
   return (
     <>

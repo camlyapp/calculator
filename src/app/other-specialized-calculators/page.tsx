@@ -16,17 +16,17 @@ import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
+    { value: 'bsa', label: 'Body Surface Area' },
+    { value: 'carbon-footprint', label: 'Carbon Footprint' },
+    { value: 'cooking-converter', label: 'Cooking Converter' },
     { value: 'fuel-efficiency', label: 'Fuel Efficiency' },
     { value: 'gpa', label: 'GPA' },
     { value: 'loan-eligibility', label: 'Loan Eligibility' },
-    { value: 'carbon-footprint', label: 'Carbon Footprint' },
-    { value: 'bsa', label: 'Body Surface Area' },
-    { value: 'cooking-converter', label: 'Cooking Converter' },
 ];
 
 
 export default function OtherSpecializedCalculators() {
-  const [activeTab, setActiveTab] = useState('fuel-efficiency');
+  const [activeTab, setActiveTab] = useState('body-surface-area');
   
   return (
     <>

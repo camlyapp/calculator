@@ -30,30 +30,30 @@ import RoiCalculator from '@/components/roi-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
-    { value: 'calculator', label: 'EMI Calculator' },
-    { value: 'mortgage-calculator', label: 'Mortgage' },
-    { value: 'comparison', label: 'Comparison' },
     { value: 'suggestions', label: 'AI Suggestions' },
-    { value: 'refinance', label: 'Refinancing' },
-    { value: 'investment', label: 'Investment' },
-    { value: 'roi', label: 'ROI' },
-    { value: 'sip-calculator', label: 'SIP Calculator' },
-    { value: 'lumpsum-calculator', label: 'Lumpsum' },
-    { value: 'ppf-calculator', label: 'PPF Calculator' },
-    { value: 'fd-calculator', label: 'FD Calculator' },
-    { value: 'rd-calculator', label: 'RD Calculator' },
-    { value: 'retirement', label: 'Retirement' },
-    { value: 'gratuity', label: 'Gratuity' },
-    { value: 'compound-interest', label: 'Compound Interest' },
-    { value: 'savings', label: 'Savings' },
-    { value: 'tax', label: 'US Tax' },
-    { value: 'indian-tax', label: 'Indian Tax' },
-    { value: 'gst', label: 'GST' },
     { value: 'budget', label: 'Budget' },
+    { value: 'comparison', label: 'Comparison' },
+    { value: 'compound-interest', label: 'Compound Interest' },
+    { value: 'calculator', label: 'EMI Calculator' },
+    { value: 'fd-calculator', label: 'FD Calculator' },
+    { value: 'gratuity', label: 'Gratuity' },
+    { value: 'gst', label: 'GST' },
+    { value: 'indian-tax', label: 'Indian Tax' },
+    { value: 'investment', label: 'Investment' },
+    { value: 'lumpsum-calculator', label: 'Lumpsum' },
+    { value: 'mortgage-calculator', label: 'Mortgage' },
+    { value: 'ppf-calculator', label: 'PPF Calculator' },
+    { value: 'rd-calculator', label: 'RD Calculator' },
+    { value: 'refinance', label: 'Refinancing' },
+    { value: 'retirement', label: 'Retirement' },
+    { value: 'roi', label: 'ROI' },
+    { value: 'savings', label: 'Savings' },
+    { value: 'sip-calculator', label: 'SIP Calculator' },
+    { value: 'tax', label: 'US Tax' },
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('calculator');
+  const [activeTab, setActiveTab] = useState('suggestions');
 
   return (
     <>

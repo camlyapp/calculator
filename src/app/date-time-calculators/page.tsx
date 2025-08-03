@@ -15,15 +15,15 @@ import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
-    { value: 'date-difference', label: 'Date Difference' },
     { value: 'add-subtract-days', label: 'Add/Subtract Days' },
     { value: 'time-calculator', label: 'Add/Subtract Time' },
-    { value: 'workdays', label: 'Workdays' },
     { value: 'countdown', label: 'Countdown' },
+    { value: 'date-difference', label: 'Date Difference' },
+    { value: 'workdays', label: 'Workdays' },
 ];
 
 export default function DateTimeCalculators() {
-  const [activeTab, setActiveTab] = useState('date-difference');
+  const [activeTab, setActiveTab] = useState('add-subtract-days');
 
   return (
     <>

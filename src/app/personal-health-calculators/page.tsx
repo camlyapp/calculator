@@ -20,18 +20,18 @@ import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
     { value: 'age', label: 'Age' },
-    { value: 'due-date', label: 'Due Date' },
-    { value: 'ovulation', label: 'Ovulation' },
     { value: 'bmi', label: 'BMI' },
     { value: 'bmr', label: 'BMR' },
     { value: 'body-fat', label: 'Body Fat' },
     { value: 'calorie', label: 'Calorie' },
+    { value: 'due-date', label: 'Due Date' },
     { value: 'heart-rate', label: 'Heart Rate' },
     { value: 'ideal-weight', label: 'Ideal Weight' },
+    { value: 'ovulation', label: 'Ovulation' },
 ];
 
 export default function PersonalHealthCalculators() {
-  const [activeTab, setActiveTab] = useState('due-date');
+  const [activeTab, setActiveTab] = useState('age');
 
   return (
     <>
