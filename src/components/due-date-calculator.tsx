@@ -6,13 +6,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { addDays, format, isValid, differenceInDays, subDays } from 'date-fns';
-import { Separator } from './ui/separator';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Input } from './ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 type CalculationMethod = 'lmp' | 'conception' | 'ovulation' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound_ga' | 'ultrasound_crl' | 'fundal_height';
 
@@ -217,8 +217,8 @@ const DueDateCalculator = () => {
         </Popover>
     );
 
-    const renderInputs = () => {
-        switch (calculationMethod) {
+    const renderInputs = (method: CalculationMethod) => {
+        switch (method) {
             case 'lmp':
                 return (
                     <div className='space-y-4'>
@@ -298,6 +298,26 @@ const DueDateCalculator = () => {
         }
     }
 
+    const commonMethods: CalculationMethod[] = ['lmp', 'conception', 'ovulation'];
+    const ivfMethods: CalculationMethod[] = ['ivf_retrieval', 'ivf_day3', 'ivf_day5'];
+    const clinicalMethods: CalculationMethod[] = ['ultrasound_ga', 'ultrasound_crl', 'fundal_height'];
+
+    const getMethodName = (method: CalculationMethod) => {
+        switch(method) {
+            case 'lmp': return "LMP";
+            case 'conception': return "Conception";
+            case 'ovulation': return "Ovulation";
+            case 'ivf_retrieval': return "Egg Retrieval";
+            case 'ivf_day3': return "3-Day Transfer";
+            case 'ivf_day5': return "5-Day Transfer";
+            case 'ultrasound_ga': return "Ultrasound (GA)";
+            case 'ultrasound_crl': return "Ultrasound (CRL)";
+            case 'fundal_height': return "Fundal Height";
+            default: return "";
+        }
+    }
+
+
     return (
         <Card className="w-full shadow-lg">
             <CardHeader>
@@ -307,27 +327,49 @@ const DueDateCalculator = () => {
             <CardContent>
                 <div className="flex flex-col md:flex-row gap-8">
                     <div className='flex-1 space-y-4'>
-                         <div className='space-y-2'>
-                            <Label>Calculation Method</Label>
-                            <Select value={calculationMethod} onValueChange={(val) => setCalculationMethod(val as CalculationMethod)}>
-                                <SelectTrigger>
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="lmp">Last Menstrual Period (LMP)</SelectItem>
-                                    <SelectItem value="conception">Date of Conception</SelectItem>
-                                    <SelectItem value="ovulation">Ovulation Date</SelectItem>
-                                    <SelectItem value="ivf_retrieval">IVF: Egg Retrieval Date</SelectItem>
-                                    <SelectItem value="ivf_day3">IVF: 3-Day Transfer</SelectItem>
-                                    <SelectItem value="ivf_day5">IVF: 5-Day Transfer</SelectItem>
-                                    <SelectItem value="ultrasound_ga">Ultrasound (by GA)</SelectItem>
-                                    <SelectItem value="ultrasound_crl">Ultrasound (by CRL)</SelectItem>
-                                    <SelectItem value="fundal_height">Fundal Height</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        
-                        {renderInputs()}
+                        <Tabs defaultValue="common" className="w-full">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="common">Common</TabsTrigger>
+                                <TabsTrigger value="ivf">IVF</TabsTrigger>
+                                <TabsTrigger value="clinical">Clinical</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="common" className="pt-4">
+                                <div className="space-y-2">
+                                    <Label>Method</Label>
+                                    <Select value={calculationMethod} onValueChange={(val) => setCalculationMethod(val as CalculationMethod)}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {commonMethods.map(m => <SelectItem key={m} value={m}>{getMethodName(m)}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="mt-4">{renderInputs(calculationMethod)}</div>
+                            </TabsContent>
+                             <TabsContent value="ivf" className="pt-4">
+                               <div className="space-y-2">
+                                    <Label>Method</Label>
+                                    <Select value={calculationMethod} onValueChange={(val) => setCalculationMethod(val as CalculationMethod)}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {ivfMethods.map(m => <SelectItem key={m} value={m}>{getMethodName(m)}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="mt-4">{renderInputs(calculationMethod)}</div>
+                            </TabsContent>
+                             <TabsContent value="clinical" className="pt-4">
+                                <div className="space-y-2">
+                                    <Label>Method</Label>
+                                    <Select value={calculationMethod} onValueChange={(val) => setCalculationMethod(val as CalculationMethod)}>
+                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            {clinicalMethods.map(m => <SelectItem key={m} value={m}>{getMethodName(m)}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="mt-4">{renderInputs(calculationMethod)}</div>
+                            </TabsContent>
+                        </Tabs>
                         
                          <Button onClick={calculateDueDate} className="w-full">Recalculate</Button>
                     </div>
