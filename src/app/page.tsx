@@ -31,8 +31,8 @@ export default function Home() {
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
-        <div className="w-full max-w-7xl mx-auto">
-          <div className="flex justify-end my-4">
+        <div className="w-full max-w-7xl mx-auto space-y-8">
+          <div className="flex justify-end">
             <div className='w-[180px] space-y-2'>
               <Label htmlFor="global-currency-select">Global Currency</Label>
               <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
@@ -46,8 +46,11 @@ export default function Home() {
               </Select>
             </div>
           </div>
+          
+          <AllCalculators />
+
           <Tabs defaultValue="calculator" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 mx-auto max-w-6xl h-auto">
               <TabsTrigger value="calculator">EMI Calculator</TabsTrigger>
               <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
               <TabsTrigger value="comparison">Comparison</TabsTrigger>
@@ -62,7 +65,6 @@ export default function Home() {
               <TabsTrigger value="gst">GST</TabsTrigger>
               <TabsTrigger value="currency">Currency</TabsTrigger>
               <TabsTrigger value="budget">Budget</TabsTrigger>
-              <TabsTrigger value="all-calculators">All Calculators</TabsTrigger>
             </TabsList>
             <TabsContent value="calculator">
               <LoanCalculator currency={currency} />
@@ -105,9 +107,6 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="budget">
               <BudgetCalculator currency={currency} />
-            </TabsContent>
-            <TabsContent value="all-calculators">
-              <AllCalculators />
             </TabsContent>
           </Tabs>
         </div>
