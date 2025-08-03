@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
@@ -18,35 +18,12 @@ const CountdownCalculator = () => {
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    useEffect(() => {
-        if (!isRunning) return;
-
-        const interval = setInterval(() => {
-            const now = new Date();
-            const fullTargetDate = getFullTargetDate();
-
-            if (fullTargetDate && isFuture(fullTargetDate)) {
-                const duration = intervalToDuration({ start: now, end: fullTargetDate });
-                setCountdown({
-                    days: duration.days || 0,
-                    hours: duration.hours || 0,
-                    minutes: duration.minutes || 0,
-                    seconds: duration.seconds || 0,
-                });
-            } else {
-                setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-                setIsRunning(false);
-            }
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isRunning, targetDate, targetTime]);
-    
     const getFullTargetDate = () => {
          if (!targetDate) return null;
         
@@ -55,14 +32,64 @@ const CountdownCalculator = () => {
         fullDate.setHours(hours, minutes, seconds);
         return fullDate;
     };
+    
+    const updateCountdown = () => {
+        const fullTargetDate = getFullTargetDate();
 
-    const handleStartStop = () => {
+        if (fullTargetDate && isFuture(fullTargetDate)) {
+            const now = new Date();
+            const duration = intervalToDuration({ start: now, end: fullTargetDate });
+            setCountdown({
+                days: duration.days || 0,
+                hours: duration.hours || 0,
+                minutes: duration.minutes || 0,
+                seconds: duration.seconds || 0,
+            });
+        } else {
+            setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            setIsRunning(false);
+            if(timeoutRef.current) clearTimeout(timeoutRef.current);
+        }
+    }
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | undefined;
+        if (isRunning) {
+            interval = setInterval(updateCountdown, 1000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isRunning, targetDate, targetTime]);
+
+    const handleStartStop = async () => {
         if (isRunning) {
             setIsRunning(false);
+            if(timeoutRef.current) clearTimeout(timeoutRef.current);
         } else {
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
-                 setIsRunning(true);
+                 if ('Notification' in window && Notification.permission !== 'granted') {
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        alert('Notification permission is required to be alerted when the countdown ends.');
+                        return;
+                    }
+                }
+                setIsRunning(true);
+                
+                // Set a more reliable timeout for the notification
+                const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
+                if (timeRemaining > 0) {
+                     if(timeoutRef.current) clearTimeout(timeoutRef.current);
+                     timeoutRef.current = setTimeout(() => {
+                         new Notification('Countdown Finished!', {
+                            body: `Your countdown set for ${fullTargetDate.toLocaleString()} has ended.`,
+                            icon: '/camly.png'
+                         });
+                         setIsRunning(false);
+                     }, timeRemaining);
+                }
             } else {
                 alert("Please select a future date and time to start the countdown.");
             }
@@ -77,7 +104,7 @@ const CountdownCalculator = () => {
         <Card className="w-full max-w-2xl shadow-2xl mt-6">
             <CardHeader>
                 <CardTitle className="text-2xl">Countdown Calculator</CardTitle>
-                <CardDescription>Set a future date and time to start a live countdown.</CardDescription>
+                <CardDescription>Set a future date and time to start a live countdown. You will be notified when it ends.</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="space-y-6">
