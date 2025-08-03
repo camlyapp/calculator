@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useActionState, useRef } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
@@ -10,12 +11,15 @@ import { addDays, subDays, format, isValid, differenceInDays, eachDayOfInterval,
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2 } from 'lucide-react';
+import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2, WandSparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { getPregnancyAdviceAction } from '@/app/actions';
+import { getPregnancyAdviceAction, askPregnancyQuestionAction } from '@/app/actions';
 import type { GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Textarea } from './ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { Separator } from './ui/separator';
 
 type CalculationMethod = 'lmp' | 'conception' | 'ovulation' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound_ga' | 'ultrasound_crl' | 'fundal_height';
 
@@ -35,6 +39,22 @@ interface CyclePrediction {
     fertileWindowStart: Date;
     fertileWindowEnd: Date;
     nextPeriodDate: Date;
+}
+
+const askQuestionInitialState = {
+  answer: undefined,
+  error: undefined,
+  errors: undefined,
+};
+
+function AskQuestionSubmitButton() {
+    const { pending } = useFormStatus();
+    return (
+        <Button type="submit" disabled={pending} className="w-full">
+            {pending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WandSparkles className="mr-2 h-4 w-4" />}
+            Ask AI
+        </Button>
+    );
 }
 
 const DueDateCalculator = () => {
@@ -60,9 +80,26 @@ const DueDateCalculator = () => {
     const [aiAdvice, setAiAdvice] = useState<GetPregnancyAdviceOutput | null>(null);
     const [isLoadingAdvice, setIsLoadingAdvice] = useState(false);
 
+    const [askQuestionState, askQuestionFormAction] = useActionState(askPregnancyQuestionAction, askQuestionInitialState);
+    const { toast } = useToast();
+    const askQuestionFormRef = useRef<HTMLFormElement>(null);
+
     useEffect(() => {
         setIsMounted(true);
     }, []);
+    
+    useEffect(() => {
+        if(askQuestionState.answer) {
+            askQuestionFormRef.current?.reset();
+        }
+        if(askQuestionState.error) {
+             toast({
+                variant: "destructive",
+                title: "Error",
+                description: askQuestionState.error,
+            })
+        }
+    }, [askQuestionState, toast])
 
     useEffect(() => {
         if (selectedDate) {
@@ -552,6 +589,35 @@ const DueDateCalculator = () => {
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>
+                        </CardContent>
+                    </Card>
+                )}
+                 {result && (
+                    <Card className="mt-8">
+                        <CardHeader>
+                            <CardTitle>Ask a Question</CardTitle>
+                            <CardDescription>Have a specific question about week {result.gestationalWeek}? Ask our AI assistant.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form action={askQuestionFormAction} ref={askQuestionFormRef} className="space-y-4">
+                                <input type="hidden" name="gestationalWeek" value={result.gestationalWeek} />
+                                <div>
+                                    <Textarea
+                                        name="question"
+                                        placeholder="e.g., How big is the baby right now? or Is it safe to exercise?"
+                                        rows={4}
+                                    />
+                                    {askQuestionState.errors?.question && <p className="text-destructive text-sm mt-1">{askQuestionState.errors.question[0]}</p>}
+                                </div>
+                                <AskQuestionSubmitButton />
+                            </form>
+                            
+                            {askQuestionState.answer && (
+                                <div className="mt-6 pt-6 border-t">
+                                     <h4 className="font-semibold mb-2">AI Answer:</h4>
+                                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">{askQuestionState.answer.answer}</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 )}

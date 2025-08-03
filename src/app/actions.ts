@@ -7,6 +7,7 @@ import { calculateIndianTax, type CalculateIndianTaxInput, type CalculateIndianT
 import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEligibilityOutput } from '@/ai/flows/check-loan-eligibility';
 import { calculateGratuity, type CalculateGratuityInput, type CalculateGratuityOutput } from '@/ai/flows/calculate-gratuity';
 import { getPregnancyAdvice, type GetPregnancyAdviceInput, type GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
+import { askPregnancyQuestion, type AskPregnancyQuestionInput, type AskPregnancyQuestionOutput } from '@/ai/flows/ask-pregnancy-question';
 
 
 import { z } from 'zod';
@@ -241,5 +242,33 @@ export async function getPregnancyAdviceAction(
     } catch (e) {
         console.error(e);
         return { error: 'An unexpected error occurred while fetching AI-powered advice. Please try again later.' };
+    }
+}
+
+const AskQuestionSchema = z.object({
+  gestationalWeek: z.coerce.number().min(1).max(42),
+  question: z.string().min(5, "Question must be at least 5 characters long."),
+});
+
+export async function askPregnancyQuestionAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ answer?: AskPregnancyQuestionOutput; error?: string; errors?: any; }> {
+    const validatedFields = AskQuestionSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+        };
+    }
+
+    const aiInput: AskPregnancyQuestionInput = validatedFields.data;
+
+    try {
+        const result = await askPregnancyQuestion(aiInput);
+        return { answer: result };
+    } catch (e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred while asking the AI. Please try again later.' };
     }
 }
