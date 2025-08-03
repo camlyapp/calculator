@@ -78,7 +78,7 @@ const PercentageCalculator = () => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="percentOf" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-auto">
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto">
             <TabsTrigger value="percentOf" className="whitespace-normal">What is X% of Y?</TabsTrigger>
             <TabsTrigger value="whatPercent" className="whitespace-normal">X is what % of Y?</TabsTrigger>
             <TabsTrigger value="change" className="whitespace-normal">% Increase/Decrease</TabsTrigger>
