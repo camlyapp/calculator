@@ -11,7 +11,7 @@ import { addDays, subDays, format, isValid, differenceInDays, eachDayOfInterval,
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2, WandSparkles, ShieldAlert } from 'lucide-react';
+import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2, WandSparkles, ShieldAlert, Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { getPregnancyAdviceAction, askPregnancyQuestionAction } from '@/app/actions';
@@ -84,13 +84,69 @@ const DueDateCalculator = () => {
     const { toast } = useToast();
     const askQuestionFormRef = useRef<HTMLFormElement>(null);
 
+    const [isListening, setIsListening] = useState(false);
+    const [questionText, setQuestionText] = useState("");
+    const recognitionRef = useRef<any>(null);
+
     useEffect(() => {
         setIsMounted(true);
-    }, []);
+        // Speech Recognition setup
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            recognitionRef.current = new SpeechRecognition();
+            const recognition = recognitionRef.current;
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setQuestionText(transcript);
+                setIsListening(false);
+            };
+
+            recognition.onerror = (event: any) => {
+                console.error("Speech recognition error", event.error);
+                toast({
+                    variant: "destructive",
+                    title: "Voice Error",
+                    description: `Could not recognize speech: ${event.error}`,
+                })
+                setIsListening(false);
+            };
+            
+            recognition.onend = () => {
+                setIsListening(false);
+            }
+
+        } else {
+            console.warn("Speech Recognition not supported in this browser.");
+        }
+    }, [toast]);
+    
+    const handleVoiceInput = () => {
+        if (!recognitionRef.current) {
+             toast({
+                variant: "destructive",
+                title: "Not Supported",
+                description: "Your browser does not support voice input.",
+            })
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current.stop();
+            setIsListening(false);
+        } else {
+            setIsListening(true);
+            recognitionRef.current.start();
+        }
+    };
     
     useEffect(() => {
         if(askQuestionState.answer) {
             askQuestionFormRef.current?.reset();
+            setQuestionText("");
         }
         if(askQuestionState.error) {
              toast({
@@ -615,11 +671,25 @@ const DueDateCalculator = () => {
                             <form action={askQuestionFormAction} ref={askQuestionFormRef} className="space-y-4">
                                 <input type="hidden" name="gestationalWeek" value={result.gestationalWeek} />
                                 <div>
-                                    <Textarea
-                                        name="question"
-                                        placeholder="e.g., How big is the baby right now? or Is it safe to exercise?"
-                                        rows={4}
-                                    />
+                                    <div className="relative">
+                                         <Textarea
+                                            name="question"
+                                            placeholder={isListening ? "Listening..." : "e.g., How big is the baby right now? or Is it safe to exercise?"}
+                                            rows={4}
+                                            value={questionText}
+                                            onChange={(e) => setQuestionText(e.target.value)}
+                                        />
+                                        <Button 
+                                            type="button" 
+                                            size="icon" 
+                                            variant="ghost" 
+                                            onClick={handleVoiceInput} 
+                                            className={cn("absolute bottom-2 right-2", isListening ? "text-destructive" : "text-muted-foreground")}
+                                            aria-label={isListening ? "Stop listening" : "Start listening"}
+                                        >
+                                            {isListening ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
+                                        </Button>
+                                    </div>
                                     {askQuestionState.errors?.question && <p className="text-destructive text-sm mt-1">{askQuestionState.errors.question[0]}</p>}
                                 </div>
                                 <AskQuestionSubmitButton />
