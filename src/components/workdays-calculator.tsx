@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { differenceInBusinessDays, format, isValid } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const WorkdaysCalculator = () => {
     const [startDate, setStartDate] = useState<Date | undefined>(new Date());
@@ -18,10 +21,16 @@ const WorkdaysCalculator = () => {
         setIsMounted(true);
     }, []);
 
+    useEffect(() => {
+        if (isMounted) {
+            calculateDifference();
+        }
+    }, [startDate, endDate, isMounted])
+
     const calculateDifference = () => {
         if (startDate && endDate) {
             if (endDate < startDate) {
-                alert("End date cannot be earlier than the start date.");
+                // Silently handle, or maybe a toast in a real app
                 setResult(null);
                 return;
             }
@@ -34,6 +43,34 @@ const WorkdaysCalculator = () => {
         return null;
     }
 
+    const DatePicker = ({date, setDate}: {date?: Date, setDate: (d?: Date) => void}) => (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={"outline"}
+                    className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    captionLayout="dropdown-buttons"
+                    fromYear={1900}
+                    toYear={new Date().getFullYear() + 100}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+    );
+
     return (
         <Card className="w-full max-w-2xl shadow-2xl mt-6">
             <CardHeader>
@@ -44,24 +81,11 @@ const WorkdaysCalculator = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-2 flex flex-col items-center">
                         <Label>Start Date</Label>
-                        <Calendar
-                            mode="single"
-                            selected={startDate}
-                            onSelect={setStartDate}
-                            className="rounded-md border"
-                            initialFocus
-                        />
-                         <p className="text-sm text-muted-foreground">{startDate && isValid(startDate) ? format(startDate, 'PPP') : 'Invalid date'}</p>
+                        <DatePicker date={startDate} setDate={setStartDate} />
                     </div>
                      <div className="space-y-2 flex flex-col items-center">
                         <Label>End Date</Label>
-                        <Calendar
-                            mode="single"
-                            selected={endDate}
-                            onSelect={setEndDate}
-                            className="rounded-md border"
-                        />
-                         <p className="text-sm text-muted-foreground">{endDate && isValid(endDate) ? format(endDate, 'PPP') : 'Invalid date'}</p>
+                        <DatePicker date={endDate} setDate={setEndDate} />
                     </div>
                 </div>
 
