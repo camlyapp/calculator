@@ -24,6 +24,7 @@ import AllCalculators from '@/components/all-calculators';
 import SipCalculator from '@/components/sip-calculator';
 import LumpsumCalculator from '@/components/lumpsum-calculator';
 import RdCalculator from '@/components/rd-calculator';
+import FdCalculator from '@/components/fd-calculator';
 
 type Currency = 'USD' | 'INR';
 
@@ -36,6 +37,7 @@ const calculatorTabs = [
     { value: 'investment', label: 'Investment' },
     { value: 'sip-calculator', label: 'SIP Calculator' },
     { value: 'lumpsum-calculator', label: 'Lumpsum' },
+    { value: 'fd-calculator', label: 'FD Calculator' },
     { value: 'rd-calculator', label: 'RD Calculator' },
     { value: 'retirement', label: 'Retirement' },
     { value: 'compound-interest', label: 'Compound Interest' },
@@ -114,6 +116,9 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="lumpsum-calculator">
                 <LumpsumCalculator currency={currency} />
+            </TabsContent>
+            <TabsContent value="fd-calculator">
+                <FdCalculator currency={currency} />
             </TabsContent>
             <TabsContent value="rd-calculator">
                 <RdCalculator currency={currency} />
