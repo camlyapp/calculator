@@ -11,7 +11,7 @@ import { addDays, subDays, format, isValid, differenceInDays, eachDayOfInterval,
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2, WandSparkles } from 'lucide-react';
+import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2, WandSparkles, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { getPregnancyAdviceAction, askPregnancyQuestionAction } from '@/app/actions';
@@ -586,6 +586,19 @@ const DueDateCalculator = () => {
                                     <AccordionTrigger><HeartPulse className="mr-2 h-5 w-5 text-primary" />General Tips</AccordionTrigger>
                                     <AccordionContent className="prose prose-sm dark:prose-invert">
                                         <ul>{aiAdvice.generalTips.map((tip, i) => <li key={i}>{tip}</li>)}</ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                 <AccordionItem value="safety">
+                                    <AccordionTrigger><ShieldAlert className="mr-2 h-5 w-5 text-destructive" />Safety Information</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert space-y-4">
+                                        <div>
+                                            <h4 className="font-semibold text-foreground">Teratogen Information</h4>
+                                            <p>{aiAdvice.teratogenicityInfo}</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="font-semibold text-foreground">Medication Advisory</h4>
+                                            <ul>{aiAdvice.medicinesToAvoid.map((tip, i) => <li key={i}>{tip}</li>)}</ul>
+                                        </div>
                                     </AccordionContent>
                                 </AccordionItem>
                             </Accordion>

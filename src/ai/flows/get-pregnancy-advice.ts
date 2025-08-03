@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -23,6 +24,8 @@ const GetPregnancyAdviceOutputSchema = z.object({
   nutritionTips: z.array(z.string()).describe("A list of 3-5 specific, actionable nutrition and food tips for this week."),
   vaccineInfo: z.string().describe("Information about any recommended vaccines or check-ups around this time."),
   generalTips: z.array(z.string()).describe("A list of 3-5 other helpful tips (e.g., exercise, sleep, preparation) for this week."),
+  teratogenicityInfo: z.string().describe("An educational overview of teratogens and general risks during pregnancy. Must include a strong disclaimer to consult a healthcare provider."),
+  medicinesToAvoid: z.array(z.string()).describe("A list of common over-the-counter and prescription medicine compositions to be cautious about. This is not exhaustive and must advise consulting a doctor."),
 });
 export type GetPregnancyAdviceOutput = z.infer<typeof GetPregnancyAdviceOutputSchema>;
 
@@ -45,6 +48,8 @@ Your response must be in the specified JSON format. Ensure all lists have betwee
 - Provide a list of specific, actionable nutrition tips relevant to this stage.
 - Provide information about vaccines (like Flu, Tdap) or important check-ups that are commonly recommended around this time. If none are typical for this specific week, mention what to expect soon.
 - Provide a list of general, helpful tips related to things like exercise, sleep, appointments, or preparing for the baby.
+- Provide a general, educational explanation of teratogenicity. Explain what teratogens are (substances that can cause birth defects) and mention that exposure is most critical during the first trimester. Give examples like alcohol, certain medications, and infections. CRITICALLY, you must include the sentence: "This information is for educational purposes only. Always consult your healthcare provider about your specific situation and before taking any medication."
+- Provide a list of common medicine compositions that pregnant women are often advised to avoid or use with caution. Include examples like Ibuprofen, Aspirin (in later stages), certain acne medications (like Isotretinoin), and some decongestants. For each, briefly state why. CRITICALLY, you must start this list with the disclaimer: "The following is a general, non-exhaustive list. YOU MUST consult your doctor before taking, stopping, or changing any medication."
 `,
 });
 
