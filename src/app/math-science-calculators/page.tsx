@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
 import DiscountCalculator from '@/components/discount-calculator';
 import MarkupMarginCalculator from '@/components/markup-margin-calculator';
+import BreakEvenCalculator from '@/components/break-even-calculator';
 
 const calculatorTabs = [
     { value: 'basic', label: 'Basic' },
@@ -28,6 +29,7 @@ const calculatorTabs = [
     { value: 'percentage', label: 'Percentage' },
     { value: 'discount', label: 'Discount' },
     { value: 'markup-margin', label: 'Markup & Margin' },
+    { value: 'break-even', label: 'Break-Even' },
     { value: 'algebra', label: 'Algebra' },
     { value: 'geometry', label: 'Geometry' },
     { value: 'unit', label: 'Unit Converter' },
@@ -96,6 +98,11 @@ export default function MathScienceCalculators() {
             <TabsContent value="markup-margin">
               <div className="flex justify-center">
                 <MarkupMarginCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="break-even">
+              <div className="flex justify-center">
+                <BreakEvenCalculator />
               </div>
             </TabsContent>
             <TabsContent value="algebra">
