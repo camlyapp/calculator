@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
-import { ChartTooltipContent } from '@/components/ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
 import { useCurrency } from '@/context/currency-context';
 
@@ -53,6 +53,13 @@ interface RetirementResult {
   shortfallOrSurplus: number;
   yearlyData: { year: number; age: number; balance: number; }[];
 }
+
+const chartConfig = {
+  balance: {
+    label: "Projected Savings",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 const RetirementCalculator = () => {
   const [result, setResult] = useState<RetirementResult | null>(null);
@@ -273,7 +280,7 @@ const RetirementCalculator = () => {
                 <CardTitle>Savings Growth to Retirement</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px] w-full">
+                <ChartContainer config={chartConfig} className="h-[400px] w-full">
                     <ResponsiveContainer>
                         <LineChart data={result.yearlyData}>
                         <CartesianGrid strokeDasharray="3 3" />
@@ -284,7 +291,7 @@ const RetirementCalculator = () => {
                         <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" name="Projected Savings" />
                         </LineChart>
                     </ResponsiveContainer>
-                </div>
+                </ChartContainer>
               </CardContent>
             </Card>
           </div>
