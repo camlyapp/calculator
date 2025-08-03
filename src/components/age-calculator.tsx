@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { intervalToDuration, format, isValid, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
-import { Separator } from './ui/separator';
 
 const getZodiacSign = (date: Date) => {
     const day = date.getDate();
@@ -29,6 +28,7 @@ const getZodiacSign = (date: Date) => {
 
 const AgeCalculator = () => {
     const [birthDate, setBirthDate] = useState<Date | undefined>(new Date('1990-01-01'));
+    const [toDate, setToDate] = useState<Date | undefined>(new Date());
     const [result, setResult] = useState<{
         age: { years: number, months: number, days: number };
         summary: { years: number, months: number, weeks: number, days: number, hours: number, minutes: number };
@@ -42,7 +42,7 @@ const AgeCalculator = () => {
     }, []);
 
     const calculateAge = () => {
-        const now = new Date();
+        const now = toDate || new Date();
         if (birthDate && isValid(birthDate) && birthDate < now) {
             const ageDuration = intervalToDuration({ start: birthDate, end: now });
             
@@ -85,7 +85,7 @@ const AgeCalculator = () => {
         if (isMounted) {
             calculateAge();
         }
-    }, [birthDate, isMounted]);
+    }, [birthDate, toDate, isMounted]);
 
     if (!isMounted) {
         return null;
@@ -95,26 +95,40 @@ const AgeCalculator = () => {
         <Card className="w-full shadow-lg">
             <CardHeader>
                 <CardTitle className="text-2xl">Age Calculator</CardTitle>
-                <CardDescription>Calculate your age and see fun facts about your life in numbers.</CardDescription>
+                <CardDescription>Calculate your age at a specific date and see fun facts about your life in numbers.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col items-center space-y-4">
-                    <Label className="text-lg">Enter Your Date of Birth</Label>
-                    <Calendar
-                        mode="single"
-                        selected={birthDate}
-                        onSelect={setBirthDate}
-                        className="rounded-md border"
-                        captionLayout="dropdown-buttons"
-                        fromYear={1900}
-                        toYear={new Date().getFullYear()}
-                    />
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-2 flex flex-col items-center">
+                        <Label>Date of Birth</Label>
+                        <Calendar
+                            mode="single"
+                            selected={birthDate}
+                            onSelect={setBirthDate}
+                            className="rounded-md border"
+                            captionLayout="dropdown-buttons"
+                            fromYear={1900}
+                            toYear={new Date().getFullYear()}
+                        />
+                    </div>
+                    <div className="space-y-2 flex flex-col items-center">
+                        <Label>Age at Date</Label>
+                        <Calendar
+                            mode="single"
+                            selected={toDate}
+                            onSelect={setToDate}
+                            className="rounded-md border"
+                            captionLayout="dropdown-buttons"
+                            fromYear={1900}
+                            toYear={new Date().getFullYear() + 100}
+                        />
+                    </div>
                 </div>
                 
                 {result && (
                     <div className="mt-8 pt-8 border-t space-y-8">
                         <div className="text-center bg-secondary/50 p-6 rounded-lg">
-                            <Label className="text-lg text-muted-foreground">Your Current Age</Label>
+                            <Label className="text-lg text-muted-foreground">Your Age at {toDate ? format(toDate, 'PPP') : 'Today'}</Label>
                              <div className="flex justify-center items-baseline space-x-4 mt-2">
                                 <div>
                                     <p className="text-4xl font-bold text-primary">{result.age.years}</p>
