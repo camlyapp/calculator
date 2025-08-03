@@ -1,4 +1,7 @@
 
+"use client";
+
+import { useState } from 'react';
 import Header from '@/components/header';
 import BasicCalculator from '@/components/basic-calculator';
 import ScientificCalculator from '@/components/scientific-calculator';
@@ -11,25 +14,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UnitConverter from '@/components/unit-converter';
 import PhysicsCalculator from '@/components/physics-calculator';
 import ChemistryCalculator from '@/components/chemistry-calculator';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+
+const calculatorTabs = [
+    { value: 'basic', label: 'Basic' },
+    { value: 'scientific', label: 'Scientific' },
+    { value: 'graphing', label: 'Graphing' },
+    { value: 'fraction', label: 'Fraction' },
+    { value: 'percentage', label: 'Percentage' },
+    { value: 'algebra', label: 'Algebra' },
+    { value: 'geometry', label: 'Geometry' },
+    { value: 'unit', label: 'Unit Converter' },
+    { value: 'physics', label: 'Physics' },
+    { value: 'chemistry', label: 'Chemistry' },
+];
 
 export default function MathScienceCalculators() {
+  const [activeTab, setActiveTab] = useState('basic');
+
   return (
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="basic" className="w-full max-w-4xl mx-auto">
-          <div className="flex justify-center">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
+          <div className="sm:hidden mb-4">
+              <Label htmlFor="calculator-select-ms">Select a Calculator</Label>
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                  <SelectTrigger id="calculator-select-ms">
+                      <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {calculatorTabs.map(tab => (
+                          <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+          </div>
+          <div className="hidden sm:flex justify-center">
             <TabsList className="flex flex-wrap justify-center h-auto">
-                <TabsTrigger value="basic">Basic</TabsTrigger>
-                <TabsTrigger value="scientific">Scientific</TabsTrigger>
-                <TabsTrigger value="graphing">Graphing</TabsTrigger>
-                <TabsTrigger value="fraction">Fraction</TabsTrigger>
-                <TabsTrigger value="percentage">Percentage</TabsTrigger>
-                <TabsTrigger value="algebra">Algebra</TabsTrigger>
-                <TabsTrigger value="geometry">Geometry</TabsTrigger>
-                <TabsTrigger value="unit">Unit Converter</TabsTrigger>
-                <TabsTrigger value="physics">Physics</TabsTrigger>
-                <TabsTrigger value="chemistry">Chemistry</TabsTrigger>
+                {calculatorTabs.map(tab => (
+                  <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+                ))}
             </TabsList>
           </div>
           <TabsContent value="basic">
