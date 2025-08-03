@@ -1,16 +1,16 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { addDays, format, isValid, differenceInDays, subDays } from 'date-fns';
+import { Input } from '@/components/ui/input';
+import { addDays, subDays, format, isValid, eachDayOfInterval, getMonth, getYear } from 'date-fns';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Input } from './ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
@@ -316,6 +316,12 @@ const DueDateCalculator = () => {
             default: return "";
         }
     }
+    
+     const handleTabChange = (tab: string) => {
+        if (tab === 'common') setCalculationMethod('lmp');
+        else if (tab === 'ivf') setCalculationMethod('ivf_retrieval');
+        else if (tab === 'clinical') setCalculationMethod('ultrasound_ga');
+    };
 
 
     return (
@@ -325,9 +331,9 @@ const DueDateCalculator = () => {
                 <CardDescription>Estimate your due date with various methods and get key pregnancy milestones.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col md:flex-row gap-8">
+                <div className="flex flex-col md:flex-row gap-8 items-start">
                     <div className='flex-1 space-y-4'>
-                        <Tabs defaultValue="common" className="w-full">
+                        <Tabs defaultValue="common" className="w-full" onValueChange={handleTabChange}>
                             <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="common">Common</TabsTrigger>
                                 <TabsTrigger value="ivf">IVF</TabsTrigger>
@@ -375,54 +381,72 @@ const DueDateCalculator = () => {
                     </div>
                     
                     {result ? (
-                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t space-y-6">
+                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t w-full space-y-6">
                             <Card>
-                                <CardHeader className="text-center">
-                                    <CardTitle className="text-primary">Estimated Due Date</CardTitle>
+                                <CardHeader className="text-center pb-2">
+                                    <CardTitle className="text-primary">Key Dates for This Cycle</CardTitle>
                                 </CardHeader>
-                                <CardContent className="text-center">
-                                    <p className="text-4xl font-bold">{format(result.dueDate, 'PPP')}</p>
-                                    <p className="text-lg text-accent">{result.daysUntilDue > 0 ? `${result.daysUntilDue} days to go!` : 'The day is here!'}</p>
-                                    <p className="text-xs text-muted-foreground mt-2">Based on {result.methodUsed}</p>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Current Status</CardTitle>
-                                </CardHeader>
-                                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
-                                     <div className="p-4 bg-muted rounded-lg">
-                                        <p className="text-sm text-muted-foreground">Gestational Age</p>
-                                        <p className="font-bold text-lg">{result.gestationalAge}</p>
+                                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="text-sm text-muted-foreground">Fertile Window</p>
+                                        <p className="font-bold text-sm">{format(result.dueDate, 'MMM d')} - {format(result.dueDate, 'MMM d')}</p>
                                     </div>
-                                    <div className="p-4 bg-muted rounded-lg">
-                                        <p className="text-sm text-muted-foreground">Current Trimester</p>
-                                        <p className="font-bold text-lg">{result.trimester}</p>
+                                     <div className="p-2 bg-muted rounded-lg">
+                                        <p className="text-sm text-muted-foreground">Est. Ovulation</p>
+                                        <p className="font-bold text-accent text-sm">{format(result.dueDate, 'PPP')}</p>
                                     </div>
-                                      <div className="p-4 bg-muted rounded-lg col-span-full">
-                                        <p className="text-sm text-muted-foreground">Estimated Conception Date</p>
-                                        <p className="font-bold text-lg">{format(result.conceptionDate, 'PPP')}</p>
+                                    <div className="p-2 bg-muted rounded-lg">
+                                        <p className="text-sm text-muted-foreground">Next Period</p>
+                                        <p className="font-bold text-sm">{format(result.dueDate, 'PPP')}</p>
                                     </div>
                                 </CardContent>
                             </Card>
-
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Key Milestones</CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    {result.milestones.map(m => (
-                                        <div key={m.name} className="flex justify-between text-sm p-2 bg-muted rounded-lg">
-                                            <span>{m.name}</span>
-                                            <span className="font-semibold">{m.date}</span>
-                                        </div>
-                                    ))}
-                                </CardContent>
-                            </Card>
-                        </div>
+                            
+                            <div className="p-4 border rounded-lg">
+                                 <div className="flex justify-center items-center mb-4">
+                                    <Button variant="ghost" size="icon" onClick={() => changeMonth(-1)}>
+                                        <ChevronLeft />
+                                    </Button>
+                                    <h3 className="text-lg font-semibold w-48 text-center">
+                                        {format(result.dueDate, 'MMMM yyyy')}
+                                    </h3>
+                                    <Button variant="ghost" size="icon" onClick={() => changeMonth(1)}>
+                                        <ChevronRight />
+                                    </Button>
+                                </div>
+                                <Calendar
+                                    month={currentMonth}
+                                    onMonthChange={setCurrentMonth}
+                                    modifiers={{ 
+                                        fertile: fertileDays, 
+                                        ovulation: ovulationDays,
+                                        period: periodDays,
+                                    }}
+                                    modifiersClassNames={{
+                                        fertile: 'bg-green-100 dark:bg-green-900/50 rounded-full',
+                                        ovulation: 'bg-accent text-accent-foreground rounded-full font-bold',
+                                        period: 'bg-red-100 dark:bg-red-900/50 rounded-none'
+                                    }}
+                                    className="rounded-md mx-auto"
+                                />
+                                <div className="flex flex-wrap justify-center gap-4 mt-4 text-xs">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-green-100 dark:bg-green-900/50 rounded-full"/>
+                                        <span>Fertile Window</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-accent rounded-full"/>
+                                        <span>Ovulation Day</span>
+                                    </div>
+                                     <div className="flex items-center gap-2">
+                                        <div className="w-4 h-4 bg-red-100 dark:bg-red-900/50"/>
+                                        <span>Period</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
                     ) : (
-                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t flex items-center justify-center">
+                         <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t flex items-center justify-center">
                             <p className="text-muted-foreground">Please provide valid inputs to see your results.</p>
                         </div>
                     )}
