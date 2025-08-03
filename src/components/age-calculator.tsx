@@ -6,6 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { intervalToDuration, format, isValid, differenceInDays, differenceInWeeks, differenceInMonths, differenceInYears } from 'date-fns';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Button } from './ui/button';
+import { CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const getZodiacSign = (date: Date) => {
     const day = date.getDate();
@@ -91,6 +95,34 @@ const AgeCalculator = () => {
         return null;
     }
 
+    const DatePicker = ({date, setDate, fromYear, toYear}: {date?: Date, setDate: (d?: Date) => void, fromYear?: number, toYear?: number}) => (
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={"outline"}
+                    className={cn(
+                        "w-[280px] justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                    )}
+                >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {date ? format(date, "PPP") : <span>Pick a date</span>}
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+                <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    captionLayout="dropdown-buttons"
+                    fromYear={fromYear}
+                    toYear={toYear}
+                    initialFocus
+                />
+            </PopoverContent>
+        </Popover>
+    );
+
     return (
         <Card className="w-full shadow-lg">
             <CardHeader>
@@ -98,27 +130,21 @@ const AgeCalculator = () => {
                 <CardDescription>Calculate your age at a specific date and see fun facts about your life in numbers.</CardDescription>
             </CardHeader>
             <CardContent>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-items-center">
                     <div className="space-y-2 flex flex-col items-center">
                         <Label>Date of Birth</Label>
-                        <Calendar
-                            mode="single"
-                            selected={birthDate}
-                            onSelect={setBirthDate}
-                            className="rounded-md border"
-                            captionLayout="dropdown-buttons"
-                            fromYear={1900}
-                            toYear={new Date().getFullYear()}
+                        <DatePicker 
+                            date={birthDate} 
+                            setDate={setBirthDate} 
+                            fromYear={1900} 
+                            toYear={new Date().getFullYear()} 
                         />
                     </div>
                     <div className="space-y-2 flex flex-col items-center">
                         <Label>Age at Date</Label>
-                        <Calendar
-                            mode="single"
-                            selected={toDate}
-                            onSelect={setToDate}
-                            className="rounded-md border"
-                            captionLayout="dropdown-buttons"
+                         <DatePicker 
+                            date={toDate} 
+                            setDate={setToDate} 
                             fromYear={1900}
                             toYear={new Date().getFullYear() + 100}
                         />
