@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-type CalculationMethod = 'lmp' | 'conception' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound';
+type CalculationMethod = 'lmp' | 'conception' | 'ovulation' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound_ga' | 'ultrasound_crl' | 'fundal_height';
 
 const DueDateCalculator = () => {
     const [calculationMethod, setCalculationMethod] = useState<CalculationMethod>('lmp');
@@ -25,6 +25,10 @@ const DueDateCalculator = () => {
     const [ultrasoundDate, setUltrasoundDate] = useState<Date | undefined>(new Date());
     const [weeksAtUltrasound, setWeeksAtUltrasound] = useState('8');
     const [daysAtUltrasound, setDaysAtUltrasound] = useState('0');
+    const [crl, setCrl] = useState('15'); // Crown-Rump Length in mm
+
+     // State for Fundal Height
+    const [fundalHeight, setFundalHeight] = useState('24'); // in cm
 
     const [result, setResult] = useState<{
         dueDate: Date;
@@ -49,7 +53,7 @@ const DueDateCalculator = () => {
         let methodUsed = '';
         const avgCycleLength = parseInt(cycleLength) || 28;
 
-        const dateForCalc = calculationMethod === 'ultrasound' ? ultrasoundDate : selectedDate;
+        const dateForCalc = calculationMethod.startsWith('ultrasound') || calculationMethod === 'fundal_height' ? ultrasoundDate : selectedDate;
 
         if (!dateForCalc || !isValid(dateForCalc)) {
             setResult(null);
@@ -58,7 +62,6 @@ const DueDateCalculator = () => {
         
         switch (calculationMethod) {
             case 'lmp':
-                // Using Parikh's Formula for more accuracy with varied cycle lengths
                 dueDate = addDays(dateForCalc, 280 + (avgCycleLength - 28));
                 lmpFromConception = subDays(dueDate, 280);
                 methodUsed = `Last Menstrual Period (Cycle: ${avgCycleLength} days)`;
@@ -66,6 +69,11 @@ const DueDateCalculator = () => {
             case 'conception':
                 lmpFromConception = subDays(dateForCalc, 14);
                 methodUsed = "Date of Conception";
+                break;
+             case 'ovulation':
+                dueDate = addDays(dateForCalc, 266);
+                lmpFromConception = subDays(dueDate, 280);
+                methodUsed = "Ovulation Date";
                 break;
             case 'ivf_retrieval':
                 lmpFromConception = subDays(dateForCalc, 14);
@@ -79,15 +87,38 @@ const DueDateCalculator = () => {
                 lmpFromConception = subDays(dateForCalc, 19); // 14 days ovulation + 5 days embryo
                 methodUsed = "IVF Transfer (5-Day Embryo)";
                 break;
-            case 'ultrasound':
+            case 'ultrasound_ga':
                 const weeks = parseInt(weeksAtUltrasound) || 0;
                 const days = parseInt(daysAtUltrasound) || 0;
                 const totalDaysGestationAtUltrasound = weeks * 7 + days;
-                // Calculate LMP from ultrasound data
-                const estLmp = subDays(dateForCalc, totalDaysGestationAtUltrasound);
-                dueDate = addDays(estLmp, 280);
+                const estLmpFromGA = subDays(dateForCalc, totalDaysGestationAtUltrasound);
+                dueDate = addDays(estLmpFromGA, 280);
                 lmpFromConception = subDays(dueDate, 280);
-                methodUsed = `Ultrasound (${weeks}w ${days}d)`;
+                methodUsed = `Ultrasound by Gestational Age (${weeks}w ${days}d)`;
+                break;
+            case 'ultrasound_crl':
+                const crlMm = parseFloat(crl);
+                if (isNaN(crlMm) || crlMm < 6 || crlMm > 140) { // Valid CRL range approx 6-14 weeks
+                    setResult(null); return;
+                }
+                // Using Robinson & Fleming formula: GA(days) = 8.052 * sqrt(CRL(mm)) + 23.73
+                const gaDaysFromCrl = 8.052 * Math.sqrt(crlMm) + 23.73;
+                const estLmpFromCrl = subDays(dateForCalc, Math.round(gaDaysFromCrl));
+                dueDate = addDays(estLmpFromCrl, 280);
+                lmpFromConception = subDays(dueDate, 280);
+                methodUsed = `Ultrasound by CRL (${crlMm}mm)`;
+                break;
+             case 'fundal_height':
+                const fhCm = parseInt(fundalHeight);
+                if (isNaN(fhCm) || fhCm < 18 || fhCm > 40) { // Valid fundal height range
+                     setResult(null); return;
+                }
+                // McDonald's Rule: Gestational Age in weeks ≈ Fundal Height in cm
+                const estGaWeeksFromFh = fhCm;
+                const estLmpFromFh = subDays(dateForCalc, estGaWeeksFromFh * 7);
+                dueDate = addDays(estLmpFromFh, 280);
+                lmpFromConception = subDays(dueDate, 280);
+                methodUsed = `Fundal Height (${fhCm}cm)`;
                 break;
         }
         
@@ -137,7 +168,7 @@ const DueDateCalculator = () => {
     
     useEffect(() => {
        calculateDueDate();
-    }, [selectedDate, calculationMethod, cycleLength, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, isMounted]);
+    }, [selectedDate, calculationMethod, cycleLength, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, crl, fundalHeight, isMounted]);
 
     if (!isMounted) {
         return null;
@@ -147,10 +178,16 @@ const DueDateCalculator = () => {
         switch(calculationMethod) {
             case 'lmp': return "First Day of Last Period";
             case 'conception': return "Date of Conception";
+            case 'ovulation': return "Date of Ovulation";
             case 'ivf_retrieval': return "Date of Egg Retrieval";
             case 'ivf_day3':
             case 'ivf_day5':
                 return "Date of Embryo Transfer";
+            case 'ultrasound_ga':
+            case 'ultrasound_crl':
+                return "Date of Ultrasound";
+            case 'fundal_height':
+                return "Date of Measurement";
             default: return "Date";
         }
     }
@@ -180,6 +217,87 @@ const DueDateCalculator = () => {
         </Popover>
     );
 
+    const renderInputs = () => {
+        switch (calculationMethod) {
+            case 'lmp':
+                return (
+                    <div className='space-y-4'>
+                        <div className="space-y-2">
+                            <Label>{getLabelForDate()}</Label>
+                            <DatePicker date={selectedDate} setDate={setSelectedDate} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="cycle-length">Average Cycle Length (Days)</Label>
+                            <Input id="cycle-length" value={cycleLength} onChange={e => setCycleLength(e.target.value)} type="number" />
+                        </div>
+                    </div>
+                );
+            case 'conception':
+            case 'ovulation':
+            case 'ivf_retrieval':
+            case 'ivf_day3':
+            case 'ivf_day5':
+                return (
+                    <div className='space-y-4'>
+                        <div className="space-y-2">
+                            <Label>{getLabelForDate()}</Label>
+                            <DatePicker date={selectedDate} setDate={setSelectedDate} />
+                        </div>
+                    </div>
+                );
+            case 'ultrasound_ga':
+                 return (
+                    <div className="space-y-4 p-4 border rounded-lg">
+                        <p className="text-sm font-semibold text-primary">Ultrasound by Gestational Age</p>
+                        <div className="space-y-2">
+                            <Label>{getLabelForDate()}</Label>
+                            <DatePicker date={ultrasoundDate} setDate={setUltrasoundDate} />
+                        </div>
+                        <div className="flex gap-4">
+                                <div className="space-y-2">
+                                <Label htmlFor="weeks-us">Weeks</Label>
+                                <Input id="weeks-us" value={weeksAtUltrasound} onChange={e => setWeeksAtUltrasound(e.target.value)} type="number" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="days-us">Days</Label>
+                                <Input id="days-us" value={daysAtUltrasound} onChange={e => setDaysAtUltrasound(e.target.value)} type="number" />
+                            </div>
+                        </div>
+                    </div>
+                );
+             case 'ultrasound_crl':
+                return (
+                    <div className="space-y-4 p-4 border rounded-lg">
+                        <p className="text-sm font-semibold text-primary">Ultrasound by CRL</p>
+                         <div className="space-y-2">
+                            <Label>{getLabelForDate()}</Label>
+                            <DatePicker date={ultrasoundDate} setDate={setUltrasoundDate} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="crl-mm">Crown-Rump Length (mm)</Label>
+                            <Input id="crl-mm" value={crl} onChange={e => setCrl(e.target.value)} type="number" />
+                        </div>
+                    </div>
+                );
+            case 'fundal_height':
+                 return (
+                    <div className="space-y-4 p-4 border rounded-lg">
+                        <p className="text-sm font-semibold text-primary">Fundal Height</p>
+                        <div className="space-y-2">
+                           <Label>{getLabelForDate()}</Label>
+                           <DatePicker date={ultrasoundDate} setDate={setUltrasoundDate} />
+                       </div>
+                       <div className="space-y-2">
+                           <Label htmlFor="fundal-cm">Fundal Height (cm)</Label>
+                           <Input id="fundal-cm" value={fundalHeight} onChange={e => setFundalHeight(e.target.value)} type="number" />
+                       </div>
+                   </div>
+               );
+            default:
+                return null;
+        }
+    }
+
     return (
         <Card className="w-full shadow-lg">
             <CardHeader>
@@ -196,47 +314,20 @@ const DueDateCalculator = () => {
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="lmp">Last Menstrual Period</SelectItem>
+                                    <SelectItem value="lmp">Last Menstrual Period (LMP)</SelectItem>
                                     <SelectItem value="conception">Date of Conception</SelectItem>
+                                    <SelectItem value="ovulation">Ovulation Date</SelectItem>
                                     <SelectItem value="ivf_retrieval">IVF: Egg Retrieval Date</SelectItem>
                                     <SelectItem value="ivf_day3">IVF: 3-Day Transfer</SelectItem>
                                     <SelectItem value="ivf_day5">IVF: 5-Day Transfer</SelectItem>
-                                    <SelectItem value="ultrasound">Ultrasound</SelectItem>
+                                    <SelectItem value="ultrasound_ga">Ultrasound (by GA)</SelectItem>
+                                    <SelectItem value="ultrasound_crl">Ultrasound (by CRL)</SelectItem>
+                                    <SelectItem value="fundal_height">Fundal Height</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
-                        {calculationMethod !== 'ultrasound' ? (
-                            <div className='space-y-4'>
-                                <div className="space-y-2">
-                                    <Label>{getLabelForDate()}</Label>
-                                    <DatePicker date={selectedDate} setDate={setSelectedDate} />
-                                </div>
-                                {calculationMethod === 'lmp' && (
-                                     <div className="space-y-2">
-                                        <Label htmlFor="cycle-length">Average Cycle Length (Days)</Label>
-                                        <Input id="cycle-length" value={cycleLength} onChange={e => setCycleLength(e.target.value)} type="number" />
-                                    </div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="space-y-4 p-4 border rounded-lg">
-                                <p className="text-sm font-semibold text-primary">Ultrasound Details</p>
-                                <div className="space-y-2">
-                                    <Label>Date of Ultrasound</Label>
-                                    <DatePicker date={ultrasoundDate} setDate={setUltrasoundDate} />
-                                </div>
-                                <div className="flex gap-4">
-                                     <div className="space-y-2">
-                                        <Label htmlFor="weeks-us">Gestation (Weeks)</Label>
-                                        <Input id="weeks-us" value={weeksAtUltrasound} onChange={e => setWeeksAtUltrasound(e.target.value)} type="number" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="days-us">Gestation (Days)</Label>
-                                        <Input id="days-us" value={daysAtUltrasound} onChange={e => setDaysAtUltrasound(e.target.value)} type="number" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
+                        
+                        {renderInputs()}
                         
                          <Button onClick={calculateDueDate} className="w-full">Recalculate</Button>
                     </div>
