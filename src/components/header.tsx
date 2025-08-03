@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Landmark, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 import { Button } from './ui/button';
@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose 
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import Image from 'next/image';
 
 const navLinks = [
     { href: '/', label: 'Financial' },
@@ -27,7 +28,7 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-3">
-            <Landmark className="h-8 w-8 text-primary" />
+            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Camly
             </h1>

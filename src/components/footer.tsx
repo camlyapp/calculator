@@ -1,6 +1,7 @@
 
-import { Landmark, Twitter, Github, Linkedin } from 'lucide-react';
+import { Twitter, Github, Linkedin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Footer = () => {
   return (
@@ -8,7 +9,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col items-center space-y-4">
           <Link href="/" className="flex items-center space-x-3">
-            <Landmark className="h-8 w-8 text-primary" />
+            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             <span className="text-xl font-bold text-foreground">
               Camly
             </span>
