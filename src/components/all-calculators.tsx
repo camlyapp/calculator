@@ -3,7 +3,7 @@
 
 import { BrainCircuit, CalendarDays, HeartPulse, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 const calculatorPages = [
     {
@@ -34,23 +34,16 @@ const calculatorPages = [
 
 const AllCalculators = () => {
     return (
-        <Card className="w-full mt-6 shadow-lg border-none">
-            <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Explore All Calculator Categories</CardTitle>
-                <CardDescription>
-                    Navigate to any of our specialized calculator pages from here.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="w-full mt-6 shadow-none border-none bg-transparent">
+            <CardContent className="p-0">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {calculatorPages.map((page) => {
                         const Icon = page.icon;
                         return (
                             <Link href={page.href} key={page.href}>
-                                <div className="p-6 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors h-full flex flex-col items-center text-center">
-                                    <Icon className="h-12 w-12 text-primary mb-4" />
-                                    <h3 className="text-lg font-semibold">{page.label}</h3>
-                                    <p className="text-sm text-muted-foreground mt-2">{page.description}</p>
+                                <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors h-full flex flex-col items-center justify-center text-center">
+                                    <Icon className="h-10 w-10 text-primary mb-2" />
+                                    <h3 className="text-sm font-semibold">{page.label}</h3>
                                 </div>
                             </Link>
                         );
