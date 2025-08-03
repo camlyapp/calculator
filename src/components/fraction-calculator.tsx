@@ -92,15 +92,15 @@ const FractionCalculator = () => {
                 <div className="grid grid-cols-2 gap-8 items-center">
                     <div className="space-y-2 text-center">
                          <Label htmlFor="num1">Fraction 1</Label>
-                        <Input id="num1" placeholder="Numerator" value={num1} onChange={(e) => setNum1(e.target.value)} className="text-center" />
+                        <Input id="num1" type="number" placeholder="Numerator" value={num1} onChange={(e) => setNum1(e.target.value)} className="text-center" />
                         <div className="h-px bg-border w-full" />
-                        <Input id="den1" placeholder="Denominator" value={den1} onChange={(e) => setDen1(e.target.value)} className="text-center" />
+                        <Input id="den1" type="number" placeholder="Denominator" value={den1} onChange={(e) => setDen1(e.target.value)} className="text-center" />
                     </div>
                     <div className="space-y-2 text-center">
                         <Label htmlFor="num2">Fraction 2</Label>
-                        <Input id="num2" placeholder="Numerator" value={num2} onChange={(e) => setNum2(e.target.value)} className="text-center" />
+                        <Input id="num2" type="number" placeholder="Numerator" value={num2} onChange={(e) => setNum2(e.target.value)} className="text-center" />
                         <div className="h-px bg-border w-full" />
-                        <Input id="den2" placeholder="Denominator" value={den2} onChange={(e) => setDen2(e.target.value)} className="text-center" />
+                        <Input id="den2" type="number" placeholder="Denominator" value={den2} onChange={(e) => setDen2(e.target.value)} className="text-center" />
                     </div>
                 </div>
 
