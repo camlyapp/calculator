@@ -26,6 +26,7 @@ import LumpsumCalculator from '@/components/lumpsum-calculator';
 import RdCalculator from '@/components/rd-calculator';
 import FdCalculator from '@/components/fd-calculator';
 import PpfCalculator from '@/components/ppf-calculator';
+import GratuityCalculator from '@/components/gratuity-calculator';
 
 type Currency = 'USD' | 'INR';
 
@@ -42,6 +43,7 @@ const calculatorTabs = [
     { value: 'fd-calculator', label: 'FD Calculator' },
     { value: 'rd-calculator', label: 'RD Calculator' },
     { value: 'retirement', label: 'Retirement' },
+    { value: 'gratuity', label: 'Gratuity' },
     { value: 'compound-interest', label: 'Compound Interest' },
     { value: 'savings', label: 'Savings' },
     { value: 'tax', label: 'US Tax' },
@@ -130,6 +132,9 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="retirement">
               <RetirementCalculator />
+            </TabsContent>
+            <TabsContent value="gratuity">
+              <GratuityCalculator />
             </TabsContent>
             <TabsContent value="compound-interest">
               <CompoundInterestCalculator />

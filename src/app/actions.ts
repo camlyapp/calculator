@@ -5,6 +5,8 @@ import { analyzeRefinance, type AnalyzeRefinanceInput, type AnalyzeRefinanceOutp
 import { convertCurrency, type ConvertCurrencyInput, type ConvertCurrencyOutput } from '@/ai/flows/convert-currency';
 import { calculateIndianTax, type CalculateIndianTaxInput, type CalculateIndianTaxOutput } from '@/ai/flows/calculate-indian-tax';
 import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEligibilityOutput } from '@/ai/flows/check-loan-eligibility';
+import { calculateGratuity, type CalculateGratuityInput, type CalculateGratuityOutput } from '@/ai/flows/calculate-gratuity';
+
 
 import { z } from 'zod';
 
@@ -181,5 +183,35 @@ export async function checkLoanEligibilityAction(
     } catch(e) {
         console.error(e);
         return { error: 'An unexpected error occurred during eligibility check. Please try again later.' };
+    }
+}
+
+
+const GratuitySchema = z.object({
+  monthlySalary: z.coerce.number().min(0, "Salary must be a positive number."),
+  yearsOfService: z.coerce.number().min(0, "Years of service must be a positive number."),
+});
+
+export async function calculateGratuityAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; result?: CalculateGratuityOutput; errors?: any, error?: string }> {
+    const validatedFields = GratuitySchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your inputs.',
+        };
+    }
+
+    const aiInput: CalculateGratuityInput = validatedFields.data;
+
+    try {
+        const result = await calculateGratuity(aiInput);
+        return { result, message: "Gratuity calculation successful." };
+    } catch(e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred during gratuity calculation. Please try again later.' };
     }
 }
