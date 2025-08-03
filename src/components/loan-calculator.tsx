@@ -36,6 +36,7 @@ import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/compone
 import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const chartConfig = {
   Principal: {
@@ -48,17 +49,12 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-type Currency = 'USD' | 'INR';
-
-interface LoanCalculatorProps {
-    currency: Currency;
-}
-
-const LoanCalculator = ({ currency }: LoanCalculatorProps) => {
+const LoanCalculator = () => {
   const [result, setResult] = useState<Partial<CalculationResult> | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<Pick<LoanFormValues, 'loanAmount' | 'interestRate' | 'loanTerm' | 'extraPayment'>>({
     resolver: zodResolver(LoanSchema.pick({ loanAmount: true, interestRate: true, loanTerm: true, extraPayment: true })),
@@ -119,15 +115,6 @@ const LoanCalculator = ({ currency }: LoanCalculatorProps) => {
         Interest: parseFloat(data.Interest.toFixed(2)),
     })));
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
 
   const formatCurrencyAxis = (value: number) => {
       const symbol = currency === 'INR' ? '₹' : '$';
@@ -297,7 +284,7 @@ const LoanCalculator = ({ currency }: LoanCalculatorProps) => {
               </CardContent>
             </Card>
 
-            <AmortizationTable data={amortizationSchedule} currency={currency} />
+            <AmortizationTable data={amortizationSchedule} />
           </div>
         )}
       </CardContent>

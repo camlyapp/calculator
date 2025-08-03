@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const sipSchema = z.object({
   monthlyInvestment: z.coerce.number().min(0),
@@ -45,12 +46,6 @@ interface SipResult {
     yearlyData: { year: number; invested: number; balance: number; }[];
 }
 
-type Currency = 'USD' | 'INR';
-
-interface SipCalculatorProps {
-    currency: Currency;
-}
-
 const chartConfig = {
   invested: {
     label: "Total Invested",
@@ -63,9 +58,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-const SipCalculator = ({ currency }: SipCalculatorProps) => {
+const SipCalculator = () => {
   const [result, setResult] = useState<SipResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<SipFormValues>({
     resolver: zodResolver(sipSchema),
@@ -113,15 +109,6 @@ const SipCalculator = ({ currency }: SipCalculatorProps) => {
 
     setResult({ finalBalance, totalInvested, totalInterest, yearlyData });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">

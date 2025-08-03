@@ -14,27 +14,19 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useCurrency } from '@/context/currency-context';
 import { AmortizationRow } from '@/lib/types';
 
 interface AmortizationTableProps {
   data: AmortizationRow[];
-  currency: 'USD' | 'INR';
 }
 
-const AmortizationTable = ({ data, currency }: AmortizationTableProps) => {
+const AmortizationTable = ({ data }: AmortizationTableProps) => {
+  const { formatCurrency } = useCurrency();
   if (!data || data.length === 0) {
     return null;
   }
   const showExtraPayment = data.some(row => row.extraPayment > 0);
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
 
   return (
     <Card>

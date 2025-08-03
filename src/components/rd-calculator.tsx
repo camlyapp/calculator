@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const rdSchema = z.object({
   monthlyDeposit: z.coerce.number().min(1, "Monthly deposit must be greater than 0."),
@@ -43,12 +44,6 @@ interface RdResult {
     yearlyData: { year: number; invested: number; balance: number; }[];
 }
 
-type Currency = 'USD' | 'INR';
-
-interface RdCalculatorProps {
-    currency: Currency;
-}
-
 const chartConfig = {
   invested: {
     label: "Total Invested",
@@ -61,9 +56,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-const RdCalculator = ({ currency }: RdCalculatorProps) => {
+const RdCalculator = () => {
   const [result, setResult] = useState<RdResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<RdFormValues>({
     resolver: zodResolver(rdSchema),
@@ -117,15 +113,6 @@ const RdCalculator = ({ currency }: RdCalculatorProps) => {
 
     setResult({ maturityValue, totalInvested, totalInterest, yearlyData });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">

@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const ppfSchema = z.object({
   yearlyInvestment: z.coerce.number().min(500, "Minimum investment is ₹500.").max(150000, "Maximum investment is ₹1,50,000."),
@@ -42,12 +43,6 @@ interface PpfResult {
     yearlyData: { year: number; invested: number; interest: number; balance: number; }[];
 }
 
-type Currency = 'USD' | 'INR';
-
-interface PpfCalculatorProps {
-    currency: Currency;
-}
-
 const chartConfig = {
   invested: {
     label: "Total Invested",
@@ -60,9 +55,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-const PpfCalculator = ({ currency }: PpfCalculatorProps) => {
+const PpfCalculator = () => {
   const [result, setResult] = useState<PpfResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
   const tenure = 15; // PPF tenure is fixed at 15 years
 
   const form = useForm<PpfFormValues>({
@@ -101,15 +97,6 @@ const PpfCalculator = ({ currency }: PpfCalculatorProps) => {
 
     setResult({ maturityValue, totalInvested, totalInterest, yearlyData });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">

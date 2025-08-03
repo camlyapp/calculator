@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const roiSchema = z.object({
   initialInvestment: z.coerce.number().min(0, "Initial investment must be a positive number."),
@@ -43,15 +44,10 @@ interface RoiResult {
     finalValue: number;
 }
 
-type Currency = 'USD' | 'INR';
-
-interface RoiCalculatorProps {
-    currency: Currency;
-}
-
-const RoiCalculator = ({ currency }: RoiCalculatorProps) => {
+const RoiCalculator = () => {
   const [result, setResult] = useState<RoiResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
 
   const form = useForm<RoiFormValues>({
     resolver: zodResolver(roiSchema),
@@ -74,15 +70,6 @@ const RoiCalculator = ({ currency }: RoiCalculatorProps) => {
         finalValue
     });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">

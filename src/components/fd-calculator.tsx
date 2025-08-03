@@ -28,6 +28,7 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, L
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { useCurrency } from '@/context/currency-context';
 
 const compoundingFrequencies = {
   annually: 1,
@@ -52,12 +53,6 @@ interface FdResult {
     yearlyData: { year: number; balance: number; }[];
 }
 
-type Currency = 'USD' | 'INR';
-
-interface FdCalculatorProps {
-    currency: Currency;
-}
-
 const chartConfig = {
   invested: {
     label: "Invested",
@@ -70,9 +65,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-const FdCalculator = ({ currency }: FdCalculatorProps) => {
+const FdCalculator = () => {
   const [result, setResult] = useState<FdResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<FdFormValues>({
     resolver: zodResolver(fdSchema),
@@ -111,15 +107,6 @@ const FdCalculator = ({ currency }: FdCalculatorProps) => {
         yearlyData 
     });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">

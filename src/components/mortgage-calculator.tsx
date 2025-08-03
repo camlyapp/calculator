@@ -37,6 +37,7 @@ import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
 import { Label } from './ui/label';
+import { useCurrency } from '@/context/currency-context';
 
 const chartConfig = {
   "Principal & Interest": {
@@ -65,17 +66,12 @@ const chartConfig = {
   },
 };
 
-type Currency = 'USD' | 'INR';
-
-interface MortgageCalculatorProps {
-    currency: Currency;
-}
-
-const MortgageCalculator = ({ currency }: MortgageCalculatorProps) => {
+const MortgageCalculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationRow[]>([]);
   const [chartData, setChartData] = useState<ChartData[]>([]);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<LoanFormValues>({
     resolver: zodResolver(LoanSchema),
@@ -146,15 +142,6 @@ const MortgageCalculator = ({ currency }: MortgageCalculatorProps) => {
         Interest: parseFloat(data.Interest.toFixed(2)),
     })));
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
 
   const formatCurrencyAxis = (value: number) => {
       const symbol = currency === 'INR' ? '₹' : '$';
@@ -386,7 +373,7 @@ const MortgageCalculator = ({ currency }: MortgageCalculatorProps) => {
               </CardContent>
             </Card>
 
-            <AmortizationTable data={amortizationSchedule} currency={currency} />
+            <AmortizationTable data={amortizationSchedule} />
           </div>
         )}
       </CardContent>

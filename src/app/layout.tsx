@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Footer from '@/components/footer';
 import { ThemeProvider } from '@/components/theme-provider';
 import SeoContent from '@/components/seo-content';
+import { CurrencyProvider } from '@/context/currency-context';
 
 export const metadata: Metadata = {
   title: 'Camly - Free Smart Financial & Loan Calculator',
@@ -65,10 +66,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <SeoContent />
-          <Footer />
-          <Toaster />
+          <CurrencyProvider>
+            {children}
+            <SeoContent />
+            <Footer />
+            <Toaster />
+          </CurrencyProvider>
         </ThemeProvider>
       </body>
     </html>

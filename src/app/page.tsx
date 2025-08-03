@@ -4,7 +4,6 @@
 import { useState } from 'react';
 import BudgetCalculator from '@/components/budget-calculator';
 import CompoundInterestCalculator from '@/components/compound-interest-calculator';
-import CurrencyConverter from '@/components/currency-converter';
 import GstCalculator from '@/components/gst-calculator';
 import Header from '@/components/header';
 import IndianTaxCalculator from '@/components/indian-tax-calculator';
@@ -28,8 +27,7 @@ import FdCalculator from '@/components/fd-calculator';
 import PpfCalculator from '@/components/ppf-calculator';
 import GratuityCalculator from '@/components/gratuity-calculator';
 import RoiCalculator from '@/components/roi-calculator';
-
-type Currency = 'USD' | 'INR';
+import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 
 const calculatorTabs = [
     { value: 'calculator', label: 'EMI Calculator' },
@@ -55,7 +53,6 @@ const calculatorTabs = [
 ];
 
 export default function Home() {
-  const [currency, setCurrency] = useState<Currency>('USD');
   const [activeTab, setActiveTab] = useState('calculator');
 
   return (
@@ -63,20 +60,7 @@ export default function Home() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-7xl mx-auto space-y-8">
-          <div className="flex justify-end">
-            <div className='w-[180px] space-y-2'>
-              <Label htmlFor="global-currency-select">Global Currency</Label>
-              <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-                  <SelectTrigger id="global-currency-select">
-                      <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                      <SelectItem value="INR">INR (₹)</SelectItem>
-                  </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <GlobalCurrencySwitcher />
           
           <AllCalculators />
 
@@ -100,10 +84,10 @@ export default function Home() {
               ))}
             </TabsList>
             <TabsContent value="calculator">
-              <LoanCalculator currency={currency} />
+              <LoanCalculator />
             </TabsContent>
             <TabsContent value="mortgage-calculator">
-              <MortgageCalculator currency={currency} />
+              <MortgageCalculator />
             </TabsContent>
             <TabsContent value="comparison">
               <LoanComparison />
@@ -118,22 +102,22 @@ export default function Home() {
               <InvestmentCalculator />
             </TabsContent>
             <TabsContent value="roi">
-              <RoiCalculator currency={currency} />
+              <RoiCalculator />
             </TabsContent>
              <TabsContent value="sip-calculator">
-              <SipCalculator currency={currency} />
+              <SipCalculator />
             </TabsContent>
             <TabsContent value="lumpsum-calculator">
-                <LumpsumCalculator currency={currency} />
+                <LumpsumCalculator />
             </TabsContent>
              <TabsContent value="ppf-calculator">
-                <PpfCalculator currency={currency} />
+                <PpfCalculator />
             </TabsContent>
             <TabsContent value="fd-calculator">
-                <FdCalculator currency={currency} />
+                <FdCalculator />
             </TabsContent>
             <TabsContent value="rd-calculator">
-                <RdCalculator currency={currency} />
+                <RdCalculator />
             </TabsContent>
             <TabsContent value="retirement">
               <RetirementCalculator />
@@ -157,7 +141,7 @@ export default function Home() {
               <GstCalculator />
             </TabsContent>
             <TabsContent value="budget">
-              <BudgetCalculator currency={currency} />
+              <BudgetCalculator />
             </TabsContent>
           </Tabs>
         </div>

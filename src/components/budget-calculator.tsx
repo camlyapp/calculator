@@ -28,6 +28,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend } from 'recha
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const itemSchema = z.object({
   description: z.string().min(1, "Description is required."),
@@ -43,7 +44,6 @@ const budgetSchema = z.object({
 });
 
 type BudgetFormValues = z.infer<typeof budgetSchema>;
-type Currency = 'USD' | 'INR';
 
 const expenseCategories = ['Housing', 'Food', 'Transportation', 'Utilities', 'Entertainment', 'Health', 'Other'];
 
@@ -57,13 +57,10 @@ const chartConfig = {
     Other: { label: "Other", color: "hsl(var(--accent))" },
 } satisfies ChartConfig;
 
-interface BudgetCalculatorProps {
-    currency: Currency;
-}
-
-const BudgetCalculator = ({ currency }: BudgetCalculatorProps) => {
+const BudgetCalculator = () => {
   const [showResults, setShowResults] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { formatCurrency } = useCurrency();
   const form = useForm<BudgetFormValues>({
     resolver: zodResolver(budgetSchema),
     defaultValues: {
@@ -107,15 +104,6 @@ const BudgetCalculator = ({ currency }: BudgetCalculatorProps) => {
   const pieChartData = useMemo(() => {
     return Object.entries(expenseByCategory).map(([name, value]) => ({ name, value, fill: `var(--color-${name})` }));
   }, [expenseByCategory]);
-  
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
 
   const onSubmit = () => {
     setShowResults(true);

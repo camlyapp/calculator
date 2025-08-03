@@ -27,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
+import { useCurrency } from '@/context/currency-context';
 
 const lumpsumSchema = z.object({
   initialInvestment: z.coerce.number().min(1, "Initial investment must be greater than 0."),
@@ -43,12 +44,6 @@ interface LumpsumResult {
     yearlyData: { year: number; balance: number; }[];
 }
 
-type Currency = 'USD' | 'INR';
-
-interface LumpsumCalculatorProps {
-    currency: Currency;
-}
-
 const chartConfig = {
   invested: {
     label: "Invested",
@@ -61,9 +56,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 
-const LumpsumCalculator = ({ currency }: LumpsumCalculatorProps) => {
+const LumpsumCalculator = () => {
   const [result, setResult] = useState<LumpsumResult | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
+  const { currency, formatCurrency } = useCurrency();
 
   const form = useForm<LumpsumFormValues>({
     resolver: zodResolver(lumpsumSchema),
@@ -100,15 +96,6 @@ const LumpsumCalculator = ({ currency }: LumpsumCalculatorProps) => {
         yearlyData 
     });
   };
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat(currency === 'INR' ? 'en-IN' : 'en-US', {
-      style: 'currency',
-      currency: currency,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-  }
 
   return (
     <Card className="w-full mt-6 shadow-lg">
