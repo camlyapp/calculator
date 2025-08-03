@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useState } from 'react';
 import AgeCalculator from '@/components/age-calculator';
 import BMICalculator from '@/components/bmi-calculator';
 import BmrCalculator from '@/components/bmr-calculator';
@@ -12,23 +13,46 @@ import IdealWeightCalculator from '@/components/ideal-weight-calculator';
 import OvulationCalculator from '@/components/ovulation-calculator';
 import BodyFatCalculator from '@/components/body-fat-calculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const calculatorTabs = [
+    { value: 'age', label: 'Age' },
+    { value: 'due-date', label: 'Due Date' },
+    { value: 'ovulation', label: 'Ovulation' },
+    { value: 'bmi', label: 'BMI' },
+    { value: 'bmr', label: 'BMR' },
+    { value: 'body-fat', label: 'Body Fat' },
+    { value: 'calorie', label: 'Calorie' },
+    { value: 'heart-rate', label: 'Heart Rate' },
+    { value: 'ideal-weight', label: 'Ideal Weight' },
+];
 
 export default function PersonalHealthCalculators() {
+  const [activeTab, setActiveTab] = useState('age');
+
   return (
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs defaultValue="age" className="w-full max-w-5xl mx-auto">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 h-auto">
-                <TabsTrigger value="age">Age</TabsTrigger>
-                <TabsTrigger value="due-date">Due Date</TabsTrigger>
-                <TabsTrigger value="ovulation">Ovulation</TabsTrigger>
-                <TabsTrigger value="bmi">BMI</TabsTrigger>
-                <TabsTrigger value="bmr">BMR</TabsTrigger>
-                <TabsTrigger value="body-fat">Body Fat</TabsTrigger>
-                <TabsTrigger value="calorie">Calorie</TabsTrigger>
-                <TabsTrigger value="heart-rate">Heart Rate</TabsTrigger>
-                <TabsTrigger value="ideal-weight">Ideal Weight</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-5xl mx-auto">
+             <div className="sm:hidden mb-4">
+              <Label htmlFor="calculator-select-ph">Select a Calculator</Label>
+              <Select value={activeTab} onValueChange={setActiveTab}>
+                  <SelectTrigger id="calculator-select-ph">
+                      <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {calculatorTabs.map(tab => (
+                          <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+          </div>
+            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 h-auto">
+                {calculatorTabs.map(tab => (
+                  <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+                ))}
             </TabsList>
             <TabsContent value="age">
                 <AgeCalculator />
