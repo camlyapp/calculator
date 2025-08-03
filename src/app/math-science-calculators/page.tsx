@@ -16,6 +16,7 @@ import PhysicsCalculator from '@/components/physics-calculator';
 import ChemistryCalculator from '@/components/chemistry-calculator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import AllCalculators from '@/components/all-calculators';
 
 const calculatorTabs = [
     { value: 'basic', label: 'Basic' },
@@ -37,76 +38,79 @@ export default function MathScienceCalculators() {
     <>
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-4xl mx-auto">
-          <div className="sm:hidden mb-4">
-              <Label htmlFor="calculator-select-ms">Select a Calculator</Label>
-              <Select value={activeTab} onValueChange={setActiveTab}>
-                  <SelectTrigger id="calculator-select-ms">
-                      <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                      {calculatorTabs.map(tab => (
-                          <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
-                      ))}
-                  </SelectContent>
-              </Select>
-          </div>
-          <div className="hidden sm:flex justify-center">
-            <TabsList className="flex flex-wrap justify-center h-auto">
-                {calculatorTabs.map(tab => (
-                  <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
-                ))}
-            </TabsList>
-          </div>
-          <TabsContent value="basic">
-            <div className="flex justify-center">
-              <BasicCalculator />
+        <div className="w-full max-w-4xl mx-auto">
+          <AllCalculators />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
+            <div className="sm:hidden mb-4">
+                <Label htmlFor="calculator-select-ms">Select a Calculator</Label>
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                    <SelectTrigger id="calculator-select-ms">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {calculatorTabs.map(tab => (
+                            <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
-          </TabsContent>
-          <TabsContent value="scientific">
-             <div className="flex justify-center">
-              <ScientificCalculator />
+            <div className="hidden sm:flex justify-center">
+              <TabsList className="flex flex-wrap justify-center h-auto">
+                  {calculatorTabs.map(tab => (
+                    <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+                  ))}
+              </TabsList>
             </div>
-          </TabsContent>
-          <TabsContent value="graphing">
-            <GraphingCalculator />
-          </TabsContent>
-          <TabsContent value="fraction">
-            <div className="flex justify-center">
-              <FractionCalculator />
-            </div>
-          </TabsContent>
-           <TabsContent value="percentage">
-            <div className="flex justify-center">
-              <PercentageCalculator />
-            </div>
-          </TabsContent>
-          <TabsContent value="algebra">
-            <div className="flex justify-center">
-              <AlgebraCalculator />
-            </div>
-          </TabsContent>
-          <TabsContent value="geometry">
-            <div className="flex justify-center">
-              <GeometryCalculator />
-            </div>
-          </TabsContent>
-           <TabsContent value="unit">
-            <div className="flex justify-center">
-              <UnitConverter />
-            </div>
-          </TabsContent>
-          <TabsContent value="physics">
-            <div className="flex justify-center">
-              <PhysicsCalculator />
-            </div>
-          </TabsContent>
-           <TabsContent value="chemistry">
-            <div className="flex justify-center">
-              <ChemistryCalculator />
-            </div>
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="basic">
+              <div className="flex justify-center">
+                <BasicCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="scientific">
+               <div className="flex justify-center">
+                <ScientificCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="graphing">
+              <GraphingCalculator />
+            </TabsContent>
+            <TabsContent value="fraction">
+              <div className="flex justify-center">
+                <FractionCalculator />
+              </div>
+            </TabsContent>
+             <TabsContent value="percentage">
+              <div className="flex justify-center">
+                <PercentageCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="algebra">
+              <div className="flex justify-center">
+                <AlgebraCalculator />
+              </div>
+            </TabsContent>
+            <TabsContent value="geometry">
+              <div className="flex justify-center">
+                <GeometryCalculator />
+              </div>
+            </TabsContent>
+             <TabsContent value="unit">
+              <div className="flex justify-center">
+                <UnitConverter />
+              </div>
+            </TabsContent>
+            <TabsContent value="physics">
+              <div className="flex justify-center">
+                <PhysicsCalculator />
+              </div>
+            </TabsContent>
+             <TabsContent value="chemistry">
+              <div className="flex justify-center">
+                <ChemistryCalculator />
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
     </>
   );
