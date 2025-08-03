@@ -1,20 +1,41 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { addDays, subDays, format, isValid, differenceInDays } from 'date-fns';
+import { addDays, subDays, format, isValid, differenceInDays, eachDayOfInterval, getMonth, getYear } from 'date-fns';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Baby, CalendarIcon, ChevronLeft, ChevronRight, Utensils, Syringe, HeartPulse, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { getPregnancyAdviceAction } from '@/app/actions';
+import type { GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 
 type CalculationMethod = 'lmp' | 'conception' | 'ovulation' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound_ga' | 'ultrasound_crl' | 'fundal_height';
+
+interface DueDateResult {
+    dueDate: Date;
+    gestationalAge: string;
+    gestationalWeek: number;
+    trimester: number;
+    conceptionDate: Date;
+    methodUsed: string;
+    daysUntilDue: number;
+    milestones: { name: string; date: string; }[];
+}
+
+interface CyclePrediction {
+    ovulationDate: Date;
+    fertileWindowStart: Date;
+    fertileWindowEnd: Date;
+    nextPeriodDate: Date;
+}
 
 const DueDateCalculator = () => {
     const [calculationMethod, setCalculationMethod] = useState<CalculationMethod>('lmp');
@@ -30,22 +51,44 @@ const DueDateCalculator = () => {
      // State for Fundal Height
     const [fundalHeight, setFundalHeight] = useState('24'); // in cm
 
-    const [result, setResult] = useState<{
-        dueDate: Date;
-        gestationalAge: string;
-        trimester: number;
-        conceptionDate: Date;
-        methodUsed: string;
-        daysUntilDue: number;
-        milestones: { name: string; date: string; }[];
-    } | null>(null);
+    const [result, setResult] = useState<DueDateResult | null>(null);
     const [isMounted, setIsMounted] = useState(false);
+    
+    const [predictions, setPredictions] = useState<CyclePrediction[]>([]);
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    const [aiAdvice, setAiAdvice] = useState<GetPregnancyAdviceOutput | null>(null);
+    const [isLoadingAdvice, setIsLoadingAdvice] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    const calculateDueDate = () => {
+    useEffect(() => {
+        if (selectedDate) {
+            setCurrentMonth(selectedDate);
+        }
+    }, [selectedDate])
+
+    const fetchPregnancyAdvice = useCallback(async (week: number) => {
+        if (week < 1 || week > 42) return;
+        setIsLoadingAdvice(true);
+        setAiAdvice(null);
+        try {
+            const response = await getPregnancyAdviceAction(week);
+            if (response.advice) {
+                setAiAdvice(response.advice);
+            } else {
+                console.error(response.error);
+            }
+        } catch (error) {
+            console.error("Failed to fetch pregnancy advice:", error);
+        } finally {
+            setIsLoadingAdvice(false);
+        }
+    }, []);
+
+    const calculateDueDate = useCallback(() => {
         if (!isMounted) return;
 
         let dueDate: Date | undefined;
@@ -62,17 +105,16 @@ const DueDateCalculator = () => {
         
         switch (calculationMethod) {
             case 'lmp':
-                dueDate = addDays(dateForCalc, 280 + (avgCycleLength - 28));
-                lmpFromConception = subDays(dueDate, 280);
+                lmpFromConception = dateForCalc;
                 methodUsed = `Last Menstrual Period (Cycle: ${avgCycleLength} days)`;
+                dueDate = addDays(dateForCalc, 280 + (avgCycleLength - 28));
                 break;
             case 'conception':
                 lmpFromConception = subDays(dateForCalc, 14);
                 methodUsed = "Date of Conception";
                 break;
              case 'ovulation':
-                dueDate = addDays(dateForCalc, 266);
-                lmpFromConception = subDays(dueDate, 280);
+                lmpFromConception = subDays(dateForCalc, 14);
                 methodUsed = "Ovulation Date";
                 break;
             case 'ivf_retrieval':
@@ -91,9 +133,7 @@ const DueDateCalculator = () => {
                 const weeks = parseInt(weeksAtUltrasound) || 0;
                 const days = parseInt(daysAtUltrasound) || 0;
                 const totalDaysGestationAtUltrasound = weeks * 7 + days;
-                const estLmpFromGA = subDays(dateForCalc, totalDaysGestationAtUltrasound);
-                dueDate = addDays(estLmpFromGA, 280);
-                lmpFromConception = subDays(dueDate, 280);
+                lmpFromConception = subDays(dateForCalc, totalDaysGestationAtUltrasound);
                 methodUsed = `Ultrasound by Gestational Age (${weeks}w ${days}d)`;
                 break;
             case 'ultrasound_crl':
@@ -103,9 +143,7 @@ const DueDateCalculator = () => {
                 }
                 // Using Robinson & Fleming formula: GA(days) = 8.052 * sqrt(CRL(mm)) + 23.73
                 const gaDaysFromCrl = 8.052 * Math.sqrt(crlMm) + 23.73;
-                const estLmpFromCrl = subDays(dateForCalc, Math.round(gaDaysFromCrl));
-                dueDate = addDays(estLmpFromCrl, 280);
-                lmpFromConception = subDays(dueDate, 280);
+                lmpFromConception = subDays(dateForCalc, Math.round(gaDaysFromCrl));
                 methodUsed = `Ultrasound by CRL (${crlMm}mm)`;
                 break;
              case 'fundal_height':
@@ -115,9 +153,7 @@ const DueDateCalculator = () => {
                 }
                 // McDonald's Rule: Gestational Age in weeks ≈ Fundal Height in cm
                 const estGaWeeksFromFh = fhCm;
-                const estLmpFromFh = subDays(dateForCalc, estGaWeeksFromFh * 7);
-                dueDate = addDays(estLmpFromFh, 280);
-                lmpFromConception = subDays(dueDate, 280);
+                lmpFromConception = subDays(dateForCalc, estGaWeeksFromFh * 7);
                 methodUsed = `Fundal Height (${fhCm}cm)`;
                 break;
         }
@@ -133,15 +169,16 @@ const DueDateCalculator = () => {
 
             if (gestationalDays < 0 || gestationalDays > 300) { // Plausible range
                 setResult(null);
+                setAiAdvice(null);
                 return;
             }
 
-            const weeks = Math.floor(gestationalDays / 7);
+            const gestationalWeek = Math.floor(gestationalDays / 7);
             const days = gestationalDays % 7;
             
             let trimester = 1;
-            if (weeks >= 28) trimester = 3;
-            else if (weeks >= 14) trimester = 2;
+            if (gestationalWeek >= 28) trimester = 3;
+            else if (gestationalWeek >= 14) trimester = 2;
             
             const milestones = [
                 { name: "Fetal Heartbeat Detectable", date: format(addDays(lmpFromConception, 6 * 7), 'PPP')},
@@ -154,25 +191,67 @@ const DueDateCalculator = () => {
 
             setResult({
                 dueDate,
-                gestationalAge: `${weeks} weeks, ${days} days`,
+                gestationalAge: `${gestationalWeek} weeks, ${days} days`,
+                gestationalWeek,
                 trimester,
                 conceptionDate,
                 methodUsed,
                 daysUntilDue: differenceInDays(dueDate, today),
                 milestones,
             });
+            fetchPregnancyAdvice(gestationalWeek);
+
+            const newPredictions: CyclePrediction[] = [];
+            let currentLmp = lmpFromConception;
+             for (let i = 0; i < 6; i++) { // Calculate for next 6 cycles
+                const nextPeriod = addDays(currentLmp, avgCycleLength);
+                const ovulationDay = subDays(nextPeriod, 14);
+                
+                newPredictions.push({
+                    ovulationDate: ovulationDay,
+                    fertileWindowStart: subDays(ovulationDay, 5),
+                    fertileWindowEnd: ovulationDay,
+                    nextPeriodDate: nextPeriod,
+                });
+                currentLmp = nextPeriod;
+            }
+            setPredictions(newPredictions);
+
         } else {
             setResult(null);
+            setAiAdvice(null);
         }
-    };
+    }, [isMounted, calculationMethod, selectedDate, cycleLength, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, crl, fundalHeight, fetchPregnancyAdvice]);
     
     useEffect(() => {
        calculateDueDate();
-    }, [selectedDate, calculationMethod, cycleLength, ultrasoundDate, weeksAtUltrasound, daysAtUltrasound, crl, fundalHeight, isMounted]);
+    }, [calculateDueDate]);
+
+    const useMemoResult = useMemo(() => {
+        const fertile: Date[] = [];
+        const ovulation: Date[] = [];
+        const period: Date[] = [];
+
+        predictions.forEach(p => {
+            fertile.push(...eachDayOfInterval({ start: p.fertileWindowStart, end: p.fertileWindowEnd }));
+            ovulation.push(p.ovulationDate);
+            // Assuming period lasts 5 days for visualization
+            period.push(...eachDayOfInterval({ start: p.nextPeriodDate, end: addDays(p.nextPeriodDate, 4)}));
+        });
+        return { fertileDays: fertile, ovulationDays: ovulation, periodDays: period };
+    }, [predictions]);
+
+    const { fertileDays, ovulationDays, periodDays } = useMemoResult;
 
     if (!isMounted) {
         return null;
     }
+    
+    const changeMonth = (amount: number) => {
+        setCurrentMonth(prev => addDays(prev, amount * 30)); // Approximate month change
+    }
+
+    const currentPrediction = predictions.find(p => getMonth(p.ovulationDate) === getMonth(currentMonth) && getYear(p.ovulationDate) === getYear(currentMonth)) || predictions[0];
     
     const getLabelForDate = () => {
         switch(calculationMethod) {
@@ -327,10 +406,10 @@ const DueDateCalculator = () => {
         <Card className="w-full shadow-lg">
             <CardHeader>
                 <CardTitle className="text-2xl">Pregnancy Due Date Calculator</CardTitle>
-                <CardDescription>Estimate your due date with various methods and get key pregnancy milestones.</CardDescription>
+                <CardDescription>Estimate your due date and get AI-powered weekly insights for your pregnancy journey.</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                     <div className='flex-1 space-y-4'>
                         <Tabs defaultValue="common" className="w-full" onValueChange={handleTabChange}>
                             <TabsList className="grid w-full grid-cols-3">
@@ -380,7 +459,7 @@ const DueDateCalculator = () => {
                     </div>
                     
                     {result ? (
-                        <div className="flex-1 mt-8 md:mt-0 pt-8 md:pt-0 md:border-l md:pl-8 border-t w-full space-y-6">
+                        <div className="flex-1 mt-8 lg:mt-0 pt-8 lg:pt-0 lg:border-l lg:pl-8 border-t w-full space-y-6">
                             <Card className="bg-secondary/50">
                                 <CardHeader className="pb-2">
                                     <CardTitle className='text-center'>Your Pregnancy Timeline</CardTitle>
@@ -428,6 +507,54 @@ const DueDateCalculator = () => {
                         </div>
                     )}
                 </div>
+                 {isLoadingAdvice && (
+                    <div className="flex items-center justify-center gap-2 mt-8">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        <p className="text-muted-foreground">Loading weekly insights...</p>
+                    </div>
+                )}
+                {aiAdvice && result && (
+                    <Card className="mt-8">
+                        <CardHeader>
+                            <CardTitle>Weekly Insights for Week {result.gestationalWeek}</CardTitle>
+                            <CardDescription>Personalized information for your current stage of pregnancy, powered by AI.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <Accordion type="single" collapsible className="w-full" defaultValue="baby">
+                                <AccordionItem value="baby">
+                                    <AccordionTrigger><Baby className="mr-2 h-5 w-5 text-primary" />Baby's Development</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert">
+                                        <p>{aiAdvice.babyDevelopment}</p>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                 <AccordionItem value="mom">
+                                    <AccordionTrigger><HeartPulse className="mr-2 h-5 w-5 text-primary" />Changes for Mom</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert">
+                                       <p>{aiAdvice.momChanges}</p>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="nutrition">
+                                    <AccordionTrigger><Utensils className="mr-2 h-5 w-5 text-primary" />Nutrition & Food</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert">
+                                        <ul>{aiAdvice.nutritionTips.map((tip, i) => <li key={i}>{tip}</li>)}</ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                 <AccordionItem value="vaccines">
+                                    <AccordionTrigger><Syringe className="mr-2 h-5 w-5 text-primary" />Vaccine Information</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert">
+                                       <p>{aiAdvice.vaccineInfo}</p>
+                                    </AccordionContent>
+                                </AccordionItem>
+                                <AccordionItem value="tips">
+                                    <AccordionTrigger><HeartPulse className="mr-2 h-5 w-5 text-primary" />General Tips</AccordionTrigger>
+                                    <AccordionContent className="prose prose-sm dark:prose-invert">
+                                        <ul>{aiAdvice.generalTips.map((tip, i) => <li key={i}>{tip}</li>)}</ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </Accordion>
+                        </CardContent>
+                    </Card>
+                )}
             </CardContent>
         </Card>
     );

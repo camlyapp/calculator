@@ -6,6 +6,7 @@ import { convertCurrency, type ConvertCurrencyInput, type ConvertCurrencyOutput 
 import { calculateIndianTax, type CalculateIndianTaxInput, type CalculateIndianTaxOutput } from '@/ai/flows/calculate-indian-tax';
 import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEligibilityOutput } from '@/ai/flows/check-loan-eligibility';
 import { calculateGratuity, type CalculateGratuityInput, type CalculateGratuityOutput } from '@/ai/flows/calculate-gratuity';
+import { getPregnancyAdvice, type GetPregnancyAdviceInput, type GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
 
 
 import { z } from 'zod';
@@ -213,5 +214,32 @@ export async function calculateGratuityAction(
     } catch(e) {
         console.error(e);
         return { error: 'An unexpected error occurred during gratuity calculation. Please try again later.' };
+    }
+}
+
+
+const PregnancyAdviceSchema = z.object({
+  gestationalWeek: z.coerce.number().min(1).max(42),
+});
+
+export async function getPregnancyAdviceAction(
+  gestationalWeek: number
+): Promise<{ advice?: GetPregnancyAdviceOutput; error?: string }> {
+    const validatedFields = PregnancyAdviceSchema.safeParse({ gestationalWeek });
+    
+    if (!validatedFields.success) {
+        return {
+            error: 'Invalid gestational week provided.',
+        };
+    }
+    
+    const aiInput: GetPregnancyAdviceInput = validatedFields.data;
+
+    try {
+        const result = await getPregnancyAdvice(aiInput);
+        return { advice: result };
+    } catch (e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred while fetching AI-powered advice. Please try again later.' };
     }
 }

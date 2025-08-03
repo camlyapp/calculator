@@ -7,3 +7,4 @@ import '@/ai/flows/convert-currency.ts';
 import '@/ai/flows/calculate-indian-tax.ts';
 import '@/ai/flows/check-loan-eligibility.ts';
 import '@/ai/flows/calculate-gratuity.ts';
+import '@/ai/flows/get-pregnancy-advice.ts';
