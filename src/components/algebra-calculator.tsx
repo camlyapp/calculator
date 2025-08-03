@@ -191,10 +191,10 @@ const AlgebraCalculator = () => {
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="linear" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="linear">Linear Equation</TabsTrigger>
-                        <TabsTrigger value="quadratic">Quadratic Equation</TabsTrigger>
-                        <TabsTrigger value="system">System of Equations</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 h-auto sm:h-10">
+                        <TabsTrigger value="linear" className="h-auto py-2 sm:py-1.5">Linear Equation</TabsTrigger>
+                        <TabsTrigger value="quadratic" className="h-auto py-2 sm:py-1.5">Quadratic Equation</TabsTrigger>
+                        <TabsTrigger value="system" className="h-auto py-2 sm:py-1.5">System of Equations</TabsTrigger>
                     </TabsList>
                     <TabsContent value="linear">
                         <LinearEquationSolver />
