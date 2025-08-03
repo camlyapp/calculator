@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     siteName: 'Camly',
     images: [
       {
-        url: '/og-image.png',
+        url: '/camly.png',
         width: 1200,
         height: 630,
       },
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Camly - Free Smart Financial & Loan Calculator',
     description: 'A comprehensive suite of free financial calculators including loan, mortgage, savings, retirement, and more. Get AI-powered suggestions to optimize your finances.',
-    images: ['/og-image.png'],
+    images: ['/camly.png'],
   },
   manifest: '/manifest.json',
 };
