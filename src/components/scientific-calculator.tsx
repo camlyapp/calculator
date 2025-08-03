@@ -9,15 +9,20 @@ import { evaluate } from 'math-expression-evaluator';
 const ScientificCalculator = () => {
     const [expression, setExpression] = useState('0');
     const [result, setResult] = useState('');
+    const [isSecondF, setIsSecondF] = useState(false);
 
     const handleInput = (value: string) => {
-        if (expression === '0' && !'()'.includes(value)) {
+        if (expression === '0' && !'()'.includes(value) && value !== '.') {
             setExpression(value);
-        } else if (result) {
+        } else if (result && !'+-*/^'.includes(value)) {
+            // Start new calculation if a number is pressed after a result
             setExpression(value);
             setResult('');
         } else {
-            setExpression(prev => prev + value);
+             // If there's a result, and an operator is pressed, continue calculation
+            const newExpression = result ? result.substring(2) + value : expression + value;
+            setExpression(newExpression);
+            setResult('');
         }
     };
     
@@ -27,16 +32,29 @@ const ScientificCalculator = () => {
     };
     
     const handleFunction = (func: string) => {
-        setExpression(prev => prev + func + '(');
+        if (expression === '0') {
+             setExpression(func + '(');
+        } else {
+            setExpression(prev => prev + func + '(');
+        }
         setResult('');
     };
 
     const calculate = () => {
         try {
-            // The library expects 'log' as log10, but JS Math.log is ln.
-            // A simple replace is not enough. We'll let the library handle it.
-            // It correctly interprets log as log10 and ln as natural log.
-            const evalResult = evaluate(expression.replace(/π/g, 'pi').replace(/√/g, 'sqrt'));
+            // The library 'math-expression-evaluator' uses 'log' for log10 and 'ln' for natural log.
+            // It supports factorial with '!'
+            // Let's replace special characters before evaluation
+            const exprToEval = expression
+                .replace(/π/g, 'pi')
+                .replace(/√/g, 'sqrt')
+                .replace(/sin⁻¹/g, 'asin')
+                .replace(/cos⁻¹/g, 'acos')
+                .replace(/tan⁻¹/g, 'atan')
+                .replace(/log₂/g, 'log2')
+                .replace(/e\^/g, 'exp');
+
+            const evalResult = evaluate(exprToEval);
             setResult(`= ${evalResult}`);
         } catch (error) {
             setResult('Error');
@@ -55,12 +73,30 @@ const ScientificCalculator = () => {
         }
         setExpression(prev => prev.length > 1 ? prev.slice(0, -1) : '0');
     };
+
+     const handlePercentage = () => {
+        try {
+            const res = evaluate(expression) / 100;
+            setExpression(res.toString());
+        } catch (error) {
+            setResult('Error');
+        }
+    };
+
+    const handleReciprocal = () => {
+        try {
+            const res = 1 / evaluate(expression);
+            setExpression(res.toString());
+        } catch (error) {
+            setResult('Error');
+        }
+    }
     
-    const renderButton = (label: string, onClick: () => void, className: string = '') => (
+    const renderButton = (label: string, onClick: () => void, className: string = '', variant: "secondary" | "outline" | "default" | "destructive" | "ghost" | "link" | null | undefined = 'outline') => (
         <Button
             onClick={onClick}
-            className={`text-lg h-12 ${className}`}
-            variant={['+', '-', '*', '/', '='].includes(label) ? 'secondary' : 'outline'}
+            className={`text-md h-12 ${className}`}
+            variant={variant || 'outline'}
         >
             {label}
         </Button>
@@ -78,41 +114,46 @@ const ScientificCalculator = () => {
                     <p className="text-2xl font-mono text-primary h-8">{result}</p>
                 </div>
                 <div className="grid grid-cols-5 gap-2">
-                    {renderButton('sin', () => handleFunction('sin'))}
-                    {renderButton('cos', () => handleFunction('cos'))}
-                    {renderButton('tan', () => handleFunction('tan'))}
-                    {renderButton('log', () => handleFunction('log'))}
-                    {renderButton('ln', () => handleFunction('ln'))}
-                    
-                    {renderButton('(', () => handleInput('('))}
-                    {renderButton(')', () => handleInput(')'))}
-                    {renderButton('x²', () => handleOperator('^2'))}
-                    {renderButton('√', () => handleOperator('√'))}
-                    {renderButton('^', () => handleOperator('^'))}
-                    
-                    {renderButton('7', () => handleInput('7'))}
-                    {renderButton('8', () => handleInput('8'))}
-                    {renderButton('9', () => handleInput('9'))}
-                    {renderButton('DEL', backspace, 'bg-destructive/80 hover:bg-destructive text-destructive-foreground')}
-                    {renderButton('AC', clear, 'bg-destructive/80 hover:bg-destructive text-destructive-foreground')}
-
-                    {renderButton('4', () => handleInput('4'))}
-                    {renderButton('5', () => handleInput('5'))}
-                    {renderButton('6', () => handleInput('6'))}
-                    {renderButton('*', () => handleOperator('*'))}
-                    {renderButton('/', () => handleOperator('/'))}
-
-                    {renderButton('1', () => handleInput('1'))}
-                    {renderButton('2', () => handleInput('2'))}
-                    {renderButton('3', () => handleInput('3'))}
-                    {renderButton('+', () => handleOperator('+'))}
-                    {renderButton('-', () => handleOperator('-'))}
-                    
-                    {renderButton('0', () => handleInput('0'))}
-                    {renderButton('.', () => handleInput('.'))}
+                    {renderButton('2nd', () => setIsSecondF(!isSecondF), '', isSecondF ? 'default': 'outline')}
                     {renderButton('π', () => handleInput('π'))}
                     {renderButton('e', () => handleInput('e'))}
+                    {renderButton('C', clear)}
+                    {renderButton('DEL', backspace)}
+                    
+                    {renderButton(isSecondF ? 'x³' : 'x²', () => handleOperator(isSecondF ? '^3' : '^2'))}
+                    {renderButton('1/x', handleReciprocal)}
+                    {renderButton('(', () => handleInput('('))}
+                    {renderButton(')', () => handleInput(')'))}
+                    {renderButton('n!', () => handleOperator('!'))}
+                    
+                    {renderButton(isSecondF ? '³√' : '√', () => handleFunction(isSecondF ? 'cbrt' : '√'))}
+                    {renderButton('7', () => handleInput('7'), '', 'secondary')}
+                    {renderButton('8', () => handleInput('8'), '', 'secondary')}
+                    {renderButton('9', () => handleInput('9'), '', 'secondary')}
+                    {renderButton('÷', () => handleOperator('/'))}
+
+                    {renderButton(isSecondF ? 'y√x' : 'xʸ', () => handleOperator(isSecondF ? 'nthRoot' : '^'))}
+                    {renderButton('4', () => handleInput('4'), '', 'secondary')}
+                    {renderButton('5', () => handleInput('5'), '', 'secondary')}
+                    {renderButton('6', () => handleInput('6'), '', 'secondary')}
+                    {renderButton('*', () => handleOperator('*'))}
+
+                    {renderButton(isSecondF ? 'sin⁻¹' : 'sin', () => handleFunction(isSecondF ? 'sin⁻¹' : 'sin'))}
+                    {renderButton('1', () => handleInput('1'), '', 'secondary')}
+                    {renderButton('2', () => handleInput('2'), '', 'secondary')}
+                    {renderButton('3', () => handleInput('3'), '', 'secondary')}
+                    {renderButton('-', () => handleOperator('-'))}
+                    
+                    {renderButton(isSecondF ? 'cos⁻¹' : 'cos', () => handleFunction(isSecondF ? 'cos⁻¹' : 'cos'))}
+                    {renderButton('0', () => handleInput('0'), '', 'secondary')}
+                    {renderButton('.', () => handleInput('.'))}
                     {renderButton('=', calculate, 'bg-primary/90 hover:bg-primary text-primary-foreground')}
+                    {renderButton('+', () => handleOperator('+'))}
+                    
+                    {renderButton(isSecondF ? 'tan⁻¹' : 'tan', () => handleFunction(isSecondF ? 'tan⁻¹' : 'tan'))}
+                    {renderButton(isSecondF ? 'eˣ' : 'ln', () => handleFunction(isSecondF ? 'e^' : 'ln'))}
+                    {renderButton(isSecondF ? 'log₂' : 'log', () => handleFunction(isSecondF ? 'log₂' : 'log'))}
+                    {renderButton('%', handlePercentage)}
                 </div>
             </CardContent>
         </Card>
