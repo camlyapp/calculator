@@ -26,7 +26,9 @@ const Header = () => {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
+      // Stash the event so it can be triggered later.
       setInstallPrompt(e);
     };
 
@@ -37,17 +39,21 @@ const Header = () => {
     };
   }, []);
 
-  const handleInstallClick = () => {
-    if (!installPrompt) return;
-    installPrompt.prompt();
-    installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted the install prompt');
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-      setInstallPrompt(null);
-    });
+  const handleInstallClick = async () => {
+    if (!installPrompt) {
+      return;
+    }
+    // Show the install prompt
+    await installPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+    // We can only use the prompt once, so clear it.
+    setInstallPrompt(null);
   };
 
   return (
@@ -63,15 +69,15 @@ const Header = () => {
           
           <div className="flex items-center gap-2">
              {installPrompt && (
-                <Button variant="outline" size="icon" onClick={handleInstallClick}>
-                    <Download className="h-6 w-6" />
+                <Button variant="outline" size="icon" onClick={handleInstallClick} aria-label="Install App">
+                    <Download className="h-5 w-5" />
                     <span className="sr-only">Install App</span>
                 </Button>
             )}
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="outline" size="icon">
+                    <Button variant="outline" size="icon" aria-label="Open menu">
                         <Menu className="h-6 w-6" />
                         <span className="sr-only">Open menu</span>
                     </Button>
