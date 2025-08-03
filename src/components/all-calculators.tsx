@@ -34,7 +34,7 @@ const calculatorPages = [
 
 const AllCalculators = () => {
     return (
-        <Card className="w-full mt-6 shadow-none border-none bg-transparent">
+        <Card className="w-full mt-6 shadow-none border-none bg-transparent hidden sm:block">
             <CardContent className="p-0">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {calculatorPages.map((page) => {
