@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -19,6 +20,7 @@ import TaxCalculator from '@/components/tax-calculator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import AllCalculators from '@/components/all-calculators';
 
 type Currency = 'USD' | 'INR';
 
@@ -30,21 +32,7 @@ export default function Home() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <Tabs defaultValue="calculator" className="w-full max-w-7xl mx-auto">
-          <div className="flex justify-end mb-4">
-            <div className='w-[180px] space-y-2'>
-              <Label htmlFor="global-currency-select">Global Currency</Label>
-              <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
-                  <SelectTrigger id="global-currency-select">
-                      <SelectValue placeholder="Select currency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="USD">USD ($)</SelectItem>
-                      <SelectItem value="INR">INR (₹)</SelectItem>
-                  </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 mx-auto max-w-6xl h-auto">
             <TabsTrigger value="calculator">EMI Calculator</TabsTrigger>
             <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
@@ -59,7 +47,22 @@ export default function Home() {
             <TabsTrigger value="gst">GST</TabsTrigger>
             <TabsTrigger value="currency">Currency</TabsTrigger>
             <TabsTrigger value="budget">Budget</TabsTrigger>
+            <TabsTrigger value="all-calculators">All Calculators</TabsTrigger>
           </TabsList>
+           <div className="flex justify-end my-4">
+            <div className='w-[180px] space-y-2'>
+              <Label htmlFor="global-currency-select">Global Currency</Label>
+              <Select value={currency} onValueChange={(value) => setCurrency(value as Currency)}>
+                  <SelectTrigger id="global-currency-select">
+                      <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="USD">USD ($)</SelectItem>
+                      <SelectItem value="INR">INR (₹)</SelectItem>
+                  </SelectContent>
+              </Select>
+            </div>
+          </div>
           <TabsContent value="calculator">
             <LoanCalculator currency={currency} />
           </TabsContent>
@@ -101,6 +104,9 @@ export default function Home() {
           </TabsContent>
            <TabsContent value="budget">
             <BudgetCalculator currency={currency} />
+          </TabsContent>
+           <TabsContent value="all-calculators">
+            <AllCalculators />
           </TabsContent>
         </Tabs>
       </main>
