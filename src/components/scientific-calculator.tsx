@@ -117,8 +117,8 @@ const ScientificCalculator = () => {
                     {renderButton('2nd', () => setIsSecondF(!isSecondF), '', isSecondF ? 'default': 'outline')}
                     {renderButton('π', () => handleInput('π'))}
                     {renderButton('e', () => handleInput('e'))}
-                    {renderButton('C', clear)}
-                    {renderButton('DEL', backspace)}
+                    {renderButton('C', clear, '', 'destructive')}
+                    {renderButton('DEL', backspace, '', 'destructive')}
                     
                     {renderButton(isSecondF ? 'x³' : 'x²', () => handleOperator(isSecondF ? '^3' : '^2'))}
                     {renderButton('1/x', handleReciprocal)}
@@ -130,30 +130,30 @@ const ScientificCalculator = () => {
                     {renderButton('7', () => handleInput('7'), '', 'secondary')}
                     {renderButton('8', () => handleInput('8'), '', 'secondary')}
                     {renderButton('9', () => handleInput('9'), '', 'secondary')}
-                    {renderButton('÷', () => handleOperator('/'))}
+                    {renderButton('÷', () => handleOperator('/'), '', 'ghost')}
 
                     {renderButton(isSecondF ? 'y√x' : 'xʸ', () => handleOperator(isSecondF ? 'nthRoot' : '^'))}
                     {renderButton('4', () => handleInput('4'), '', 'secondary')}
                     {renderButton('5', () => handleInput('5'), '', 'secondary')}
                     {renderButton('6', () => handleInput('6'), '', 'secondary')}
-                    {renderButton('*', () => handleOperator('*'))}
+                    {renderButton('*', () => handleOperator('*'), '', 'ghost')}
 
                     {renderButton(isSecondF ? 'sin⁻¹' : 'sin', () => handleFunction(isSecondF ? 'sin⁻¹' : 'sin'))}
                     {renderButton('1', () => handleInput('1'), '', 'secondary')}
                     {renderButton('2', () => handleInput('2'), '', 'secondary')}
                     {renderButton('3', () => handleInput('3'), '', 'secondary')}
-                    {renderButton('-', () => handleOperator('-'))}
+                    {renderButton('-', () => handleOperator('-'), '', 'ghost')}
                     
                     {renderButton(isSecondF ? 'cos⁻¹' : 'cos', () => handleFunction(isSecondF ? 'cos⁻¹' : 'cos'))}
-                    {renderButton('0', () => handleInput('0'), '', 'secondary')}
+                    {renderButton('0', () => handleInput('0'), 'col-span-2', 'secondary')}
                     {renderButton('.', () => handleInput('.'))}
-                    {renderButton('=', calculate, 'bg-primary/90 hover:bg-primary text-primary-foreground')}
-                    {renderButton('+', () => handleOperator('+'))}
-                    
+                    {renderButton('+', () => handleOperator('+'), '', 'ghost')}
+
                     {renderButton(isSecondF ? 'tan⁻¹' : 'tan', () => handleFunction(isSecondF ? 'tan⁻¹' : 'tan'))}
                     {renderButton(isSecondF ? 'eˣ' : 'ln', () => handleFunction(isSecondF ? 'e^' : 'ln'))}
                     {renderButton(isSecondF ? 'log₂' : 'log', () => handleFunction(isSecondF ? 'log₂' : 'log'))}
                     {renderButton('%', handlePercentage)}
+                    {renderButton('=', calculate, 'bg-primary/90 hover:bg-primary text-primary-foreground')}
                 </div>
             </CardContent>
         </Card>
