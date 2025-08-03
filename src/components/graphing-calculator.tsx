@@ -11,7 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
 import { evaluate } from 'math-expression-evaluator';
-import { ChartTooltipContent } from './ui/chart';
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from './ui/chart';
 
 const graphingSchema = z.object({
   expression: z.string().min(1, "Function is required."),
@@ -25,6 +25,13 @@ const graphingSchema = z.object({
 
 type GraphingFormValues = z.infer<typeof graphingSchema>;
 type PlotData = { x: number; y: number | null }[];
+
+const chartConfig = {
+  y: {
+    label: "y",
+    color: "hsl(var(--primary))",
+  },
+} satisfies ChartConfig;
 
 const GraphingCalculator = () => {
   const [plotData, setPlotData] = useState<PlotData>([]);
@@ -136,29 +143,31 @@ const GraphingCalculator = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="h-[400px] w-full">
-                        <ResponsiveContainer>
-                        <LineChart data={plotData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                                dataKey="x" 
-                                type="number"
-                                domain={['dataMin', 'dataMax']}
-                                allowDecimals={false}
-                                label={{ value: 'x-axis', position: 'insideBottom', offset: -5 }}
-                            />
-                            <YAxis 
-                                domain={['auto', 'auto']}
-                                allowDecimals={false}
-                                label={{ value: 'y-axis', angle: -90, position: 'insideLeft' }}
-                            />
-                            <Tooltip 
-                                content={<ChartTooltipContent />}
-                                formatter={(value, name) => [value, name === 'y' ? `y = ${form.getValues('expression')}` : name]}
-                            />
-                            <Legend />
-                            <Line type="monotone" dataKey="y" stroke="hsl(var(--primary))" dot={false} connectNulls />
-                        </LineChart>
-                        </ResponsiveContainer>
+                       <ChartContainer config={chartConfig}>
+                          <ResponsiveContainer>
+                          <LineChart data={plotData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis 
+                                  dataKey="x" 
+                                  type="number"
+                                  domain={['dataMin', 'dataMax']}
+                                  allowDecimals={false}
+                                  label={{ value: 'x-axis', position: 'insideBottom', offset: -5 }}
+                              />
+                              <YAxis 
+                                  domain={['auto', 'auto']}
+                                  allowDecimals={false}
+                                  label={{ value: 'y-axis', angle: -90, position: 'insideLeft' }}
+                              />
+                              <Tooltip 
+                                  content={<ChartTooltipContent />}
+                                  formatter={(value, name) => [value, name === 'y' ? `y = ${form.getValues('expression')}` : name]}
+                              />
+                              <Legend />
+                              <Line type="monotone" dataKey="y" stroke="hsl(var(--primary))" dot={false} connectNulls />
+                          </LineChart>
+                          </ResponsiveContainer>
+                       </ChartContainer>
                     </div>
                 </CardContent>
             </Card>
