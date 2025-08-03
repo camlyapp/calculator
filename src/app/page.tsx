@@ -24,8 +24,26 @@ import AllCalculators from '@/components/all-calculators';
 
 type Currency = 'USD' | 'INR';
 
+const calculatorTabs = [
+    { value: 'calculator', label: 'EMI Calculator' },
+    { value: 'mortgage-calculator', label: 'Mortgage' },
+    { value: 'comparison', label: 'Comparison' },
+    { value: 'suggestions', label: 'AI Suggestions' },
+    { value: 'refinance', label: 'Refinancing' },
+    { value: 'investment', label: 'Investment' },
+    { value: 'retirement', label: 'Retirement' },
+    { value: 'compound-interest', label: 'Compound Interest' },
+    { value: 'savings', label: 'Savings' },
+    { value: 'tax', label: 'US Tax' },
+    { value: 'indian-tax', label: 'Indian Tax' },
+    { value: 'gst', label: 'GST' },
+    { value: 'currency', label: 'Currency' },
+    { value: 'budget', label: 'Budget' },
+];
+
 export default function Home() {
   const [currency, setCurrency] = useState<Currency>('USD');
+  const [activeTab, setActiveTab] = useState('calculator');
 
   return (
     <>
@@ -49,22 +67,24 @@ export default function Home() {
           
           <AllCalculators />
 
-          <Tabs defaultValue="calculator" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 mx-auto max-w-6xl h-auto">
-              <TabsTrigger value="calculator">EMI Calculator</TabsTrigger>
-              <TabsTrigger value="mortgage-calculator">Mortgage</TabsTrigger>
-              <TabsTrigger value="comparison">Comparison</TabsTrigger>
-              <TabsTrigger value="suggestions">AI Suggestions</TabsTrigger>
-              <TabsTrigger value="refinance">Refinancing</TabsTrigger>
-              <TabsTrigger value="investment">Investment</TabsTrigger>
-              <TabsTrigger value="retirement">Retirement</TabsTrigger>
-              <TabsTrigger value="compound-interest">Compound Interest</TabsTrigger>
-              <TabsTrigger value="savings">Savings</TabsTrigger>
-              <TabsTrigger value="tax">US Tax</TabsTrigger>
-              <TabsTrigger value="indian-tax">Indian Tax</TabsTrigger>
-              <TabsTrigger value="gst">GST</TabsTrigger>
-              <TabsTrigger value="currency">Currency</TabsTrigger>
-              <TabsTrigger value="budget">Budget</TabsTrigger>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+             <div className="sm:hidden mb-4">
+                <Label htmlFor="calculator-select">Select a Calculator</Label>
+                <Select value={activeTab} onValueChange={setActiveTab}>
+                    <SelectTrigger id="calculator-select">
+                        <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {calculatorTabs.map(tab => (
+                            <SelectItem key={tab.value} value={tab.value}>{tab.label}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 mx-auto max-w-6xl h-auto">
+              {calculatorTabs.map(tab => (
+                <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
+              ))}
             </TabsList>
             <TabsContent value="calculator">
               <LoanCalculator currency={currency} />
