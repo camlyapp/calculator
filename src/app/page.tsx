@@ -27,6 +27,7 @@ import RdCalculator from '@/components/rd-calculator';
 import FdCalculator from '@/components/fd-calculator';
 import PpfCalculator from '@/components/ppf-calculator';
 import GratuityCalculator from '@/components/gratuity-calculator';
+import RoiCalculator from '@/components/roi-calculator';
 
 type Currency = 'USD' | 'INR';
 
@@ -37,6 +38,7 @@ const calculatorTabs = [
     { value: 'suggestions', label: 'AI Suggestions' },
     { value: 'refinance', label: 'Refinancing' },
     { value: 'investment', label: 'Investment' },
+    { value: 'roi', label: 'ROI' },
     { value: 'sip-calculator', label: 'SIP Calculator' },
     { value: 'lumpsum-calculator', label: 'Lumpsum' },
     { value: 'ppf-calculator', label: 'PPF Calculator' },
@@ -92,7 +94,7 @@ export default function Home() {
                     </SelectContent>
                 </Select>
             </div>
-            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9 mx-auto max-w-7xl h-auto">
+            <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-10 mx-auto max-w-7xl h-auto">
               {calculatorTabs.map(tab => (
                 <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
               ))}
@@ -114,6 +116,9 @@ export default function Home() {
             </TabsContent>
             <TabsContent value="investment">
               <InvestmentCalculator />
+            </TabsContent>
+            <TabsContent value="roi">
+              <RoiCalculator currency={currency} />
             </TabsContent>
              <TabsContent value="sip-calculator">
               <SipCalculator currency={currency} />
