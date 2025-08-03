@@ -73,10 +73,6 @@ const OvulationCalculator = () => {
         }
     }, [lastPeriodDate, cycleLength, lutealPhaseLength, isMounted]);
 
-    if (!isMounted) {
-        return null;
-    }
-
     const { fertileDays, ovulationDays, periodDays } = useMemo(() => {
         const fertile: Date[] = [];
         const ovulation: Date[] = [];
@@ -90,6 +86,10 @@ const OvulationCalculator = () => {
         });
         return { fertileDays: fertile, ovulationDays: ovulation, periodDays: period };
     }, [predictions]);
+
+    if (!isMounted) {
+        return null;
+    }
 
     const changeMonth = (amount: number) => {
         setCurrentMonth(prev => addDays(prev, amount * 30)); // Approximate month change
@@ -220,5 +220,3 @@ const OvulationCalculator = () => {
 };
 
 export default OvulationCalculator;
-
-    
