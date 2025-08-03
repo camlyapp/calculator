@@ -7,10 +7,10 @@ import { Card, CardContent } from '@/components/ui/card';
 
 const calculatorPages = [
     {
-        href: '/math-science-calculators',
-        label: 'Math & Science',
-        icon: BrainCircuit,
-        description: 'Solve equations, graph functions, and handle complex calculations with ease.',
+        href: '/personal-health-calculators',
+        label: 'Personal & Health',
+        icon: HeartPulse,
+        description: 'Track your BMI, BMR, due date, and other health metrics to stay on top of your well-being.',
     },
     {
         href: '/date-time-calculators',
@@ -19,10 +19,10 @@ const calculatorPages = [
         description: 'Calculate durations, workdays, countdowns, and manipulate dates effortlessly.',
     },
     {
-        href: '/personal-health-calculators',
-        label: 'Personal & Health',
-        icon: HeartPulse,
-        description: 'Track your BMI, BMR, due date, and other health metrics to stay on top of your well-being.',
+        href: '/math-science-calculators',
+        label: 'Math & Science',
+        icon: BrainCircuit,
+        description: 'Solve equations, graph functions, and handle complex calculations with ease.',
     },
     {
         href: '/other-specialized-calculators',
