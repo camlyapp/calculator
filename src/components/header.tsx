@@ -1,14 +1,14 @@
 
 "use client";
 
-import { Menu } from 'lucide-react';
+import { Menu, Download } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from './ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 const navLinks = [
@@ -22,6 +22,33 @@ const navLinks = [
 const Header = () => {
   const pathname = usePathname();
   const [isSheetOpen, setSheetOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    installPrompt.userChoice.then((choiceResult: { outcome: string }) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      setInstallPrompt(null);
+    });
+  };
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
@@ -35,6 +62,12 @@ const Header = () => {
           </Link>
           
           <div className="flex items-center gap-2">
+             {installPrompt && (
+                <Button variant="outline" size="icon" onClick={handleInstallClick}>
+                    <Download className="h-6 w-6" />
+                    <span className="sr-only">Install App</span>
+                </Button>
+            )}
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
