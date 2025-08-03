@@ -110,6 +110,78 @@ const QuadraticEquationSolver = () => {
     );
 };
 
+const SystemOfEquationsSolver = () => {
+    const [a1, setA1] = useState('2');
+    const [b1, setB1] = useState('3');
+    const [c1, setC1] = useState('8');
+    const [a2, setA2] = useState('5');
+    const [b2, setB2] = useState('-1');
+    const [c2, setC2] = useState('3');
+    const [result, setResult] = useState('');
+
+    const solve = () => {
+        const valA1 = parseFloat(a1);
+        const valB1 = parseFloat(b1);
+        const valC1 = parseFloat(c1);
+        const valA2 = parseFloat(a2);
+        const valB2 = parseFloat(b2);
+        const valC2 = parseFloat(c2);
+
+        if (isNaN(valA1) || isNaN(valB1) || isNaN(valC1) || isNaN(valA2) || isNaN(valB2) || isNaN(valC2)) {
+            setResult('Please enter valid numbers for all coefficients.');
+            return;
+        }
+
+        const determinant = valA1 * valB2 - valA2 * valB1;
+
+        if (determinant === 0) {
+            const determinantX = valC1 * valB2 - valC2 * valB1;
+            if (determinantX === 0) {
+                 setResult('Infinite solutions (dependent system).');
+            } else {
+                 setResult('No solution (inconsistent system).');
+            }
+        } else {
+            const x = (valC1 * valB2 - valC2 * valB1) / determinant;
+            const y = (valA1 * valC2 - valA2 * valC1) / determinant;
+            setResult(`x = ${x.toFixed(4)}, y = ${y.toFixed(4)}`);
+        }
+    };
+
+    return (
+        <div className="space-y-4 pt-4">
+            <div className="text-center text-lg font-medium">Solve the system:</div>
+            <div className="space-y-2">
+                <Label>Equation 1: <span className="font-mono">a₁x + b₁y = c₁</span></Label>
+                <div className="flex flex-col sm:flex-row gap-2 items-center">
+                    <Input aria-label="Value for a1" value={a1} onChange={e => setA1(e.target.value)} type="number" className="text-center" />
+                    <span className="font-mono text-xl">x +</span>
+                    <Input aria-label="Value for b1" value={b1} onChange={e => setB1(e.target.value)} type="number" className="text-center" />
+                     <span className="font-mono text-xl">y =</span>
+                    <Input aria-label="Value for c1" value={c1} onChange={e => setC1(e.target.value)} type="number" className="text-center" />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label>Equation 2: <span className="font-mono">a₂x + b₂y = c₂</span></Label>
+                 <div className="flex flex-col sm:flex-row gap-2 items-center">
+                    <Input aria-label="Value for a2" value={a2} onChange={e => setA2(e.target.value)} type="number" className="text-center" />
+                    <span className="font-mono text-xl">x +</span>
+                    <Input aria-label="Value for b2" value={b2} onChange={e => setB2(e.target.value)} type="number" className="text-center" />
+                    <span className="font-mono text-xl">y =</span>
+                    <Input aria-label="Value for c2" value={c2} onChange={e => setC2(e.target.value)} type="number" className="text-center" />
+                </div>
+            </div>
+            <Button onClick={solve} className="w-full">Solve System</Button>
+            {result && (
+                <div className="text-center pt-4">
+                    <Label>Result</Label>
+                    <p className="text-2xl font-bold">{result}</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const AlgebraCalculator = () => {
     return (
         <Card className="w-full max-w-lg shadow-2xl mt-6">
@@ -119,15 +191,19 @@ const AlgebraCalculator = () => {
             </CardHeader>
             <CardContent>
                 <Tabs defaultValue="linear" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="linear">Linear Equation</TabsTrigger>
                         <TabsTrigger value="quadratic">Quadratic Equation</TabsTrigger>
+                        <TabsTrigger value="system">System of Equations</TabsTrigger>
                     </TabsList>
                     <TabsContent value="linear">
                         <LinearEquationSolver />
                     </TabsContent>
                     <TabsContent value="quadratic">
                         <QuadraticEquationSolver />
+                    </TabsContent>
+                    <TabsContent value="system">
+                        <SystemOfEquationsSolver />
                     </TabsContent>
                 </Tabs>
             </CardContent>
