@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -33,26 +34,16 @@ const AnalyzeRefinanceOutputSchema = z.object({
 });
 export type AnalyzeRefinanceOutput = z.infer<typeof AnalyzeRefinanceOutputSchema>;
 
-export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<AnalyzeRefinanceOutput> {
-  return analyzeRefinanceFlow(input);
-}
-
 // Helper function to calculate remaining balance
 const calculateRemainingBalance = (originalAmount: number, annualRate: number, originalTermYears: number, paymentsMadeMonths: number) => {
     const { schedule } = generateAmortizationSchedule(originalAmount, annualRate * 100, originalTermYears, 0);
-    if (paymentsMadeMonths >= schedule.length) {
-        return 0;
+    if (paymentsMadeMonths >= schedule.length || paymentsMadeMonths <= 0) {
+        return originalAmount; // Return original amount if no payments made or loan is over
     }
     return schedule[paymentsMadeMonths - 1].remainingBalance;
 };
 
-const analyzeRefinanceFlow = ai.defineFlow(
-  {
-    name: 'analyzeRefinanceFlow',
-    inputSchema: AnalyzeRefinanceInputSchema,
-    outputSchema: AnalyzeRefinanceOutputSchema,
-  },
-  async (input) => {
+export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<AnalyzeRefinanceOutput> {
     const paymentsMade = input.loanAge * 12;
 
     const remainingBalance = calculateRemainingBalance(
@@ -85,22 +76,54 @@ const analyzeRefinanceFlow = ai.defineFlow(
 
     const lifetimeSavings = remainingCurrentCost - totalNewCost;
 
+    const analysisInput = {
+        remainingBalance,
+        currentInterestRate: input.currentInterestRate,
+        currentLoanTerm: input.currentLoanTerm,
+        loanAge: input.loanAge,
+        currentMonthlyPayment,
+        newLoanAmount,
+        newInterestRate: input.newInterestRate,
+        newLoanTerm: input.newLoanTerm,
+        newMonthlyPayment,
+        refinanceCosts: input.refinanceCosts,
+        lifetimeSavings,
+    };
+    
+    const aiAnalysis = await analyzeRefinanceFlow(analysisInput);
+
+    return {
+        ...aiAnalysis,
+        lifetimeSavings,
+        currentMonthlyPayment,
+        newMonthlyPayment,
+    };
+}
+
+
+const analyzeRefinanceFlow = ai.defineFlow(
+  {
+    name: 'analyzeRefinanceFlow',
+    inputSchema: z.any(), // Input is pre-processed now
+    outputSchema: AnalyzeRefinanceOutputSchema.omit({ lifetimeSavings: true, currentMonthlyPayment: true, newMonthlyPayment: true }),
+  },
+  async (input) => {
     const prompt = `You are an expert financial advisor specializing in loan refinancing. Analyze the following scenario and provide a clear recommendation.
 
     Current Loan:
-    - Remaining Balance: $${remainingBalance.toFixed(2)}
+    - Remaining Balance: $${input.remainingBalance.toFixed(2)}
     - Interest Rate: ${(input.currentInterestRate * 100).toFixed(2)}%
     - Remaining Term: ${input.currentLoanTerm - input.loanAge} years
-    - Monthly Payment: $${currentMonthlyPayment.toFixed(2)}
+    - Monthly Payment: $${input.currentMonthlyPayment.toFixed(2)}
 
     Proposed New Loan:
-    - Loan Amount: $${newLoanAmount.toFixed(2)} (includes $${input.refinanceCosts.toFixed(2)} in closing costs)
+    - Loan Amount: $${input.newLoanAmount.toFixed(2)} (includes $${input.refinanceCosts.toFixed(2)} in closing costs)
     - Interest Rate: ${(input.newInterestRate * 100).toFixed(2)}%
     - Term: ${input.newLoanTerm} years
-    - Monthly Payment: $${newMonthlyPayment.toFixed(2)}
+    - Monthly Payment: $${input.newMonthlyPayment.toFixed(2)}
 
     Analysis:
-    - The user will save $${lifetimeSavings.toFixed(2)} over the life of the loan by refinancing.
+    - The user will save $${input.lifetimeSavings.toFixed(2)} over the life of the loan by refinancing.
 
     Based on this data, provide a clear recommendation (Recommended/Not Recommended) and a detailed analysis.
     Explain the pros (e.g., lower monthly payment, interest savings) and cons (e.g., extending the loan term, upfront costs).
@@ -109,14 +132,9 @@ const analyzeRefinanceFlow = ai.defineFlow(
 
     const { output } = await ai.generate({
       prompt,
-      output: { schema: AnalyzeRefinanceOutputSchema },
+      output: { schema: AnalyzeRefinanceOutputSchema.omit({ lifetimeSavings: true, currentMonthlyPayment: true, newMonthlyPayment: true }) },
     });
     
-    return {
-        ...output!,
-        lifetimeSavings,
-        currentMonthlyPayment,
-        newMonthlyPayment,
-    };
+    return output!;
   }
 );
