@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -13,16 +14,23 @@ import { z } from 'genkit';
 
 const CalculateIndianTaxInputSchema = z.object({
   grossIncome: z.coerce.number().min(0, "Income must be a positive number."),
-  deductions: z.coerce.number().min(0, "Deductions cannot be negative.").default(0),
+  otherIncome: z.coerce.number().min(0, "Other income cannot be negative.").default(0),
+  deduction80C: z.coerce.number().min(0).max(150000, "Max 80C deduction is 1,50,000.").default(0),
+  deduction80D: z.coerce.number().min(0).max(100000, "Max 80D deduction is 1,00,000.").default(0),
+  homeLoanInterest: z.coerce.number().min(0).max(200000, "Max home loan interest deduction is 2,00,000.").default(0),
   taxRegime: z.enum(['new', 'old']),
 });
 export type CalculateIndianTaxInput = z.infer<typeof CalculateIndianTaxInputSchema>;
 
 const CalculateIndianTaxOutputSchema = z.object({
+    totalIncome: z.number(),
+    totalDeductions: z.number(),
     taxableIncome: z.number(),
     incomeTax: z.number(),
+    surcharge: z.number(),
     cess: z.number(),
     totalTax: z.number(),
+    monthlyTds: z.number(),
     effectiveRate: z.number(),
     breakdown: z.array(z.object({ bracket: z.string(), tax: z.number() })),
 });
@@ -41,7 +49,9 @@ const calculateIndianTaxFlow = ai.defineFlow(
     outputSchema: CalculateIndianTaxOutputSchema,
   },
   async (input) => {
-    const { grossIncome, deductions, taxRegime } = input;
+    const { grossIncome, otherIncome, deduction80C, deduction80D, homeLoanInterest, taxRegime } = input;
+    
+    const totalIncome = grossIncome + otherIncome;
 
     const newRegimeSlabs = [
         { from: 0, to: 300000, rate: 0 },
@@ -63,13 +73,16 @@ const calculateIndianTaxFlow = ai.defineFlow(
     const CESS_RATE = 0.04;
     
     let taxableIncome: number;
+    let totalDeductions = 0;
     let taxSlabs;
 
     if (taxRegime === 'new') {
-        taxableIncome = Math.max(0, grossIncome - STANDARD_DEDUCTION);
+        taxableIncome = Math.max(0, totalIncome - STANDARD_DEDUCTION);
+        totalDeductions = STANDARD_DEDUCTION;
         taxSlabs = newRegimeSlabs;
     } else { // Old Regime
-        taxableIncome = Math.max(0, grossIncome - STANDARD_DEDUCTION - deductions);
+        totalDeductions = STANDARD_DEDUCTION + deduction80C + deduction80D + homeLoanInterest;
+        taxableIncome = Math.max(0, totalIncome - totalDeductions);
         taxSlabs = oldRegimeSlabs;
     }
     
@@ -109,15 +122,33 @@ const calculateIndianTaxFlow = ai.defineFlow(
         incomeTax -= rebate;
     }
     
-    const cess = incomeTax * CESS_RATE;
-    const totalTax = incomeTax + cess;
+    // Surcharge calculation
+    let surcharge = 0;
+    if (taxableIncome > 5000000 && taxableIncome <= 10000000) {
+        surcharge = incomeTax * 0.10;
+    } else if (taxableIncome > 10000000 && taxableIncome <= 20000000) {
+        surcharge = incomeTax * 0.15;
+    } else if (taxableIncome > 20000000 && taxableIncome <= 50000000) {
+        surcharge = incomeTax * 0.25;
+    } else if (taxableIncome > 50000000) {
+        surcharge = incomeTax * 0.37;
+    }
+
+    const taxBeforeCess = incomeTax + surcharge;
+    const cess = taxBeforeCess * CESS_RATE;
+    const totalTax = taxBeforeCess + cess;
+    const monthlyTds = totalTax / 12;
 
     return {
+        totalIncome,
+        totalDeductions,
         taxableIncome,
         incomeTax,
+        surcharge,
         cess,
         totalTax,
-        effectiveRate: grossIncome > 0 ? (totalTax / grossIncome) * 100 : 0,
+        monthlyTds,
+        effectiveRate: grossIncome > 0 ? (totalTax / totalIncome) * 100 : 0,
         breakdown,
     };
   }

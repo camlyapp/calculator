@@ -1,3 +1,4 @@
+
 'use server';
 
 import { suggestLoanOptimizations, type SuggestLoanOptimizationsInput, type SuggestLoanOptimizationsOutput } from '@/ai/flows/suggest-loan-optimizations';
@@ -127,9 +128,13 @@ export async function convertCurrencyAction(
 
 const IndianTaxSchema = z.object({
   grossIncome: z.coerce.number().min(0, "Income must be a positive number."),
-  deductions: z.coerce.number().min(0, "Deductions cannot be negative.").default(0),
+  otherIncome: z.coerce.number().min(0, "Other income cannot be negative.").default(0),
+  deduction80C: z.coerce.number().min(0).max(150000).default(0),
+  deduction80D: z.coerce.number().min(0).max(100000).default(0),
+  homeLoanInterest: z.coerce.number().min(0).max(200000).default(0),
   taxRegime: z.enum(['new', 'old']),
 });
+
 
 export async function calculateIndianTaxAction(
   prevState: any,

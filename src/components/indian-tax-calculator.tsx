@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useActionState, useEffect, useRef } from 'react';
+import { useActionState, useEffect, useRef, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   Card,
@@ -46,6 +46,7 @@ const IndianTaxCalculator = () => {
   const { toast } = useToast();
   const resultsRef = useRef<HTMLDivElement>(null);
   const { formatCurrency } = useCurrency();
+  const [taxRegime, setTaxRegime] = useState('new');
   
   useEffect(() => {
     if (state?.error) {
@@ -70,21 +71,24 @@ const IndianTaxCalculator = () => {
       <form action={formAction}>
         <CardContent>
             <div className="space-y-6">
+                 <h3 className="text-lg font-semibold text-primary border-b pb-2">Income Details</h3>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <Label htmlFor="grossIncome">Annual Gross Income</Label>
+                        <Label htmlFor="grossIncome">Annual Salary Income</Label>
                         <Input id="grossIncome" name="grossIncome" type="number" placeholder="e.g., 1000000" defaultValue="1000000" required />
                          {state?.errors?.grossIncome && <p className="text-destructive text-sm mt-1">{state.errors.grossIncome[0]}</p>}
                     </div>
                     <div>
-                        <Label htmlFor="deductions">Total Deductions (Old Regime, e.g., 80C)</Label>
-                        <Input id="deductions" name="deductions" type="number" placeholder="e.g., 150000" defaultValue="150000" />
-                        {state?.errors?.deductions && <p className="text-destructive text-sm mt-1">{state.errors.deductions[0]}</p>}
+                        <Label htmlFor="otherIncome">Income from Other Sources</Label>
+                        <Input id="otherIncome" name="otherIncome" type="number" placeholder="e.g., 50000" defaultValue="50000" />
+                        {state?.errors?.otherIncome && <p className="text-destructive text-sm mt-1">{state.errors.otherIncome[0]}</p>}
                     </div>
                  </div>
+
+                 <h3 className="text-lg font-semibold text-primary border-b pb-2">Tax Regime & Deductions</h3>
                  <div>
                     <Label>Select Tax Regime</Label>
-                    <RadioGroup name="taxRegime" defaultValue="new" className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 pt-2">
+                    <RadioGroup name="taxRegime" defaultValue="new" className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 pt-2" onValueChange={(val) => setTaxRegime(val)}>
                         <div className="flex items-center space-x-3 space-y-0">
                            <RadioGroupItem value="new" id="new-regime" />
                            <Label htmlFor="new-regime" className="font-normal">New Tax Regime (Default)</Label>
@@ -96,29 +100,65 @@ const IndianTaxCalculator = () => {
                     </RadioGroup>
                      {state?.errors?.taxRegime && <p className="text-destructive text-sm mt-1">{state.errors.taxRegime[0]}</p>}
                  </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <Label htmlFor="deduction80C">Section 80C (PPF, ELSS, etc.)</Label>
+                        <Input id="deduction80C" name="deduction80C" type="number" placeholder="e.g., 150000" defaultValue="150000" disabled={taxRegime === 'new'} />
+                        {state?.errors?.deduction80C && <p className="text-destructive text-sm mt-1">{state.errors.deduction80C[0]}</p>}
+                    </div>
+                     <div>
+                        <Label htmlFor="deduction80D">Section 80D (Medical Insurance)</Label>
+                        <Input id="deduction80D" name="deduction80D" type="number" placeholder="e.g., 25000" defaultValue="25000" disabled={taxRegime === 'new'}/>
+                        {state?.errors?.deduction80D && <p className="text-destructive text-sm mt-1">{state.errors.deduction80D[0]}</p>}
+                    </div>
+                     <div>
+                        <Label htmlFor="homeLoanInterest">Home Loan Interest</Label>
+                        <Input id="homeLoanInterest" name="homeLoanInterest" type="number" placeholder="e.g., 200000" defaultValue="0" disabled={taxRegime === 'new'}/>
+                        {state?.errors?.homeLoanInterest && <p className="text-destructive text-sm mt-1">{state.errors.homeLoanInterest[0]}</p>}
+                    </div>
+                </div>
+
                  <SubmitButton />
             </div>
 
             {result && (
             <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
                 <Card className="bg-secondary/50">
-                <CardHeader>
-                    <CardTitle>Tax Estimate Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                    <p className="text-muted-foreground">Taxable Income</p>
-                    <p className="text-3xl font-bold">{formatCurrency(result.taxableIncome)}</p>
-                    </div>
-                    <div>
-                    <p className="text-muted-foreground">Total Income Tax</p>
-                    <p className="text-3xl font-bold text-primary">{formatCurrency(result.totalTax)}</p>
-                    </div>
-                    <div>
-                    <p className="text-muted-foreground">Effective Tax Rate</p>
-                    <p className="text-3xl font-bold text-accent">{result.effectiveRate.toFixed(2)}%</p>
-                    </div>
-                </CardContent>
+                    <CardHeader>
+                        <CardTitle>Tax Estimate Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p className="text-muted-foreground">Total Income</p>
+                                <p className="text-2xl font-bold">{formatCurrency(result.totalIncome)}</p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">Total Deductions</p>
+                                <p className="text-2xl font-bold">{formatCurrency(result.totalDeductions)}</p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">Taxable Income</p>
+                                <p className="text-2xl font-bold text-primary">{formatCurrency(result.taxableIncome)}</p>
+                            </div>
+                         </div>
+                         <Separator />
+                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center pt-4">
+                            <div>
+                                <p className="text-muted-foreground">Total Income Tax</p>
+                                <p className="text-3xl font-bold text-primary">{formatCurrency(result.totalTax)}</p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">Effective Tax Rate</p>
+                                <p className="text-3xl font-bold text-accent">{result.effectiveRate.toFixed(2)}%</p>
+                            </div>
+                            <div>
+                                <p className="text-muted-foreground">Monthly TDS</p>
+                                <p className="text-3xl font-bold">{formatCurrency(result.monthlyTds)}</p>
+                            </div>
+                         </div>
+                    </CardContent>
                 </Card>
 
                 <Card>
@@ -128,7 +168,7 @@ const IndianTaxCalculator = () => {
                 <CardContent>
                     <Table>
                         <TableBody>
-                            {result.breakdown.length > 0 && (
+                            {result.breakdown.length > 0 ? (
                                 <>
                                 {result.breakdown.map((item, index) => (
                                     <TableRow key={index}>
@@ -141,6 +181,17 @@ const IndianTaxCalculator = () => {
                                     <TableCell className="text-right">{formatCurrency(result.incomeTax)}</TableCell>
                                 </TableRow>
                                 </>
+                            ) : (
+                                <TableRow>
+                                    <TableCell>Income Tax</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(result.incomeTax)}</TableCell>
+                                </TableRow>
+                            )}
+                             {result.surcharge > 0 && (
+                                <TableRow>
+                                    <TableCell>Surcharge</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(result.surcharge)}</TableCell>
+                                </TableRow>
                             )}
                             <TableRow>
                                 <TableCell>Health & Education Cess (4%)</TableCell>
