@@ -5,3 +5,14 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+
+# Environment variables are only available to your run environment.
+# They will not be available in your build environment.
+secretEnv:
+  - secret: GEMINI_API_KEY
+    env: GEMINI_API_KEY
+
+# A VPC connector is required to connect to Google Cloud services.
+vpcConnector:
+  name: "projects/camly-d5867/locations/us-central1/connectors/apphosting-vpc"
+  egress: private-ranges-only
