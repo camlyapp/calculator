@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -22,8 +23,22 @@ const AskPregnancyQuestionOutputSchema = z.object({
 });
 export type AskPregnancyQuestionOutput = z.infer<typeof AskPregnancyQuestionOutputSchema>;
 
+const getFallbackAnswer = (): AskPregnancyQuestionOutput => {
+    return {
+        answer: `The AI assistant is currently unavailable to answer your question. We apologize for the inconvenience. 
+        
+Disclaimer: This information is for educational purposes only and is not a substitute for professional medical advice. Please consult with your healthcare provider for any personal health concerns.`
+    }
+}
+
 export async function askPregnancyQuestion(input: AskPregnancyQuestionInput): Promise<AskPregnancyQuestionOutput> {
-  return askPregnancyQuestionFlow(input);
+  try {
+    const result = await askPregnancyQuestionFlow(input);
+    return result;
+  } catch (error) {
+    console.error("AI question answering for pregnancy failed, providing fallback.", error);
+    return getFallbackAnswer();
+  }
 }
 
 const prompt = ai.definePrompt({

@@ -29,8 +29,45 @@ const GetPregnancyAdviceOutputSchema = z.object({
 });
 export type GetPregnancyAdviceOutput = z.infer<typeof GetPregnancyAdviceOutputSchema>;
 
+const getFallbackAdvice = (week: number): GetPregnancyAdviceOutput => {
+    let trimester = 1;
+    if (week >= 28) trimester = 3;
+    else if (week >= 14) trimester = 2;
+    
+    return {
+        trimester,
+        babyDevelopment: "The AI assistant is currently unavailable to provide personalized developmental milestones. Generally, this is a period of significant growth. Please consult your healthcare provider for specific information.",
+        momChanges: "Changes for the mother vary greatly. Common experiences include shifts in energy levels and body shape. For details specific to your situation, please speak with your doctor.",
+        nutritionTips: [
+            "Stay hydrated by drinking plenty of water.",
+            "Focus on a balanced diet with fruits, vegetables, and lean proteins.",
+            "Ensure you are taking a prenatal vitamin as prescribed by your doctor."
+        ],
+        vaccineInfo: "Vaccine recommendations (like the flu shot or Tdap) depend on the time of year and your specific stage of pregnancy. Your healthcare provider will give you the best advice.",
+        generalTips: [
+            "Listen to your body and get adequate rest.",
+            "Engage in light to moderate exercise as approved by your doctor.",
+            "Keep all your prenatal appointments."
+        ],
+        teratogenicityInfo: "Teratogens are substances that can cause birth defects. Exposure is most critical during the first trimester. Examples include alcohol, certain medications, and infections. This information is for educational purposes only. Always consult your healthcare provider about your specific situation and before taking any medication.",
+        medicinesToAvoid: [
+            "The following is a general, non-exhaustive list. YOU MUST consult your doctor before taking, stopping, or changing any medication.",
+            "Ibuprofen is often discouraged, especially in the third trimester.",
+            "Certain acne medications like Isotretinoin are known to be harmful.",
+            "Some decongestants may not be recommended. Always check with your doctor first."
+        ]
+    }
+}
+
+
 export async function getPregnancyAdvice(input: GetPregnancyAdviceInput): Promise<GetPregnancyAdviceOutput> {
-  return getPregnancyAdviceFlow(input);
+  try {
+    const result = await getPregnancyAdviceFlow(input);
+    return result;
+  } catch (error) {
+    console.error("AI advice for pregnancy failed, providing fallback.", error);
+    return getFallbackAdvice(input.gestationalWeek);
+  }
 }
 
 const prompt = ai.definePrompt({
