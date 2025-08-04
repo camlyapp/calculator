@@ -10,6 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
+import { calculateMonthlyPayment } from '@/lib/loan-utils';
 import {z} from 'genkit';
 
 const SuggestLoanOptimizationsInputSchema = z.object({
@@ -37,16 +38,25 @@ const SuggestLoanOptimizationsOutputSchema = z.object({
 });
 export type SuggestLoanOptimizationsOutput = z.infer<typeof SuggestLoanOptimizationsOutputSchema>;
 
-// Fallback function in case the AI call fails
+// Enhanced fallback function that uses the input
 const getFallbackSuggestions = (input: SuggestLoanOptimizationsInput): SuggestLoanOptimizationsOutput => {
+    const monthlyPayment = calculateMonthlyPayment(input.loanAmount, input.interestRate * 100, input.loanTermMonths / 12);
+    const disposableIncome = input.monthlyIncome - input.monthlyExpenses - monthlyPayment;
+
     const suggestions = [
         "Consider making bi-weekly payments instead of monthly. This results in one extra monthly payment per year, accelerating your loan payoff.",
-        "Round up your monthly payments. Even an extra $50 per month can significantly reduce the total interest paid over the life of the loan.",
-        "Explore refinancing options if current interest rates are lower than your loan's rate. A lower rate can lead to substantial savings.",
-        "Review your budget to identify areas where you can cut back on expenses. The saved money can be applied as extra payments towards your loan principal."
+        "Round up your monthly payments. Even a small extra amount each month can significantly reduce the total interest paid over the life of the loan.",
     ];
+    
+    if (disposableIncome > 200) { // Arbitrary threshold for suggesting extra payments
+        suggestions.push(`With an estimated disposable income of around $${disposableIncome.toFixed(0)}, consider applying an extra $100-$200 towards your principal each month to pay off the loan faster.`);
+    }
 
-    const rationale = `These are general financial best practices for loan optimization. For personalized advice, please ensure your environment is configured for AI suggestions. The AI considers your specific income, expenses, and risk tolerance to provide tailored strategies.`;
+    if (input.interestRate > 0.06) { // Arbitrary threshold for suggesting refinance
+        suggestions.push("Explore refinancing options. If current market rates are lower than your loan's rate, a new loan could lead to substantial savings.");
+    }
+
+    const rationale = `These are general financial best practices for loan optimization. For personalized advice tailored to your risk tolerance and financial goals, please ensure your environment is configured for AI suggestions.`;
 
     return { suggestions, rationale };
 }
@@ -58,6 +68,7 @@ export async function suggestLoanOptimizations(input: SuggestLoanOptimizationsIn
     return result;
   } catch (error) {
     console.error("AI suggestions failed, providing fallback.", error);
+    // Use the new, more dynamic fallback
     return getFallbackSuggestions(input);
   }
 }
@@ -68,21 +79,28 @@ const prompt = ai.definePrompt({
   output: {schema: SuggestLoanOptimizationsOutputSchema},
   prompt: `You are an AI-powered financial advisor specializing in loan optimization.
 
-  Based on the user's loan details and financial situation, provide a list of actionable suggestions to help them save money and pay off their loan faster. Explain why each suggestion was made.
+  Analyze the user's financial situation and provide a list of actionable suggestions to help them save money and pay off their loan faster. Explain why each suggestion was made.
 
-  Loan Amount: {{{loanAmount}}}
-  Interest Rate: {{{interestRate}}}
-  Loan Term (Months): {{{loanTermMonths}}}
-  Monthly Income: {{{monthlyIncome}}}
-  Monthly Expenses: {{{monthlyExpenses}}}
-  Risk Tolerance: {{{riskTolerance}}}
-  Financial Goals: {{{financialGoals}}}
+  User's Financial Profile:
+  - Loan Amount: \${{{loanAmount}}}
+  - Interest Rate: {{multiply interestRate 100}}%
+  - Loan Term: {{divide loanTermMonths 12}} years
+  - Monthly Income: \${{{monthlyIncome}}}
+  - Monthly Expenses: \${{{monthlyExpenses}}}
+  - Stated Risk Tolerance: {{{riskTolerance}}}
+  - Stated Financial Goals: "{{{financialGoals}}}"
 
-  Consider strategies such as making extra payments, exploring options for refinancing, or adjusting the loan term.
+  Calculated Metrics (for your reference):
+  - Estimated Monthly Payment: \${{{@root.monthlyPayment}}}
+  - Debt-to-Income (DTI) Ratio: {{@root.dti}}% (This is based on provided expenses, excluding the new loan payment)
+  - Disposable Income (after expenses and loan payment): \${{{@root.disposableIncome}}}
 
-  Provide each suggestion with a clear rationale.
+  Your Task:
+  - Generate 3-5 clear, actionable suggestions.
+  - Base your suggestions on all the data provided, especially their risk tolerance and financial goals. For example, if risk tolerance is high and the goal is to be debt-free, suggest aggressive extra payments. If risk is low, suggest smaller, consistent extra payments.
+  - Provide a concise rationale explaining *why* you are making these suggestions, linking them back to the user's specific situation.
 
-  Output your suggestions in the requested JSON format, as a list of strings.
+  Output your response in the requested JSON format.
   `,
 });
 
@@ -92,8 +110,20 @@ const suggestLoanOptimizationsFlow = ai.defineFlow(
     inputSchema: SuggestLoanOptimizationsInputSchema,
     outputSchema: SuggestLoanOptimizationsOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // Perform calculations to enrich the prompt context
+    const monthlyPayment = calculateMonthlyPayment(input.loanAmount, input.interestRate * 100, input.loanTermMonths / 12);
+    const dti = input.monthlyIncome > 0 ? ((input.monthlyExpenses) / input.monthlyIncome) * 100 : 0;
+    const disposableIncome = input.monthlyIncome - input.monthlyExpenses - monthlyPayment;
+
+    const promptInput = {
+      ...input,
+      monthlyPayment: monthlyPayment.toFixed(2),
+      dti: dti.toFixed(2),
+      disposableIncome: disposableIncome.toFixed(2),
+    };
+
+    const {output} = await prompt(promptInput);
     return output!;
   }
 );
