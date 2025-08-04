@@ -1,11 +1,17 @@
 
 "use client";
 
-import { BrainCircuit, CalendarDays, HeartPulse, Sparkles } from 'lucide-react';
+import { BrainCircuit, CalendarDays, HeartPulse, Landmark, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 
 const calculatorPages = [
+    {
+        href: '/',
+        label: 'Financial',
+        icon: Landmark,
+        description: 'Calculate loans, mortgages, investments, and plan your financial future with our powerful tools.',
+    },
     {
         href: '/personal-health-calculators',
         label: 'Personal & Health',
@@ -36,7 +42,7 @@ const AllCalculators = () => {
     return (
         <Card className="w-full mt-6 shadow-none border-none bg-transparent hidden sm:block">
             <CardContent className="p-0">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                     {calculatorPages.map((page) => {
                         const Icon = page.icon;
                         return (
