@@ -12,10 +12,10 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 const navLinks = [
-    { href: '/', label: 'Financial' },
+    { href: '/personal-health-calculators', label: 'Personal & Health' },
     { href: '/math-science-calculators', label: 'Math & Science' },
     { href: '/date-time-calculators', label: 'Date & Time' },
-    { href: '/personal-health-calculators', label: 'Personal & Health' },
+    { href: '/', label: 'Financial' },
     { href: '/other-specialized-calculators', label: 'Other' },
 ];
 
