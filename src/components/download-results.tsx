@@ -29,16 +29,16 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
 
     const elementToCapture = resultsRef.current;
     
-    // Temporarily add timestamp
-    const timestampElement = document.createElement('div');
+    // Temporarily add timestamp and website link
+    const footerElement = document.createElement('div');
     const now = new Date();
-    timestampElement.innerText = `Generated from camly.d5867.web.app on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
-    timestampElement.style.padding = '10px';
-    timestampElement.style.marginTop = '20px';
-    timestampElement.style.textAlign = 'center';
-    timestampElement.style.fontSize = '12px';
-    timestampElement.style.color = 'gray';
-    elementToCapture.appendChild(timestampElement);
+    footerElement.innerText = `Generated from calput.vercel.app on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
+    footerElement.style.padding = '10px';
+    footerElement.style.marginTop = '20px';
+    footerElement.style.textAlign = 'center';
+    footerElement.style.fontSize = '12px';
+    footerElement.style.color = 'gray';
+    elementToCapture.appendChild(footerElement);
 
     let capturedCanvas;
     try {
@@ -48,7 +48,7 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
             backgroundColor: null, // Transparent background to handle padding correctly
         });
     } finally {
-        elementToCapture.removeChild(timestampElement);
+        elementToCapture.removeChild(footerElement);
     }
     
     // Create a new canvas with padding
@@ -86,7 +86,7 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
         const shareData = {
                 title: 'Camly Calculation Results',
                 text: 'Check out my financial calculation from Camly!',
-                url: 'https://camly.d5867.web.app',
+                url: 'https://calput.vercel.app',
                 files: [file],
             };
         
