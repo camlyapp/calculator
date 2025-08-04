@@ -36,19 +36,7 @@ const CalculateIndianTaxOutputSchema = z.object({
 });
 export type CalculateIndianTaxOutput = z.infer<typeof CalculateIndianTaxOutputSchema>;
 
-
-export async function calculateIndianTax(input: CalculateIndianTaxInput): Promise<CalculateIndianTaxOutput> {
-  return calculateIndianTaxFlow(input);
-}
-
-
-const calculateIndianTaxFlow = ai.defineFlow(
-  {
-    name: 'calculateIndianTaxFlow',
-    inputSchema: CalculateIndianTaxInputSchema,
-    outputSchema: CalculateIndianTaxOutputSchema,
-  },
-  async (input) => {
+const performTaxCalculation = (input: CalculateIndianTaxInput): CalculateIndianTaxOutput => {
     const { grossIncome, otherIncome, deduction80C, deduction80D, homeLoanInterest, taxRegime } = input;
     
     const totalIncome = grossIncome + otherIncome;
@@ -151,5 +139,20 @@ const calculateIndianTaxFlow = ai.defineFlow(
         effectiveRate: grossIncome > 0 ? (totalTax / totalIncome) * 100 : 0,
         breakdown,
     };
+};
+
+export async function calculateIndianTax(input: CalculateIndianTaxInput): Promise<CalculateIndianTaxOutput> {
+  return performTaxCalculation(input);
+}
+
+
+const calculateIndianTaxFlow = ai.defineFlow(
+  {
+    name: 'calculateIndianTaxFlow',
+    inputSchema: CalculateIndianTaxInputSchema,
+    outputSchema: CalculateIndianTaxOutputSchema,
+  },
+  async (input) => {
+    return performTaxCalculation(input);
   }
 );
