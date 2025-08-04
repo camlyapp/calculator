@@ -137,34 +137,38 @@ const BudgetCalculator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {incomeFields.map((field, index) => (
-                    <div key={field.id} className="flex gap-4 items-start">
-                      <FormField
-                        control={form.control}
-                        name={`incomes.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem className="flex-grow">
-                            <FormControl>
-                              <Input placeholder="Description" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`incomes.${index}.amount`}
-                        render={({ field }) => (
-                           <FormItem>
-                            <FormControl>
-                              <Input type="number" placeholder="Amount" {...field} className="w-32" />
-                            </FormControl>
-                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="button" variant="destructive" size="icon" onClick={() => removeIncome(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                    <div key={field.id} className="grid grid-cols-2 sm:grid-cols-[1fr_auto_auto] gap-2 items-start p-2 border rounded-lg">
+                      <div className="col-span-2 sm:col-span-1 grid grid-cols-2 gap-2">
+                        <FormField
+                          control={form.control}
+                          name={`incomes.${index}.description`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input placeholder="Description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name={`incomes.${index}.amount`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input type="number" placeholder="Amount" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <div className="col-span-2 sm:col-span-1 sm:justify-self-end">
+                        <Button type="button" variant="destructive" size="icon" onClick={() => removeIncome(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
@@ -182,46 +186,50 @@ const BudgetCalculator = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {expenseFields.map((field, index) => (
-                    <div key={field.id} className="flex gap-4 items-start">
-                       <FormField
-                        control={form.control}
-                        name={`expenses.${index}.category`}
-                        render={({ field }) => (
-                           <FormItem className="w-40">
-                             <select {...field} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                                {expenseCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                             </select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`expenses.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem className="flex-grow">
-                            <FormControl>
-                              <Input placeholder="Description" {...field} />
-                            </FormControl>
-                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name={`expenses.${index}.amount`}
-                        render={({ field }) => (
-                           <FormItem>
-                            <FormControl>
-                              <Input type="number" placeholder="Amount" {...field} className="w-28" />
-                            </FormControl>
-                             <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <Button type="button" variant="destructive" size="icon" onClick={() => removeExpense(index)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                     <div key={field.id} className="grid grid-cols-2 sm:grid-cols-[auto_1fr_auto_auto] gap-2 items-start p-2 border rounded-lg">
+                        <FormField
+                          control={form.control}
+                          name={`expenses.${index}.category`}
+                          render={({ field }) => (
+                            <FormItem className="col-span-2 sm:col-span-1">
+                              <select {...field} className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                                  {expenseCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                              </select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      <div className="col-span-2 sm:col-span-1 grid grid-cols-2 gap-2">
+                          <FormField
+                          control={form.control}
+                          name={`expenses.${index}.description`}
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormControl>
+                                  <Input placeholder="Description" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                          />
+                          <FormField
+                          control={form.control}
+                          name={`expenses.${index}.amount`}
+                          render={({ field }) => (
+                              <FormItem>
+                              <FormControl>
+                                  <Input type="number" placeholder="Amount" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                              </FormItem>
+                          )}
+                          />
+                      </div>
+                       <div className="col-span-2 sm:col-span-1 sm:justify-self-end">
+                        <Button type="button" variant="destructive" size="icon" onClick={() => removeExpense(index)}>
+                            <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </CardContent>
