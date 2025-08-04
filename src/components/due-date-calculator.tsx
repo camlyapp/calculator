@@ -151,7 +151,7 @@ const DueDateCalculator = () => {
         if(askQuestionState.error) {
              toast({
                 variant: "destructive",
-                title: "Error",
+                title: "Error Asking AI",
                 description: askQuestionState.error,
             })
         }
@@ -171,15 +171,25 @@ const DueDateCalculator = () => {
             const response = await getPregnancyAdviceAction(week);
             if (response.advice) {
                 setAiAdvice(response.advice);
-            } else {
+            } else if (response.error) {
                 console.error(response.error);
+                 toast({
+                    variant: "destructive",
+                    title: "Error",
+                    description: response.error,
+                })
             }
         } catch (error) {
             console.error("Failed to fetch pregnancy advice:", error);
+             toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not fetch weekly advice.",
+            })
         } finally {
             setIsLoadingAdvice(false);
         }
-    }, []);
+    }, [toast]);
 
     const calculateDueDate = useCallback(() => {
         if (!isMounted) return;
