@@ -44,7 +44,7 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
     try {
         capturedCanvas = await html2canvas(elementToCapture, {
             useCORS: true,
-            scale: 2,
+            scale: 3,
             backgroundColor: null, // Transparent background to handle padding correctly
         });
     } finally {
