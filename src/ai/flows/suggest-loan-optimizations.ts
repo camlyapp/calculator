@@ -37,8 +37,29 @@ const SuggestLoanOptimizationsOutputSchema = z.object({
 });
 export type SuggestLoanOptimizationsOutput = z.infer<typeof SuggestLoanOptimizationsOutputSchema>;
 
+// Fallback function in case the AI call fails
+const getFallbackSuggestions = (input: SuggestLoanOptimizationsInput): SuggestLoanOptimizationsOutput => {
+    const suggestions = [
+        "Consider making bi-weekly payments instead of monthly. This results in one extra monthly payment per year, accelerating your loan payoff.",
+        "Round up your monthly payments. Even an extra $50 per month can significantly reduce the total interest paid over the life of the loan.",
+        "Explore refinancing options if current interest rates are lower than your loan's rate. A lower rate can lead to substantial savings.",
+        "Review your budget to identify areas where you can cut back on expenses. The saved money can be applied as extra payments towards your loan principal."
+    ];
+
+    const rationale = `These are general financial best practices for loan optimization. For personalized advice, please ensure your environment is configured for AI suggestions. The AI considers your specific income, expenses, and risk tolerance to provide tailored strategies.`;
+
+    return { suggestions, rationale };
+}
+
+
 export async function suggestLoanOptimizations(input: SuggestLoanOptimizationsInput): Promise<SuggestLoanOptimizationsOutput> {
-  return suggestLoanOptimizationsFlow(input);
+  try {
+    const result = await suggestLoanOptimizationsFlow(input);
+    return result;
+  } catch (error) {
+    console.error("AI suggestions failed, providing fallback.", error);
+    return getFallbackSuggestions(input);
+  }
 }
 
 const prompt = ai.definePrompt({
