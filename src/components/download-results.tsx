@@ -28,27 +28,45 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
     if (!resultsRef.current) throw new Error("Result container not found.");
 
     const elementToCapture = resultsRef.current;
+    
+    // Temporarily add timestamp
     const timestampElement = document.createElement('div');
     const now = new Date();
-    timestampElement.innerText = `Generated on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
+    timestampElement.innerText = `Generated from camly.d5867.web.app on: ${now.toLocaleDateString()} at ${now.toLocaleTimeString()}`;
     timestampElement.style.padding = '10px';
     timestampElement.style.marginTop = '20px';
     timestampElement.style.textAlign = 'center';
     timestampElement.style.fontSize = '12px';
     timestampElement.style.color = 'gray';
-
     elementToCapture.appendChild(timestampElement);
 
+    let capturedCanvas;
     try {
-        const canvas = await html2canvas(elementToCapture, {
+        capturedCanvas = await html2canvas(elementToCapture, {
             useCORS: true,
             scale: 2,
-            backgroundColor: null,
+            backgroundColor: null, // Transparent background to handle padding correctly
         });
-        return canvas;
     } finally {
         elementToCapture.removeChild(timestampElement);
     }
+    
+    // Create a new canvas with padding
+    const padding = 20;
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = capturedCanvas.width + padding * 2;
+    newCanvas.height = capturedCanvas.height + padding * 2;
+    const ctx = newCanvas.getContext('2d');
+
+    if (ctx) {
+        // Fill background for padding
+        ctx.fillStyle = getComputedStyle(document.body).getPropertyValue('background-color') || '#ffffff';
+        ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+        // Draw the captured canvas onto the new canvas
+        ctx.drawImage(capturedCanvas, padding, padding);
+    }
+
+    return newCanvas;
   };
 
   const handleShare = async () => {
@@ -65,13 +83,15 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
         }
 
         const file = new File([blob], `${fileName}.png`, { type: 'image/png' });
-        
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-            await navigator.share({
-                title: 'Calculation Results',
+        const shareData = {
+                title: 'Camly Calculation Results',
                 text: 'Check out my financial calculation from Camly!',
+                url: 'https://camly.d5867.web.app',
                 files: [file],
-            });
+            };
+        
+        if (navigator.canShare && navigator.canShare(shareData)) {
+            await navigator.share(shareData);
         } else {
             toast({
                 title: "Share Not Supported",
@@ -104,16 +124,12 @@ const DownloadResults = ({ resultsRef, fileName }: DownloadResultsProps) => {
 
       if (format === 'pdf') {
         const imgData = canvas.toDataURL('image/png');
-        const margin = 20;
-        const pdfWidth = canvas.width + margin * 2;
-        const pdfHeight = canvas.height + margin * 2;
-        
         const pdf = new jsPDF({
-          orientation: 'portrait',
+          orientation: canvas.width > canvas.height ? 'landscape' : 'portrait',
           unit: 'px',
-          format: [pdfWidth, pdfHeight],
+          format: [canvas.width, canvas.height],
         });
-        pdf.addImage(imgData, 'PNG', margin, margin, canvas.width, canvas.height);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
         pdf.save(`${fileName}.pdf`);
       } else {
         const image = canvas.toDataURL(`image/${format}`, 1.0);
