@@ -40,8 +40,38 @@ const calculateRemainingBalance = (originalAmount: number, annualRate: number, o
     if (paymentsMadeMonths >= schedule.length || paymentsMadeMonths <= 0) {
         return originalAmount; // Return original amount if no payments made or loan is over
     }
+    // Correctly access the remaining balance from the *previous* period.
     return schedule[paymentsMadeMonths - 1].remainingBalance;
 };
+
+// Fallback function in case the AI call fails
+const getFallbackAnalysis = (lifetimeSavings: number, newMonthlyPayment: number, currentMonthlyPayment: number): Omit<AnalyzeRefinanceOutput, 'lifetimeSavings'|'currentMonthlyPayment'|'newMonthlyPayment'> => {
+    const isRecommended = lifetimeSavings > 0;
+    const recommendation = isRecommended ? "Recommended" : "Not Recommended";
+    
+    const pros = [];
+    if (newMonthlyPayment < currentMonthlyPayment) {
+        pros.push(`a lower monthly payment of about $${newMonthlyPayment.toFixed(2)}`);
+    }
+    if (lifetimeSavings > 0) {
+        pros.push(`total lifetime savings of about $${lifetimeSavings.toFixed(2)}`);
+    }
+
+    const cons = [];
+    if (newMonthlyPayment > currentMonthlyPayment) {
+        cons.push(`a higher monthly payment`);
+    }
+
+    const detailedAnalysis = `Based on the numbers, refinancing is **${recommendation.toLowerCase()}**.
+    
+Pros: This new loan offers ${pros.length > 0 ? pros.join(' and ') : 'no clear advantages'}.
+Cons: You should be aware of ${cons.length > 0 ? cons.join(' and ') : 'no clear disadvantages'}.
+
+This analysis is based on a direct calculation. For a more detailed, qualitative review, please ensure your environment is configured for AI suggestions.`;
+
+    return { isRecommended, recommendation, detailedAnalysis };
+};
+
 
 export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<AnalyzeRefinanceOutput> {
     const paymentsMade = input.loanAge * 12;
@@ -62,8 +92,9 @@ export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<An
       input.currentLoanTerm,
       0
     );
-    const remainingPayments = currentSchedule.slice(paymentsMade);
-    const remainingCurrentCost = remainingPayments.reduce((sum, row) => sum + row.totalPayment, 0);
+
+    const remainingPaymentsCount = (input.currentLoanTerm * 12) - paymentsMade;
+    const remainingCurrentCost = currentMonthlyPayment * remainingPaymentsCount;
     
     // Calculate total cost of new loan
     const { schedule: newSchedule, monthlyPayment: newMonthlyPayment } = generateAmortizationSchedule(
@@ -72,7 +103,7 @@ export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<An
       input.newLoanTerm,
       0
     );
-    const totalNewCost = newSchedule.reduce((sum, row) => sum + row.totalPayment, 0);
+    const totalNewCost = newMonthlyPayment * (input.newLoanTerm * 12);
 
     const lifetimeSavings = remainingCurrentCost - totalNewCost;
 
@@ -90,7 +121,14 @@ export async function analyzeRefinance(input: AnalyzeRefinanceInput): Promise<An
         lifetimeSavings,
     };
     
-    const aiAnalysis = await analyzeRefinanceFlow(analysisInput);
+    let aiAnalysis;
+    try {
+        aiAnalysis = await analyzeRefinanceFlow(analysisInput);
+    } catch (error) {
+        console.error("AI analysis for refinancing failed, providing fallback.", error);
+        aiAnalysis = getFallbackAnalysis(lifetimeSavings, newMonthlyPayment, currentMonthlyPayment);
+    }
+
 
     return {
         ...aiAnalysis,
