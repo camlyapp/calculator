@@ -40,19 +40,19 @@ import { Label } from './ui/label';
 import { useCurrency } from '@/context/currency-context';
 
 const chartConfig = {
-  "Principal & Interest": {
+  principalAndInterest: {
     label: "Principal & Interest",
     color: "hsl(var(--primary))",
   },
-  "Property Tax": {
+  propertyTax: {
     label: "Property Tax",
     color: "hsl(var(--chart-2))",
   },
-  "Home Insurance": {
+  homeInsurance: {
     label: "Home Insurance",
     color: "hsl(var(--chart-3))",
   },
-  "HOA Dues": {
+  hoaDues: {
     label: "HOA Dues",
     color: "hsl(var(--chart-4))",
   },
@@ -64,7 +64,7 @@ const chartConfig = {
     label: 'Interest',
     color: 'hsl(var(--accent))',
   },
-};
+} satisfies ChartConfig;
 
 const MortgageCalculator = () => {
   const [result, setResult] = useState<CalculationResult | null>(null);
@@ -151,10 +151,10 @@ const MortgageCalculator = () => {
   }
 
   const pieChartData = result ? [
-    { name: 'Principal & Interest', value: result.principalAndInterest, fill: 'var(--color-Principal & Interest)' },
-    { name: 'Property Tax', value: result.propertyTax, fill: 'var(--color-Property Tax)' },
-    { name: 'Home Insurance', value: result.homeInsurance, fill: 'var(--color-Home Insurance)' },
-    { name: 'HOA Dues', value: result.hoaDues, fill: 'var(--color-HOA Dues)' },
+    { name: 'principalAndInterest', value: result.principalAndInterest, fill: 'var(--color-principalAndInterest)' },
+    { name: 'propertyTax', value: result.propertyTax, fill: 'var(--color-propertyTax)' },
+    { name: 'homeInsurance', value: result.homeInsurance, fill: 'var(--color-homeInsurance)' },
+    { name: 'hoaDues', value: result.hoaDues, fill: 'var(--color-hoaDues)' },
   ].filter(item => item.value > 0) : [];
 
   return (
@@ -285,7 +285,7 @@ const MortgageCalculator = () => {
                       className="mx-auto aspect-square h-[250px] w-full"
                     >
                       <PieChart>
-                        <ChartTooltipContent hideLabel formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
+                        <ChartTooltipContent hideLabel nameKey="name" formatter={(value, name) => <div>{(chartConfig as any)[name]?.label}: {formatCurrency(value as number)}</div>} />
                         <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
                             {pieChartData.map((entry) => (
                                 <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
