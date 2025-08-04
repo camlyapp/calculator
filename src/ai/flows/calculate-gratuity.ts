@@ -22,19 +22,7 @@ const CalculateGratuityOutputSchema = z.object({
 });
 export type CalculateGratuityOutput = z.infer<typeof CalculateGratuityOutputSchema>;
 
-
-export async function calculateGratuity(input: CalculateGratuityInput): Promise<CalculateGratuityOutput> {
-  return calculateGratuityFlow(input);
-}
-
-
-const calculateGratuityFlow = ai.defineFlow(
-  {
-    name: 'calculateGratuityFlow',
-    inputSchema: CalculateGratuityInputSchema,
-    outputSchema: CalculateGratuityOutputSchema,
-  },
-  async (input) => {
+const performGratuityCalculation = (input: CalculateGratuityInput): CalculateGratuityOutput => {
     const { monthlySalary, yearsOfService } = input;
     
     // The number of years is rounded up to the nearest integer if the service period is more than 6 months.
@@ -49,5 +37,20 @@ const calculateGratuityFlow = ai.defineFlow(
     return {
         gratuityAmount: finalGratuity
     };
+};
+
+export async function calculateGratuity(input: CalculateGratuityInput): Promise<CalculateGratuityOutput> {
+  return performGratuityCalculation(input);
+}
+
+
+const calculateGratuityFlow = ai.defineFlow(
+  {
+    name: 'calculateGratuityFlow',
+    inputSchema: CalculateGratuityInputSchema,
+    outputSchema: CalculateGratuityOutputSchema,
+  },
+  async (input) => {
+    return performGratuityCalculation(input);
   }
 );
