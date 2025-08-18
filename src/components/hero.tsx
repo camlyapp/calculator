@@ -2,9 +2,35 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, BrainCircuit, Calculator, CalendarDays, HeartPulse, Landmark, Sparkles } from 'lucide-react';
+
+const iconSections = [
+    {
+        icon: <Landmark className="h-10 w-10 text-primary" />,
+        label: "Financial",
+    },
+    {
+        icon: <HeartPulse className="h-10 w-10 text-primary" />,
+        label: "Health",
+    },
+     {
+        icon: <BrainCircuit className="h-10 w-10 text-primary" />,
+        label: "Math & Science",
+    },
+     {
+        icon: <CalendarDays className="h-10 w-10 text-primary" />,
+        label: "Date & Time",
+    },
+     {
+        icon: <Sparkles className="h-10 w-10 text-primary" />,
+        label: "Other Tools",
+    },
+     {
+        icon: <Calculator className="h-10 w-10 text-primary" />,
+        label: "Calculators",
+    },
+]
 
 const Hero = () => {
   return (
@@ -29,14 +55,16 @@ const Hero = () => {
               </Button>
             </div>
           </div>
-           <Image
-            src="https://placehold.co/600x400.png"
-            data-ai-hint="finance abstract"
-            width="600"
-            height="400"
-            alt="Hero"
-            className="mx-auto aspect-video overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
-          />
+           <div className="mx-auto lg:order-last">
+            <div className="grid grid-cols-3 gap-4">
+              {iconSections.map(section => (
+                <div key={section.label} className="flex flex-col items-center justify-center p-4 sm:p-6 bg-secondary/50 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300">
+                    {section.icon}
+                    <p className="mt-2 text-xs sm:text-sm font-semibold text-center">{section.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
