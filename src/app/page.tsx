@@ -53,7 +53,7 @@ const calculatorTabs = [
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('suggestions');
+  const [activeTab, setActiveTab] = useState('calculator');
 
   return (
     <>
