@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BodySurfaceAreaCalculator from '@/components/body-surface-area-calculator';
 import CarbonFootprintCalculator from '@/components/carbon-footprint-calculator';
 import CookingConverter from '@/components/cooking-converter';
@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
+import { useSearchParams } from 'next/navigation';
 
 const calculatorTabs = [
     { value: 'bsa', label: 'Body Surface Area' },
@@ -26,7 +27,15 @@ const calculatorTabs = [
 
 
 export default function OtherSpecializedCalculators() {
-  const [activeTab, setActiveTab] = useState('body-surface-area');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tab || 'body-surface-area');
+
+  useEffect(() => {
+    if (tab && calculatorTabs.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
   
   return (
     <>

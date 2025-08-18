@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/header';
 import BasicCalculator from '@/components/basic-calculator';
 import ScientificCalculator from '@/components/scientific-calculator';
@@ -21,6 +21,7 @@ import DiscountCalculator from '@/components/discount-calculator';
 import MarkupMarginCalculator from '@/components/markup-margin-calculator';
 import BreakEvenCalculator from '@/components/break-even-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
+import { useSearchParams } from 'next/navigation';
 
 const calculatorTabs = [
     { value: 'algebra', label: 'Algebra' },
@@ -39,7 +40,15 @@ const calculatorTabs = [
 ];
 
 export default function MathScienceCalculators() {
-  const [activeTab, setActiveTab] = useState('algebra');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tab || 'algebra');
+
+  useEffect(() => {
+    if (tab && calculatorTabs.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   return (
     <>

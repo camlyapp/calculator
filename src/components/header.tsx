@@ -10,6 +10,7 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import Image from 'next/image';
+import { SearchCommand } from './search-command';
 
 const navLinks = [
     { href: '/personal-health-calculators', label: 'Personal & Health' },
@@ -35,6 +36,7 @@ const Header = () => {
           </Link>
           
           <div className="flex items-center gap-2">
+             <SearchCommand />
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AgeCalculator from '@/components/age-calculator';
 import BMICalculator from '@/components/bmi-calculator';
 import BmrCalculator from '@/components/bmr-calculator';
@@ -19,6 +19,7 @@ import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import CreatinineClearanceCalculator from '@/components/creatinine-clearance-calculator';
 import EgfrCalculator from '@/components/egfr-calculator';
+import { useSearchParams } from 'next/navigation';
 
 const calculatorTabs = [
     { value: 'age', label: 'Age' },
@@ -35,7 +36,15 @@ const calculatorTabs = [
 ];
 
 export default function PersonalHealthCalculators() {
-  const [activeTab, setActiveTab] = useState('due-date');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tab || 'due-date');
+
+  useEffect(() => {
+    if (tab && calculatorTabs.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   return (
     <>

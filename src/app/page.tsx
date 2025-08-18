@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BudgetCalculator from '@/components/budget-calculator';
 import CompoundInterestCalculator from '@/components/compound-interest-calculator';
 import GstCalculator from '@/components/gst-calculator';
@@ -29,6 +29,7 @@ import GratuityCalculator from '@/components/gratuity-calculator';
 import RoiCalculator from '@/components/roi-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import Hero from '@/components/hero';
+import { useSearchParams } from 'next/navigation';
 
 const calculatorTabs = [
     { value: 'suggestions', label: 'AI Suggestions' },
@@ -54,7 +55,15 @@ const calculatorTabs = [
 ];
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('calculator');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tab || 'calculator');
+
+  useEffect(() => {
+    if (tab && calculatorTabs.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
 
   return (
     <>

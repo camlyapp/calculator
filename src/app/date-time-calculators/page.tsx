@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '@/components/header';
 import DateCalculator from '@/components/date-calculator';
 import TimeCalculator from '@/components/time-calculator';
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
+import { useSearchParams } from 'next/navigation';
 
 const calculatorTabs = [
     { value: 'add-subtract-days', label: 'Add/Subtract Days' },
@@ -23,7 +24,16 @@ const calculatorTabs = [
 ];
 
 export default function DateTimeCalculators() {
-  const [activeTab, setActiveTab] = useState('add-subtract-days');
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(tab || 'add-subtract-days');
+
+  useEffect(() => {
+    if (tab && calculatorTabs.some(t => t.value === tab)) {
+      setActiveTab(tab);
+    }
+  }, [tab]);
+
 
   return (
     <>
