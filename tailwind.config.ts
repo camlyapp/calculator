@@ -84,11 +84,17 @@ export default {
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
+         'border-spin': {
+          '100%': {
+            transform: 'translate(-50%, -50%) rotate(360deg)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'rainbow-glow': 'rainbow-glow 4s ease-in-out infinite',
+        'rainbow-glow': 'rainbow-glow 4s linear infinite',
+        'border-spin': 'border-spin 4s linear infinite',
       },
     },
   },

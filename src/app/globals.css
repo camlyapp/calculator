@@ -67,3 +67,36 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .animated-border-box {
+    @apply relative overflow-hidden;
+  }
+
+  .animated-border-box::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 200%;
+    background-repeat: no-repeat;
+    background-size: 50% 50%, 50% 50%;
+    background-position: 0 0, 100% 0, 100% 100%, 0 100%;
+    background-image: linear-gradient(theme(colors.primary.DEFAULT), theme(colors.primary.DEFAULT)),
+      linear-gradient(theme(colors.accent.DEFAULT), theme(colors.accent.DEFAULT)),
+      linear-gradient(theme(colors.primary.DEFAULT), theme(colors.primary.DEFAULT)),
+      linear-gradient(theme(colors.accent.DEFAULT), theme(colors.accent.DEFAULT));
+    animation: border-spin 4s linear infinite;
+    transform-origin: center center;
+    transform: translate(-50%, -50%);
+    z-index: -1;
+  }
+
+  .dark .animated-border-box::before {
+     background-image: linear-gradient(theme(colors.primary.DEFAULT), theme(colors.primary.DEFAULT)),
+      linear-gradient(theme(colors.accent.DEFAULT), theme(colors.accent.DEFAULT)),
+      linear-gradient(theme(colors.primary.DEFAULT), theme(colors.primary.DEFAULT)),
+      linear-gradient(theme(colors.accent.DEFAULT), theme(colors.accent.DEFAULT));
+  }
+}
