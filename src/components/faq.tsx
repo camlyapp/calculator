@@ -7,8 +7,7 @@ import type { GenerateFaqOutput } from "@/ai/flows/generate-faq";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "./ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import { Skeleton } from "./ui/skeleton";
-import { AlertCircle, HelpCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { HelpCircle } from "lucide-react";
 
 interface FaqProps {
     calculatorName: string;
@@ -17,24 +16,17 @@ interface FaqProps {
 const Faq = ({ calculatorName }: FaqProps) => {
     const [faqData, setFaqData] = useState<GenerateFaqOutput | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchFaqs = async () => {
             setIsLoading(true);
-            setError(null);
-            try {
-                const response = await generateFaqAction(calculatorName);
-                if (response.faqs) {
-                    setFaqData(response.faqs);
-                } else if (response.error) {
-                    setError(response.error);
-                }
-            } catch (err) {
-                setError("An unexpected error occurred while fetching FAQs.");
-            } finally {
-                setIsLoading(false);
+            const response = await generateFaqAction(calculatorName);
+            if (response.faqs) {
+                setFaqData(response.faqs);
             }
+            // Even if there's an error in the action, the flow now provides a fallback,
+            // so we don't need to handle the error state here explicitly.
+            setIsLoading(false);
         };
 
         fetchFaqs();
@@ -56,16 +48,6 @@ const Faq = ({ calculatorName }: FaqProps) => {
         );
     }
     
-    if (error) {
-         return (
-             <Alert variant="destructive" className="mt-8">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-            </Alert>
-        )
-    }
-
     if (!faqData || faqData.faqs.length === 0) {
         return null;
     }

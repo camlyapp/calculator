@@ -27,9 +27,39 @@ const GenerateFaqOutputSchema = z.object({
 });
 export type GenerateFaqOutput = z.infer<typeof GenerateFaqOutputSchema>;
 
+const getFallbackFaqs = (calculatorName: string): GenerateFaqOutput => {
+    return {
+        faqs: [
+            {
+                question: `How accurate is the ${calculatorName}?`,
+                answer: `The ${calculatorName} provides estimates based on the data you provide. While we strive for accuracy, the results should be considered for informational purposes only. For financial calculators, consult a qualified professional for personalized advice.`,
+            },
+            {
+                question: "Can I save or export my calculation results?",
+                answer: "Yes, most of our calculators feature a 'Share / Download' button that allows you to save your results as a PNG, JPG, or PDF file for your records.",
+            },
+            {
+                question: "Is my data safe?",
+                answer: "Yes, your privacy is important to us. The data you enter is processed on your device or sent to our AI services for processing and is not stored on our servers. For more details, please see our Privacy Policy.",
+            }
+        ]
+    };
+}
+
 
 export async function generateFaq(input: GenerateFaqInput): Promise<GenerateFaqOutput> {
-    return generateFaqFlow(input);
+    try {
+        const result = await generateFaqFlow(input);
+        // Basic validation to ensure the AI returned something reasonable
+        if (result && result.faqs && result.faqs.length > 0) {
+            return result;
+        }
+        // Fallback if AI returns empty or invalid data
+        return getFallbackFaqs(input.calculatorName);
+    } catch (error) {
+        console.error(`AI FAQ generation failed for ${input.calculatorName}, providing fallback.`, error);
+        return getFallbackFaqs(input.calculatorName);
+    }
 }
 
 
