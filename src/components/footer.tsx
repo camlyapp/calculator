@@ -17,8 +17,10 @@ const Footer = () => {
              <div className="p-1 rounded-md animated-border-box">
               <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             </div>
-            <span className="text-xl font-bold text-foreground">
-              Camly
+            <span className="text-xl font-bold">
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
+                Camly
+              </span>
             </span>
           </Link>
 

@@ -32,8 +32,10 @@ const Header = () => {
             <div className="p-1 rounded-md animated-border-box">
               <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              Camly
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
+                Camly
+              </span>
             </h1>
           </Link>
           
