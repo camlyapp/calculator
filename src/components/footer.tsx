@@ -14,7 +14,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col items-center space-y-4">
           <Link href="/" className="flex items-center space-x-3">
-            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
+             <div className="p-1 rounded-md animated-border-box">
+              <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
+            </div>
             <span className="text-xl font-bold text-foreground">
               Camly
             </span>
@@ -51,7 +53,7 @@ const Footer = () => {
               <Github className="h-6 w-6" />
             </a>
             <a href="#" aria-label="LinkedIn" className="text-muted-foreground hover:text-primary transition-colors">
-              <Linkedin className="h-6 w-6" />
+              <Linkedin className="h-6" />
             </a>
           </div>
           

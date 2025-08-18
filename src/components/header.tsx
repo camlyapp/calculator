@@ -29,7 +29,9 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-3">
-            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
+            <div className="p-1 rounded-md animated-border-box">
+              <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
+            </div>
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               Camly
             </h1>
