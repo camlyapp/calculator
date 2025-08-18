@@ -38,6 +38,7 @@ import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
 import { Label } from './ui/label';
 import { useCurrency } from '@/context/currency-context';
+import Faq from './faq';
 
 const chartConfig = {
   principalAndInterest: {
@@ -270,111 +271,114 @@ const MortgageCalculator = () => {
         </Form>
 
         {result && (
-          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-              <Card className="lg:col-span-2 bg-secondary/50">
-                <CardHeader>
-                  <CardTitle>Total Monthly Payment</CardTitle>
-                </CardHeader>
-                <CardContent className='flex flex-col items-center justify-center'>
-                  <p className="text-4xl font-bold text-primary">
-                    {formatCurrency(result.totalMonthlyPayment)}
-                  </p>
-                    <ChartContainer
-                      config={chartConfig}
-                      className="mx-auto aspect-square h-[250px] w-full"
-                    >
-                      <PieChart>
-                        <ChartTooltipContent hideLabel nameKey="name" formatter={(value, name) => <div>{(chartConfig as any)[name]?.label}: {formatCurrency(value as number)}</div>} />
-                        <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
-                            {pieChartData.map((entry) => (
-                                <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
-                            ))}
-                        </Pie>
-                      </PieChart>
-                    </ChartContainer>
-                </CardContent>
-              </Card>
-
-              <Card className="lg:col-span-3">
-                 <CardHeader>
-                  <CardTitle>Payment Details</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Principal & Interest</span>
-                    <span className="font-semibold text-lg">{formatCurrency(result.principalAndInterest)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Property Tax</span>
-                    <span className="font-semibold text-lg">{formatCurrency(result.propertyTax)}</span>
-                  </div>
-                  <Separator />
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Home Insurance</span>
-                    <span className="font-semibold text-lg">{formatCurrency(result.homeInsurance)}</span>
-                  </div>
-                   <Separator />
-                  <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">HOA Dues</span>
-                    <span className="font-semibold text-lg">{formatCurrency(result.hoaDues)}</span>
-                  </div>
-                   <Separator />
-                  <div className="flex justify-between items-center pt-2">
-                    <span className="text-muted-foreground">Payoff Date</span>
-                    <span className="font-bold text-lg">{result.payoffDate}</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {result.interestSaved !== undefined && result.interestSaved > 0 && (
-                <Card className="bg-accent/20 border-accent">
+          <>
+            <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <Card className="lg:col-span-2 bg-secondary/50">
                     <CardHeader>
-                        <CardTitle className="text-accent-foreground">Extra Payment Savings</CardTitle>
+                    <CardTitle>Total Monthly Payment</CardTitle>
                     </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
-                        <div>
-                            <p className="font-semibold">Interest Saved</p>
-                            <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
-                        </div>
-                         <div>
-                            <p className="font-semibold">Payoff Time Saved</p>
-                            <p className="text-2xl font-bold text-accent">{result.payoffTimeSaved}</p>
-                        </div>
+                    <CardContent className='flex flex-col items-center justify-center'>
+                    <p className="text-4xl font-bold text-primary">
+                        {formatCurrency(result.totalMonthlyPayment)}
+                    </p>
+                        <ChartContainer
+                        config={chartConfig}
+                        className="mx-auto aspect-square h-[250px] w-full"
+                        >
+                        <PieChart>
+                            <ChartTooltipContent hideLabel nameKey="name" formatter={(value, name) => <div>{(chartConfig as any)[name]?.label}: {formatCurrency(value as number)}</div>} />
+                            <Pie data={pieChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label>
+                                {pieChartData.map((entry) => (
+                                    <Cell key={`cell-${entry.name}`} fill={entry.fill as string} />
+                                ))}
+                            </Pie>
+                        </PieChart>
+                        </ChartContainer>
                     </CardContent>
                 </Card>
-            )}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Loan Principal vs. Interest</CardTitle>
-                <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan, excluding taxes, insurance, or HOA fees.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
-                    <BarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                        dataKey="name"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                    />
-                     <YAxis
-                        tickFormatter={formatCurrencyAxis}
-                     />
-                    <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
-                    <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
-                    <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
-                    </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
+                <Card className="lg:col-span-3">
+                    <CardHeader>
+                    <CardTitle>Payment Details</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Principal & Interest</span>
+                        <span className="font-semibold text-lg">{formatCurrency(result.principalAndInterest)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Property Tax</span>
+                        <span className="font-semibold text-lg">{formatCurrency(result.propertyTax)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">Home Insurance</span>
+                        <span className="font-semibold text-lg">{formatCurrency(result.homeInsurance)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                        <span className="text-muted-foreground">HOA Dues</span>
+                        <span className="font-semibold text-lg">{formatCurrency(result.hoaDues)}</span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center pt-2">
+                        <span className="text-muted-foreground">Payoff Date</span>
+                        <span className="font-bold text-lg">{result.payoffDate}</span>
+                    </div>
+                    </CardContent>
+                </Card>
+                </div>
 
-            <AmortizationTable data={amortizationSchedule} />
-          </div>
+                {result.interestSaved !== undefined && result.interestSaved > 0 && (
+                    <Card className="bg-accent/20 border-accent">
+                        <CardHeader>
+                            <CardTitle className="text-accent-foreground">Extra Payment Savings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
+                            <div>
+                                <p className="font-semibold">Interest Saved</p>
+                                <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
+                            </div>
+                            <div>
+                                <p className="font-semibold">Payoff Time Saved</p>
+                                <p className="text-2xl font-bold text-accent">{result.payoffTimeSaved}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
+                <Card>
+                <CardHeader>
+                    <CardTitle>Loan Principal vs. Interest</CardTitle>
+                    <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan, excluding taxes, insurance, or HOA fees.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+                        <BarChart accessibilityLayer data={chartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                            dataKey="name"
+                            tickLine={false}
+                            tickMargin={10}
+                            axisLine={false}
+                        />
+                        <YAxis
+                            tickFormatter={formatCurrencyAxis}
+                        />
+                        <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
+                        <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
+                        <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
+                        </BarChart>
+                    </ChartContainer>
+                </CardContent>
+                </Card>
+
+                <AmortizationTable data={amortizationSchedule} />
+            </div>
+            <Faq calculatorName='Mortgage Calculator' />
+          </>
         )}
       </CardContent>
        {result && (

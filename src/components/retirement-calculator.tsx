@@ -27,6 +27,7 @@ import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, L
 import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import DownloadResults from './download-results';
 import { useCurrency } from '@/context/currency-context';
+import Faq from './faq';
 
 const retirementSchema = z.object({
   currentAge: z.coerce.number().min(18, "Must be at least 18."),
@@ -252,49 +253,52 @@ const RetirementCalculator = () => {
         </Form>
 
         {result && (
-          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
-            <Card className="bg-secondary/50">
-                <CardHeader>
-                    <CardTitle>Retirement Projection</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p className="text-muted-foreground">Required Nest Egg</p>
-                        <p className="text-3xl font-bold">{formatCurrency(result.requiredNestEgg)}</p>
-                    </div>
-                     <div>
-                        <p className="text-muted-foreground">Projected Savings</p>
-                        <p className="text-3xl font-bold text-primary">{formatCurrency(result.projectedSavings)}</p>
-                    </div>
-                     <div>
-                        <p className="text-muted-foreground">Shortfall / Surplus</p>
-                        <p className={`text-3xl font-bold ${result.shortfallOrSurplus >= 0 ? 'text-accent' : 'text-destructive'}`}>
-                            {formatCurrency(result.shortfallOrSurplus)}
-                        </p>
-                    </div>
-                </CardContent>
-            </Card>
+          <>
+            <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
+                <Card className="bg-secondary/50">
+                    <CardHeader>
+                        <CardTitle>Retirement Projection</CardTitle>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p className="text-muted-foreground">Required Nest Egg</p>
+                            <p className="text-3xl font-bold">{formatCurrency(result.requiredNestEgg)}</p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground">Projected Savings</p>
+                            <p className="text-3xl font-bold text-primary">{formatCurrency(result.projectedSavings)}</p>
+                        </div>
+                        <div>
+                            <p className="text-muted-foreground">Shortfall / Surplus</p>
+                            <p className={`text-3xl font-bold ${result.shortfallOrSurplus >= 0 ? 'text-accent' : 'text-destructive'}`}>
+                                {formatCurrency(result.shortfallOrSurplus)}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Savings Growth to Retirement</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="h-[400px] w-full">
-                    <ResponsiveContainer>
-                        <LineChart data={result.yearlyData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="age" name="Age" />
-                        <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
-                        <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)}/>
-                        <Legend />
-                        <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" name="Projected Savings" />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-          </div>
+                <Card>
+                <CardHeader>
+                    <CardTitle>Savings Growth to Retirement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="h-[400px] w-full">
+                        <ResponsiveContainer>
+                            <LineChart data={result.yearlyData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="age" name="Age" />
+                            <YAxis tickFormatter={(value) => formatCurrency(value as number)} />
+                            <Tooltip content={<ChartTooltipContent />} formatter={(value) => formatCurrency(value as number)}/>
+                            <Legend />
+                            <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" name="Projected Savings" />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </ChartContainer>
+                </CardContent>
+                </Card>
+            </div>
+            <Faq calculatorName='Retirement Calculator' />
+          </>
         )}
       </CardContent>
        {result && (

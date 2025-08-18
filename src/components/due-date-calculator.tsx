@@ -20,6 +20,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './
 import { Textarea } from './ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from './ui/separator';
+import Faq from './faq';
 
 type CalculationMethod = 'lmp' | 'conception' | 'ovulation' | 'ivf_retrieval' | 'ivf_day3' | 'ivf_day5' | 'ultrasound_ga' | 'ultrasound_crl' | 'fundal_height';
 
@@ -714,6 +715,7 @@ const DueDateCalculator = () => {
                         </CardContent>
                     </Card>
                 )}
+                {result && <Faq calculatorName='Due Date Calculator' />}
             </CardContent>
         </Card>
     );

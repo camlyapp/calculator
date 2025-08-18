@@ -12,3 +12,4 @@ import '@/ai/flows/calculate-gratuity.ts';
 import '@/ai/flows/get-pregnancy-advice.ts';
 import '@/ai/flows/ask-pregnancy-question.ts';
 import '@/ai/flows/solve-chemistry-problem.ts';
+import '@/ai/flows/generate-faq.ts';

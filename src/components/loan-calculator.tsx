@@ -37,6 +37,7 @@ import { format } from 'date-fns';
 import { Separator } from './ui/separator';
 import DownloadResults from './download-results';
 import { useCurrency } from '@/context/currency-context';
+import Faq from './faq';
 
 const chartConfig = {
   Principal: {
@@ -197,95 +198,98 @@ const LoanCalculator = () => {
           </form>
         </Form>
 
-        {result && result.totalMonthlyPayment !== undefined && (
-          <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="bg-secondary/50">
-                    <CardHeader>
-                        <CardTitle>Monthly Payment</CardTitle>
-                    </CardHeader>
-                    <CardContent className='flex flex-col items-center justify-center'>
-                        <p className="text-4xl font-bold text-primary">
-                            {formatCurrency(result.totalMonthlyPayment)}
-                        </p>
-                        {form.getValues('extraPayment') > 0 && result.principalAndInterest && (
-                             <p className="text-sm text-muted-foreground mt-2">
-                                ({formatCurrency(result.principalAndInterest)} base + {formatCurrency(form.getValues('extraPayment'))} extra)
-                             </p>
-                        )}
-                    </CardContent>
-                </Card>
+        {result && (
+            <>
+            <div ref={resultsRef} className="mt-8 pt-8 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card className="bg-secondary/50">
+                        <CardHeader>
+                            <CardTitle>Monthly Payment</CardTitle>
+                        </CardHeader>
+                        <CardContent className='flex flex-col items-center justify-center'>
+                            <p className="text-4xl font-bold text-primary">
+                                {formatCurrency(result.totalMonthlyPayment!)}
+                            </p>
+                            {form.getValues('extraPayment') > 0 && result.principalAndInterest && (
+                                <p className="text-sm text-muted-foreground mt-2">
+                                    ({formatCurrency(result.principalAndInterest)} base + {formatCurrency(form.getValues('extraPayment'))} extra)
+                                </p>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Loan Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Total Principal</span>
+                            <span className="font-semibold text-lg">{formatCurrency(form.getValues('loanAmount'))}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between items-center">
+                            <span className="text-muted-foreground">Total Interest</span>
+                            <span className="font-semibold text-lg">{formatCurrency(result.totalInterest!)}</span>
+                        </div>
+                        <Separator />
+                        <div className="flex justify-between items-center pt-2">
+                            <span className="text-muted-foreground">Payoff Date</span>
+                            <span className="font-bold text-lg">{result.payoffDate}</span>
+                        </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+
+                {result.interestSaved !== undefined && result.interestSaved > 0 && (
+                    <Card className="bg-accent/20 border-accent">
+                        <CardHeader>
+                            <CardTitle className="text-accent-foreground">Extra Payment Savings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
+                            <div>
+                                <p className="font-semibold">Interest Saved</p>
+                                <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
+                            </div>
+                            <div>
+                                <p className="font-semibold">Payoff Time Saved</p>
+                                <p className="text-2xl font-bold text-accent">{result.payoffTimeSaved}</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Loan Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Total Principal</span>
-                        <span className="font-semibold text-lg">{formatCurrency(form.getValues('loanAmount'))}</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-center">
-                        <span className="text-muted-foreground">Total Interest</span>
-                        <span className="font-semibold text-lg">{formatCurrency(result.totalInterest!)}</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between items-center pt-2">
-                        <span className="text-muted-foreground">Payoff Date</span>
-                        <span className="font-bold text-lg">{result.payoffDate}</span>
-                      </div>
-                    </CardContent>
+                <CardHeader>
+                    <CardTitle>Loan Principal vs. Interest</CardTitle>
+                    <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
+                    <BarChart accessibilityLayer data={chartData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                        dataKey="name"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        />
+                        <YAxis
+                            tickFormatter={formatCurrencyAxis}
+                        />
+                        <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
+                        <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
+                        <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
+                    </BarChart>
+                    </ChartContainer>
+                </CardContent>
                 </Card>
+
+                <AmortizationTable data={amortizationSchedule} />
             </div>
-
-
-            {result.interestSaved !== undefined && result.interestSaved > 0 && (
-                <Card className="bg-accent/20 border-accent">
-                    <CardHeader>
-                        <CardTitle className="text-accent-foreground">Extra Payment Savings</CardTitle>
-                    </CardHeader>
-                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4 text-lg">
-                        <div>
-                            <p className="font-semibold">Interest Saved</p>
-                            <p className="text-2xl font-bold text-accent">{formatCurrency(result.interestSaved)}</p>
-                        </div>
-                         <div>
-                            <p className="font-semibold">Payoff Time Saved</p>
-                            <p className="text-2xl font-bold text-accent">{result.payoffTimeSaved}</p>
-                        </div>
-                    </CardContent>
-                </Card>
-            )}
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Loan Principal vs. Interest</CardTitle>
-                <CardDescription>This chart shows the breakdown of principal and interest payments over the life of the loan.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ChartContainer config={chartConfig} className="min-h-[400px] w-full">
-                  <BarChart accessibilityLayer data={chartData}>
-                    <CartesianGrid vertical={false} />
-                    <XAxis
-                      dataKey="name"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                    />
-                     <YAxis
-                        tickFormatter={formatCurrencyAxis}
-                     />
-                    <ChartTooltipContent indicator="dot" formatter={(value, name) => <div>{name}: {formatCurrency(value as number)}</div>} />
-                    <Bar dataKey="Principal" stackId="a" fill="var(--color-Principal)" />
-                    <Bar dataKey="Interest" stackId="a" fill="var(--color-Interest)" />
-                  </BarChart>
-                </ChartContainer>
-              </CardContent>
-            </Card>
-
-            <AmortizationTable data={amortizationSchedule} />
-          </div>
+            <Faq calculatorName='EMI (Loan) Calculator' />
+          </>
         )}
       </CardContent>
       {result && (

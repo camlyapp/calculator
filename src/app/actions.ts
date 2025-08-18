@@ -9,6 +9,7 @@ import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEli
 import { calculateGratuity, type CalculateGratuityInput, type CalculateGratuityOutput } from '@/ai/flows/calculate-gratuity';
 import { getPregnancyAdvice, type GetPregnancyAdviceInput, type GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
 import { askPregnancyQuestion, type AskPregnancyQuestionInput, type AskPregnancyQuestionOutput } from '@/ai/flows/ask-pregnancy-question';
+import { generateFaq, type GenerateFaqInput, type GenerateFaqOutput } from '@/ai/flows/generate-faq';
 
 
 import { z } from 'zod';
@@ -275,5 +276,32 @@ export async function askPregnancyQuestionAction(
     } catch (e) {
         console.error(e);
         return { error: 'An unexpected error occurred while asking the AI. Please try again later.' };
+    }
+}
+
+
+const GenerateFaqSchema = z.object({
+  calculatorName: z.string(),
+});
+
+export async function generateFaqAction(
+  calculatorName: string
+): Promise<{ faqs?: GenerateFaqOutput; error?: string }> {
+    const validatedFields = GenerateFaqSchema.safeParse({ calculatorName });
+    
+    if (!validatedFields.success) {
+        return {
+            error: 'Invalid calculator name provided.',
+        };
+    }
+    
+    const aiInput: GenerateFaqInput = validatedFields.data;
+
+    try {
+        const result = await generateFaq(aiInput);
+        return { faqs: result };
+    } catch (e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred while fetching FAQs. Please try again later.' };
     }
 }
