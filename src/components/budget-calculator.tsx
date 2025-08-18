@@ -85,8 +85,8 @@ const BudgetCalculator = () => {
   const watchedValues = form.watch();
 
   const { totalIncome, totalExpenses, netBalance, expenseByCategory } = useMemo(() => {
-    const totalIncome = watchedValues.incomes.reduce((sum, item) => sum + item.amount, 0);
-    const totalExpenses = watchedValues.expenses.reduce((sum, item) => sum + item.amount, 0);
+    const totalIncome = watchedValues.incomes.reduce((sum, item) => sum + (parseFloat(item.amount as any) || 0), 0);
+    const totalExpenses = watchedValues.expenses.reduce((sum, item) => sum + (parseFloat(item.amount as any) || 0), 0);
     const netBalance = totalIncome - totalExpenses;
     
     const expenseByCategory = watchedValues.expenses.reduce((acc, expense) => {
@@ -94,7 +94,7 @@ const BudgetCalculator = () => {
         if (!acc[category]) {
             acc[category] = 0;
         }
-        acc[category] += expense.amount;
+        acc[category] += (parseFloat(expense.amount as any) || 0);
         return acc;
     }, {} as {[key: string]: number});
 
