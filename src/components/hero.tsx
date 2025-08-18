@@ -58,7 +58,7 @@ const Hero = () => {
            <div className="mx-auto lg:order-last">
             <div className="grid grid-cols-3 gap-4">
               {iconSections.map(section => (
-                <div key={section.label} className="flex flex-col items-center justify-center p-4 sm:p-6 bg-secondary/50 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300">
+                <div key={section.label} className="flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 animate-rainbow-glow bg-[length:400%_400%]">
                     {section.icon}
                     <p className="mt-2 text-xs sm:text-sm font-semibold text-center">{section.label}</p>
                 </div>
