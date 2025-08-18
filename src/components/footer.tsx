@@ -55,7 +55,7 @@ const Footer = () => {
               <Github className="h-6 w-6" />
             </a>
             <a href="#" aria-label="LinkedIn" className="text-muted-foreground hover:text-primary transition-colors">
-              <Linkedin className="h-6" />
+              <Linkedin className="h-6 w-6" />
             </a>
           </div>
           
