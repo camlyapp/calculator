@@ -17,6 +17,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
+import CreatinineClearanceCalculator from '@/components/creatinine-clearance-calculator';
+import EgfrCalculator from '@/components/egfr-calculator';
 
 const calculatorTabs = [
     { value: 'age', label: 'Age' },
@@ -24,7 +26,9 @@ const calculatorTabs = [
     { value: 'bmr', label: 'BMR' },
     { value: 'body-fat', label: 'Body Fat' },
     { value: 'calorie', label: 'Calorie' },
+    { value: 'creatinine-clearance', label: 'Creatinine Clearance' },
     { value: 'due-date', label: 'Due Date' },
+    { value: 'egfr', label: 'eGFR' },
     { value: 'heart-rate', label: 'Heart Rate' },
     { value: 'ideal-weight', label: 'Ideal Weight' },
     { value: 'ovulation', label: 'Ovulation' },
@@ -54,7 +58,7 @@ export default function PersonalHealthCalculators() {
                     </SelectContent>
                 </Select>
             </div>
-              <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 h-auto">
+              <TabsList className="hidden sm:grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 h-auto">
                   {calculatorTabs.map(tab => (
                     <TabsTrigger key={tab.value} value={tab.value}>{tab.label}</TabsTrigger>
                   ))}
@@ -85,6 +89,12 @@ export default function PersonalHealthCalculators() {
               </TabsContent>
               <TabsContent value="ideal-weight">
                   <IdealWeightCalculator />
+              </TabsContent>
+               <TabsContent value="creatinine-clearance">
+                  <CreatinineClearanceCalculator />
+              </TabsContent>
+               <TabsContent value="egfr">
+                  <EgfrCalculator />
               </TabsContent>
           </Tabs>
         </div>
