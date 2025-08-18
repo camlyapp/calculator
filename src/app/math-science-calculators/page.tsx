@@ -79,67 +79,43 @@ export default function MathScienceCalculators() {
               </TabsList>
             </div>
             <TabsContent value="basic">
-              <div className="flex justify-center">
-                <BasicCalculator />
-              </div>
+              <BasicCalculator />
             </TabsContent>
             <TabsContent value="scientific">
-               <div className="flex justify-center">
-                <ScientificCalculator />
-              </div>
+              <ScientificCalculator />
             </TabsContent>
             <TabsContent value="graphing">
               <GraphingCalculator />
             </TabsContent>
             <TabsContent value="fraction">
-              <div className="flex justify-center">
-                <FractionCalculator />
-              </div>
+              <FractionCalculator />
             </TabsContent>
              <TabsContent value="percentage">
-              <div className="flex justify-center">
-                <PercentageCalculator />
-              </div>
+              <PercentageCalculator />
             </TabsContent>
             <TabsContent value="discount">
-              <div className="flex justify-center">
-                <DiscountCalculator />
-              </div>
+              <DiscountCalculator />
             </TabsContent>
             <TabsContent value="markup-margin">
-              <div className="flex justify-center">
-                <MarkupMarginCalculator />
-              </div>
+              <MarkupMarginCalculator />
             </TabsContent>
             <TabsContent value="break-even">
-              <div className="flex justify-center">
-                <BreakEvenCalculator />
-              </div>
+              <BreakEvenCalculator />
             </TabsContent>
             <TabsContent value="algebra">
-              <div className="flex justify-center">
-                <AlgebraCalculator />
-              </div>
+              <AlgebraCalculator />
             </TabsContent>
             <TabsContent value="geometry">
-              <div className="flex justify-center">
-                <GeometryCalculator />
-              </div>
+              <GeometryCalculator />
             </TabsContent>
              <TabsContent value="unit">
-              <div className="flex justify-center">
-                <UnitConverter />
-              </div>
+              <UnitConverter />
             </TabsContent>
             <TabsContent value="physics">
-              <div className="flex justify-center">
-                <PhysicsCalculator />
-              </div>
+              <PhysicsCalculator />
             </TabsContent>
              <TabsContent value="chemistry">
-              <div className="flex justify-center">
-                <ChemistryCalculator />
-              </div>
+              <ChemistryCalculator />
             </TabsContent>
           </Tabs>
         </div>
