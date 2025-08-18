@@ -9,6 +9,8 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { FormItem } from './ui/form';
 import { Separator } from './ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 
 // 2021 CKD-EPI Creatinine Equation
 const calculateEgfr = (
@@ -34,7 +36,16 @@ const calculateEgfr = (
     return egfr;
 };
 
-const getEgfrStage = (egfr: number): { stage: string, description: string, colorClass: string } => {
+const egfrStages = [
+    { stage: 'Stage 1', gfr: '90+', description: 'Normal or high', colorClass: 'bg-green-100 dark:bg-green-900/50' },
+    { stage: 'Stage 2', gfr: '60-89', description: 'Mildly decreased', colorClass: 'bg-yellow-100 dark:bg-yellow-900/50' },
+    { stage: 'Stage 3a', gfr: '45-59', description: 'Mildly to moderately decreased', colorClass: 'bg-orange-100 dark:bg-orange-900/50' },
+    { stage: 'Stage 3b', gfr: '30-44', description: 'Moderately to severely decreased', colorClass: 'bg-orange-200 dark:bg-orange-800/50' },
+    { stage: 'Stage 4', gfr: '15-29', description: 'Severely decreased', colorClass: 'bg-red-100 dark:bg-red-900/50' },
+    { stage: 'Stage 5', gfr: '<15', description: 'Kidney failure', colorClass: 'bg-red-200 dark:bg-red-800/50' },
+];
+
+const getEgfrStageInfo = (egfr: number): { stage: string, description: string, colorClass: string } => {
     if (egfr >= 90) return { stage: 'Stage 1', description: 'Normal or high GFR', colorClass: 'text-green-500' };
     if (egfr >= 60) return { stage: 'Stage 2', description: 'Mildly decreased GFR', colorClass: 'text-yellow-500' };
     if (egfr >= 45) return { stage: 'Stage 3a', description: 'Mildly to moderately decreased GFR', colorClass: 'text-orange-500' };
@@ -53,13 +64,13 @@ const EgfrCalculator = () => {
         const ageVal = parseInt(age);
         const creatinineVal = parseFloat(serumCreatinine);
         
-        if (isNaN(ageVal) || isNaN(creatinineVal)) {
+        if (isNaN(ageVal) || isNaN(creatinineVal) || ageVal <=0 || creatinineVal <= 0) {
             setResult(null);
             return;
         }
 
         const egfr = calculateEgfr(creatinineVal, ageVal, gender);
-        const stageInfo = getEgfrStage(egfr);
+        const stageInfo = getEgfrStageInfo(egfr);
         setResult({
             egfr,
             ...stageInfo
@@ -104,9 +115,9 @@ const EgfrCalculator = () => {
                 </div>
 
                 {result !== null && (
-                    <div className="mt-8 pt-8">
+                    <div className="mt-8 pt-8 space-y-8">
                         <Separator />
-                        <div className="mt-8 text-center bg-secondary/50 p-6 rounded-lg">
+                        <div className="text-center bg-secondary/50 p-6 rounded-lg">
                             <Label className="text-lg text-muted-foreground">Estimated GFR</Label>
                             <p className="text-5xl font-bold text-primary">{result.egfr.toFixed(0)} mL/min/1.73m²</p>
                             <div className={`mt-2 font-semibold text-xl ${result.colorClass}`}>
@@ -114,6 +125,72 @@ const EgfrCalculator = () => {
                             </div>
                              <p className="text-xs text-muted-foreground mt-2">This is an estimate. Consult a healthcare professional for medical advice.</p>
                         </div>
+
+                         <Card>
+                            <CardHeader>
+                                <CardTitle>eGFR Stages of Chronic Kidney Disease (CKD)</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Stage</TableHead>
+                                            <TableHead>eGFR (mL/min/1.73m²)</TableHead>
+                                            <TableHead>Description</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {egfrStages.map(stage => (
+                                            <TableRow key={stage.stage} className={result.stage === stage.stage ? stage.colorClass : ''}>
+                                                <TableCell className="font-bold">{stage.stage}</TableCell>
+                                                <TableCell>{stage.gfr}</TableCell>
+                                                <TableCell>{stage.description}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </CardContent>
+                        </Card>
+
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Frequently Asked Questions</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <Accordion type="single" collapsible className="w-full">
+                                    <AccordionItem value="item-1">
+                                        <AccordionTrigger>What is eGFR?</AccordionTrigger>
+                                        <AccordionContent>
+                                            eGFR stands for estimated Glomerular Filtration Rate. It is a measure of how well your kidneys are filtering wastes from your blood. It's calculated from your blood serum creatinine level, age, and gender.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="item-2">
+                                        <AccordionTrigger>Why is eGFR important?</AccordionTrigger>
+                                        <AccordionContent>
+                                            The eGFR is a key indicator of kidney health. A low eGFR may be a sign of kidney disease. Early detection can help prevent the progression of kidney disease.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                     <AccordionItem value="item-3">
+                                        <AccordionTrigger>What do the different stages mean?</AccordionTrigger>
+                                        <AccordionContent>
+                                            The stages classify the severity of chronic kidney disease (CKD). Stage 1 indicates normal or high function but with evidence of kidney damage. Stages 2-4 indicate progressively worsening kidney function. Stage 5 signifies kidney failure, often requiring dialysis or a transplant.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="item-4">
+                                        <AccordionTrigger>What factors can affect eGFR results?</AccordionTrigger>
+                                        <AccordionContent>
+                                            Several factors can influence eGFR, including muscle mass, diet (especially high meat intake), certain medications, and hydration levels. The formula used here is a standardized estimate and may not be perfectly accurate for every individual.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                     <AccordionItem value="item-5">
+                                        <AccordionTrigger>Is this calculator a medical diagnosis?</AccordionTrigger>
+                                        <AccordionContent className="font-semibold text-destructive">
+                                            No. This calculator is for informational and educational purposes only. It is not a substitute for professional medical advice, diagnosis, or treatment. Always consult with a qualified healthcare provider regarding your health and any medical conditions.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
+                            </CardContent>
+                        </Card>
                     </div>
                 )}
             </CardContent>
