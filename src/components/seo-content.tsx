@@ -20,19 +20,19 @@ const SeoContent = () => {
             <div className="space-y-2">
                 <h3 className="font-semibold text-lg text-primary">Financial Calculators</h3>
                 <p className="text-sm text-muted-foreground">
-                    Master your finances with our extensive suite of tools. Calculate your EMI for personal loans with our versatile Loan Calculator, plan your home purchase with the Mortgage Calculator, and compare different loan options side-by-side. Project your wealth with the Investment and Compound Interest calculators, and secure your future with the Retirement and Savings Goal planners. We also offer specialized tools like Tax, GST, and Budget calculators to give you a complete financial picture.
+                    Master your finances with our extensive suite of tools. Calculate your EMI for personal loans with our versatile Loan Calculator, plan your home purchase with the Mortgage Calculator, and compare different loan options side-by-side. Project your wealth with the Investment and Compound Interest calculators, and secure your future with the Retirement and Savings Goal planners. We also offer specialized tools for Indian users like SIP, PPF, and Gratuity calculators, alongside universal Tax, GST, and Budget calculators to give you a complete financial picture.
                 </p>
             </div>
              <div className="space-y-2">
                 <h3 className="font-semibold text-lg text-primary">Math & Science Tools</h3>
                 <p className="text-sm text-muted-foreground">
-                    Whether you're a student or a professional, our math and science calculators have you covered. Perform basic arithmetic, solve complex equations with the Scientific Calculator, and visualize functions with our Graphing Calculator. We also provide specialized tools for fractions, percentages, algebra, geometry, physics, and chemistry to help you with your academic or professional needs.
+                    Whether you're a student or a professional, our math and science calculators have you covered. Perform basic arithmetic, solve complex equations with the Scientific Calculator, and visualize functions with our Graphing Calculator. We also provide specialized tools for fractions, percentages, algebra (linear, quadratic), geometry (area, perimeter), physics (speed, force), and chemistry (molarity, molecular weight) to help you with your academic or professional needs.
                 </p>
             </div>
              <div className="space-y-2">
                 <h3 className="font-semibold text-lg text-primary">Health & Lifestyle Planners</h3>
                 <p className="text-sm text-muted-foreground">
-                    Take control of your well-being with our health and lifestyle calculators. Track your fitness with the BMI, BMR, and Body Fat calculators. Plan your family with the Due Date and Ovulation predictors. Monitor your fitness journey with our Calorie and Heart Rate tools. Plus, explore a variety of other calculators for daily life, including Age, Workdays, and even a Carbon Footprint estimator.
+                    Take control of your well-being with our health and lifestyle calculators. Track your fitness with the BMI, BMR, and Body Fat calculators. Plan for your family with the Due Date and Ovulation predictors. Monitor your fitness journey with our Calorie and Heart Rate tools. Plus, explore a variety of other calculators for daily life, including Age, Workdays, GPA, Fuel Efficiency and even a Carbon Footprint estimator.
                 </p>
             </div>
           </CardContent>
