@@ -27,9 +27,9 @@ const Header = () => {
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-16">
           <Link href="/" className="flex items-center space-x-3">
-            <Image src="/camly.png" alt="Camly Logo" width={40} height={40} className="h-10 w-10" />
+            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
                 Camly
