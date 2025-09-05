@@ -29,9 +29,7 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link href="/" className="flex items-center space-x-3">
-            <div className="p-1 rounded-md animated-border-box">
-              <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
-            </div>
+            <Image src="/camly.png" alt="Camly Logo" width={40} height={40} className="h-10 w-10" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
                 Camly

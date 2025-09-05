@@ -14,9 +14,7 @@ const Footer = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col items-center space-y-4">
           <Link href="/" className="flex items-center space-x-3">
-             <div className="p-1 rounded-md animated-border-box">
-              <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
-            </div>
+             <Image src="/camly.png" alt="Camly Logo" width={40} height={40} className="h-10 w-10" />
             <span className="text-xl font-bold">
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
                 Camly
