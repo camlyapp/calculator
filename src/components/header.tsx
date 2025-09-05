@@ -30,9 +30,7 @@ const Header = () => {
           <Link href="/" className="flex items-center space-x-3">
             <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
-                Camly
-              </span>
+              Camly
             </h1>
           </Link>
           
