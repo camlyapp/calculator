@@ -42,7 +42,7 @@ const Header = () => {
              <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="outline" size="icon" aria-label="Open menu">
+                    <Button variant="ghost" size="icon" aria-label="Open menu">
                         <Menu className="h-6 w-6" />
                         <span className="sr-only">Open menu</span>
                     </Button>
