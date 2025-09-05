@@ -56,7 +56,7 @@ export function SearchCommand() {
       <Button
         variant="ghost"
         className={cn(
-          "relative w-full justify-start rounded-md text-sm font-normal text-muted-foreground shadow-none sm:pr-12 md:w-40 lg:w-64"
+          "relative h-10 w-full justify-start rounded-md border text-sm font-normal text-muted-foreground shadow-none hover:bg-secondary/80 sm:pr-12 md:w-40 lg:w-64"
         )}
         onClick={() => setOpen(true)}
       >
