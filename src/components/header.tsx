@@ -2,7 +2,6 @@
 "use client";
 
 import { Menu } from 'lucide-react';
-import { ThemeToggle } from './theme-toggle';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from './ui/sheet';
@@ -39,7 +38,6 @@ const Header = () => {
           
           <div className="flex items-center gap-2">
              <SearchCommand />
-             <ThemeToggle />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon" aria-label="Open menu">
