@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
 import { Landmark, HeartPulse, BrainCircuit, Lightbulb, UserCheck } from 'lucide-react';
+import Image from 'next/image';
+import placeholderImages from '@/app/lib/placeholder-images.json';
 
 export const metadata: Metadata = {
   title: 'Features - Camly | Financial, Health, & AI Calculators',
@@ -44,16 +46,30 @@ export default function FeaturesPage() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-6xl mx-auto">
-          <Card className="bg-card/50">
-            <CardHeader className="text-center">
-              <CardTitle className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                Camly Features
-              </CardTitle>
-              <p className="text-muted-foreground md:text-xl max-w-3xl mx-auto pt-2">
-                Discover the tools and intelligence that make Camly the ultimate calculator suite for finance, health, and more.
-              </p>
-            </CardHeader>
-            <CardContent className="mt-8">
+          <Card className="bg-card/50 overflow-hidden">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+                 <div className="p-8 md:p-12 flex flex-col justify-center">
+                    <CardHeader className="p-0">
+                    <CardTitle className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                        Camly Features
+                    </CardTitle>
+                    <p className="text-muted-foreground md:text-xl pt-2">
+                        Discover the tools and intelligence that make Camly the ultimate calculator suite for finance, health, and more.
+                    </p>
+                    </CardHeader>
+                 </div>
+                 <div className="relative h-64 lg:h-full">
+                    <Image 
+                        src={placeholderImages.features.src}
+                        alt={placeholderImages.features.alt}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={placeholderImages.features['data-ai-hint']}
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                    />
+                 </div>
+            </div>
+            <CardContent className="p-8 md:p-12">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
                          <Card key={index} className="bg-background/70 hover:shadow-lg transition-shadow">
