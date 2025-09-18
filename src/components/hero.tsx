@@ -7,27 +7,27 @@ import { ArrowDown, BrainCircuit, Calculator, CalendarDays, HeartPulse, Landmark
 
 const iconSections = [
     {
-        icon: <Landmark className="h-10 w-10 text-primary" />,
+        icon: <Landmark className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Financial",
     },
     {
-        icon: <HeartPulse className="h-10 w-10 text-primary" />,
+        icon: <HeartPulse className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Health",
     },
      {
-        icon: <BrainCircuit className="h-10 w-10 text-primary" />,
+        icon: <BrainCircuit className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Math & Science",
     },
      {
-        icon: <CalendarDays className="h-10 w-10 text-primary" />,
+        icon: <CalendarDays className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Date & Time",
     },
      {
-        icon: <Sparkles className="h-10 w-10 text-primary" />,
+        icon: <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Other Tools",
     },
      {
-        icon: <Calculator className="h-10 w-10 text-primary" />,
+        icon: <Calculator className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Calculators",
     },
 ]
@@ -56,11 +56,11 @@ const Hero = () => {
             </div>
           </div>
            <div className="mx-auto lg:order-last">
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               {iconSections.map(section => (
-                <div key={section.label} className="flex flex-col items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 animate-rainbow-glow bg-[length:400%_400%]">
+                <div key={section.label} className="flex flex-col items-center justify-center p-2 sm:p-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 animate-rainbow-glow bg-[length:400%_400%]">
                     {section.icon}
-                    <p className="mt-2 text-xs sm:text-sm font-semibold text-center">{section.label}</p>
+                    <p className="mt-2 text-xs font-semibold text-center">{section.label}</p>
                 </div>
               ))}
             </div>
