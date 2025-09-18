@@ -18,10 +18,14 @@ const CountdownCalculator = () => {
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         setIsMounted(true);
+        // Clean up timer on component unmount
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
     }, []);
 
     const getFullTargetDate = () => {
@@ -48,45 +52,55 @@ const CountdownCalculator = () => {
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             setIsRunning(false);
-            if(timeoutRef.current) clearTimeout(timeoutRef.current);
+             if (timerRef.current) {
+                clearTimeout(timerRef.current);
+                timerRef.current = null;
+            }
         }
     }
 
     useEffect(() => {
-        let interval: NodeJS.Timeout | undefined;
         if (isRunning) {
-            interval = setInterval(updateCountdown, 1000);
+            updateCountdown(); // Initial update
+            timerRef.current = setInterval(updateCountdown, 1000);
+        } else {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
         }
+        
         return () => {
-            if (interval) clearInterval(interval);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
         };
-    }, [isRunning, targetDate, targetTime]);
+    }, [isRunning]);
 
     const handleStartStop = async () => {
         if (isRunning) {
             setIsRunning(false);
-            if(timeoutRef.current) clearTimeout(timeoutRef.current);
         } else {
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
-                 if ('Notification' in window && Notification.permission !== 'granted') {
+                 if ('Notification' in window && Notification.permission === 'default') {
                     const permission = await Notification.requestPermission();
                     if (permission !== 'granted') {
-                        alert('Notification permission is required to be alerted when the countdown ends.');
-                        return;
+                        alert('Notification permission was not granted. You will not be notified when the countdown ends.');
                     }
                 }
                 setIsRunning(true);
                 
-                // Set a more reliable timeout for the notification
                 const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
                 if (timeRemaining > 0) {
-                     if(timeoutRef.current) clearTimeout(timeoutRef.current);
-                     timeoutRef.current = setTimeout(() => {
-                         new Notification('Countdown Finished!', {
-                            body: `Your countdown set for ${fullTargetDate.toLocaleString()} has ended.`,
-                            icon: '/camly.png'
-                         });
+                     // Notification on completion
+                     setTimeout(() => {
+                         if (Notification.permission === 'granted') {
+                             new Notification('Countdown Finished!', {
+                                body: `Your countdown set for ${fullTargetDate.toLocaleString()} has ended.`,
+                                icon: '/camly.png'
+                             });
+                         }
                          setIsRunning(false);
                      }, timeRemaining);
                 }
