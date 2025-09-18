@@ -19,6 +19,7 @@ import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent } from './ui/menub
 
 
 const navLinks = [
+    { href: '/features', label: 'Features' },
     { href: '/personal-health-calculators', label: 'Personal & Health' },
     { href: '/math-science-calculators', label: 'Math & Science' },
     { href: '/date-time-calculators', label: 'Date & Time' },
