@@ -4,12 +4,12 @@
 import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from './ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from './ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import Image from 'next/image';
 import { SearchCommand } from './search-command';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
 
 const navLinks = [
     { href: '/personal-health-calculators', label: 'Personal & Health' },
@@ -38,22 +38,22 @@ const Header = () => {
           
           <div className="flex items-center gap-2">
              <SearchCommand />
-             <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
-                <SheetTrigger asChild>
+             <Dialog open={isSheetOpen} onOpenChange={setSheetOpen}>
+                <DialogTrigger asChild>
                    <Button variant="ghost" size="icon" aria-label="Open menu" className="relative">
                       <div className={cn("flex items-center justify-center rounded-full p-2 transition-all", isSheetOpen && "animated-border-box")}>
                           <Menu className="h-6 w-6" />
                       </div>
                       <span className="sr-only">Open menu</span>
                     </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-auto">
-                    <SheetHeader>
-                        <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    </SheetHeader>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
+                    </DialogHeader>
                      <nav className="flex flex-col space-y-4 mt-8">
                         {navLinks.map((link) => (
-                            <SheetClose asChild key={link.href}>
+                            <DialogClose asChild key={link.href}>
                                 <Link
                                     href={link.href}
                                     className={cn(
@@ -64,11 +64,11 @@ const Header = () => {
                                 >
                                     {link.label}
                                 </Link>
-                            </SheetClose>
+                            </DialogClose>
                         ))}
                     </nav>
-                </SheetContent>
-            </Sheet>
+                </DialogContent>
+            </Dialog>
            </div>
         </div>
       </div>
