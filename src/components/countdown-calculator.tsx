@@ -20,7 +20,7 @@ const CountdownCalculator = () => {
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow);
-    const [targetTime, setTargetTime] = useState('09:00:00');
+    const [targetTime, setTargetTime] = useState('00:00:00');
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number, milliseconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
@@ -36,6 +36,9 @@ const CountdownCalculator = () => {
 
     useEffect(() => {
         setIsMounted(true);
+        const now = new Date();
+        const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+        setTargetTime(formattedTime);
         // Clean up timer on component unmount
         return () => {
             if (timerRef.current) cancelAnimationFrame(timerRef.current);
