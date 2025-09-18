@@ -9,7 +9,14 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import Image from 'next/image';
 import { SearchCommand } from './search-command';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from './ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent } from './ui/menubar';
+
 
 const navLinks = [
     { href: '/personal-health-calculators', label: 'Personal & Health' },
@@ -21,16 +28,16 @@ const navLinks = [
 
 const Header = () => {
   const pathname = usePathname();
-  const [isSheetOpen, setSheetOpen] = useState(false);
+  const [isMenuOpen, setMenuOpen] = useState(false);
 
   return (
     <header className="bg-card shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2">
              <div className="relative flex items-center justify-center">
                 <h1 className="relative text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
-                    <Image src="/camly.png" alt="Camly background" width={40} height={40} className="absolute top-1/2 left-0 transform -translate-y-1/2 opacity-30 pointer-events-none" />
+                    <Image src="/camly.png" alt="Camly background" width={30} height={30} className="absolute top-1/2 left-0 transform -translate-x-1 -translate-y-1/2 opacity-80 pointer-events-none" />
                     Camly
                 </h1>
             </div>
@@ -38,37 +45,36 @@ const Header = () => {
           
           <div className="flex items-center gap-2">
              <SearchCommand />
-             <Dialog open={isSheetOpen} onOpenChange={setSheetOpen}>
-                <DialogTrigger asChild>
+             <Menubar className="p-0 border-none bg-transparent">
+              <MenubarMenu>
+                <MenubarTrigger asChild>
                    <Button variant="ghost" size="icon" aria-label="Open menu" className="relative">
-                      <div className={cn("flex items-center justify-center rounded-full p-2 transition-all", isSheetOpen && "animated-border-box")}>
+                      <div className={cn("flex items-center justify-center rounded-full p-2 transition-all", isMenuOpen && "animated-border-box")}>
                           <Menu className="h-6 w-6" />
                       </div>
                       <span className="sr-only">Open menu</span>
                     </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className="sr-only">Navigation Menu</DialogTitle>
-                    </DialogHeader>
-                     <nav className="flex flex-col space-y-4 mt-8">
+                </MenubarTrigger>
+                <MenubarContent align="end" onFocusOutside={() => setMenuOpen(false)} onInteractOutside={() => setMenuOpen(false)}>
+                   <nav className="flex flex-col space-y-1 p-2">
                         {navLinks.map((link) => (
-                            <DialogClose asChild key={link.href}>
-                                <Link
-                                    href={link.href}
-                                    className={cn(
-                                        "w-full justify-start text-lg p-2 rounded-md",
-                                        "hover:bg-accent hover:text-accent-foreground transition-colors",
-                                        pathname === link.href ? "text-primary bg-accent font-semibold" : "text-muted-foreground"
-                                    )}
-                                >
-                                    {link.label}
-                                </Link>
-                            </DialogClose>
+                          <Link
+                              href={link.href}
+                              key={link.href}
+                              className={cn(
+                                  "w-full justify-start text-md p-2 rounded-md",
+                                  "hover:bg-accent hover:text-accent-foreground transition-colors",
+                                  pathname === link.href ? "text-primary bg-accent font-semibold" : "text-muted-foreground"
+                              )}
+                              onClick={() => setMenuOpen(false)}
+                          >
+                              {link.label}
+                          </Link>
                         ))}
                     </nav>
-                </DialogContent>
-            </Dialog>
+                </MenubarContent>
+              </MenubarMenu>
+            </Menubar>
            </div>
         </div>
       </div>
