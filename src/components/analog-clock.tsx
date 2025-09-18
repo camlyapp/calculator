@@ -47,8 +47,8 @@ const AnalogClock = ({ hours, minutes, seconds }: AnalogClockProps) => {
       <div
         className="absolute w-1 h-16 bg-foreground rounded-t-full origin-bottom"
         style={{
-          transform: `rotate(${hourDeg}deg) translateY(-50%)`,
-          top: '50%',
+          transform: `rotate(${hourDeg}deg)`,
+          top: 'calc(50% - 4rem)',
           transition: 'transform 0.3s ease-in-out',
         }}
       />
@@ -56,8 +56,8 @@ const AnalogClock = ({ hours, minutes, seconds }: AnalogClockProps) => {
       <div
         className="absolute w-0.5 h-24 bg-foreground/80 rounded-t-full origin-bottom"
         style={{
-          transform: `rotate(${minuteDeg}deg) translateY(-50%)`,
-          top: '50%',
+          transform: `rotate(${minuteDeg}deg)`,
+           top: 'calc(50% - 6rem)',
           transition: 'transform 0.3s ease-in-out',
         }}
       />
@@ -65,8 +65,8 @@ const AnalogClock = ({ hours, minutes, seconds }: AnalogClockProps) => {
       <div
         className="absolute w-px h-28 bg-accent origin-bottom"
         style={{
-          transform: `rotate(${secondDeg}deg) translateY(-50%)`,
-          top: '50%',
+          transform: `rotate(${secondDeg}deg)`,
+           top: 'calc(50% - 7rem)',
           transition: 'transform 0.2s linear',
         }}
       />
