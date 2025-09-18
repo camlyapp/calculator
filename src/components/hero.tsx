@@ -61,7 +61,7 @@ const Hero = () => {
               </Button>
             </div>
           </div>
-           <div className="mx-auto lg:order-last">
+           <div className="mx-auto lg:order-last md:hidden lg:block">
             <div className="grid grid-cols-3 gap-2 sm:gap-4">
               {iconSections.map(section => (
                 <Link href={section.href} key={section.label}>
