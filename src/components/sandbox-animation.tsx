@@ -68,14 +68,13 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
 
          {/* Falling Sand Stream */}
         {percentage > 0 && percentage < 100 && (
-          <line 
-            x1="50" 
-            y1="72" 
-            x2="50" 
-            y2="78" 
+          <path
+            d="M 50 72 v 6"
             stroke="url(#sandGradient)"
             strokeWidth="2"
-            className="animate-pulse"
+            strokeDasharray="1 3"
+            className="animate-[flow_500ms_linear_infinite]"
+            style={{ strokeLinecap: 'round' }}
           />
         )}
       </svg>
