@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { isFuture, format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { CalendarIcon, Mic, MicOff } from 'lucide-react';
@@ -14,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import TimePicker from './time-picker';
 import { Clock } from 'lucide-react';
+import SandboxAnimation from './sandbox-animation';
 
 const CountdownCalculator = () => {
     const tomorrow = new Date();
@@ -25,6 +25,9 @@ const CountdownCalculator = () => {
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const timerRef = useRef<number | null>(null);
+
+    const [countdownProgress, setCountdownProgress] = useState(100);
+    const [totalCountdownDuration, setTotalCountdownDuration] = useState(0);
 
     const { toast } = useToast();
 
@@ -68,15 +71,22 @@ const CountdownCalculator = () => {
                 
                 setCountdown({ days, hours, minutes, seconds, milliseconds });
 
+                if (totalCountdownDuration > 0) {
+                    const remainingTime = (target - now);
+                    setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
+                }
+
                 timerRef.current = requestAnimationFrame(updateCountdown);
 
             } else {
                  setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
                  setIsRunning(false);
+                 setCountdownProgress(0);
             }
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
             setIsRunning(false);
+            setCountdownProgress(0);
         }
     }
 
@@ -101,6 +111,10 @@ const CountdownCalculator = () => {
                         });
                     }
                 }
+                const now = new Date().getTime();
+                const totalDuration = fullTargetDate.getTime() - now;
+                setTotalCountdownDuration(totalDuration);
+                setCountdownProgress(100);
                 setIsRunning(true);
                 
                 const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
@@ -196,28 +210,31 @@ const CountdownCalculator = () => {
                     </Button>
 
                     {(countdown || isRunning) && (
-                        <div className="mt-6 text-center bg-secondary/50 p-6 rounded-lg">
-                            <Label className="text-lg text-muted-foreground">Time Remaining</Label>
-                            <div className="flex flex-wrap justify-center items-baseline space-x-2 sm:space-x-4 mt-2">
-                                <div>
-                                    <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{countdown?.days ?? '0'}</p>
-                                    <p className="text-sm text-muted-foreground">Days</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.hours ?? 0).padStart(2, '0')}</p>
-                                    <p className="text-sm text-muted-foreground">Hours</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.minutes ?? 0).padStart(2, '0')}</p>
-                                    <p className="text-sm text-muted-foreground">Minutes</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.seconds ?? 0).padStart(2, '0')}</p>
-                                    <p className="text-sm text-muted-foreground">Seconds</p>
-                                </div>
-                                <div>
-                                    <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.milliseconds ?? 0).padStart(3, '0')}</p>
-                                    <p className="text-sm text-muted-foreground">Milliseconds</p>
+                        <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/50 p-6 rounded-lg">
+                           <SandboxAnimation percentage={countdownProgress} />
+                            <div className="text-center">
+                                <Label className="text-lg text-muted-foreground">Time Remaining</Label>
+                                <div className="flex flex-wrap justify-center items-baseline space-x-2 sm:space-x-4 mt-2">
+                                    <div>
+                                        <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{countdown?.days ?? '0'}</p>
+                                        <p className="text-sm text-muted-foreground">Days</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.hours ?? 0).padStart(2, '0')}</p>
+                                        <p className="text-sm text-muted-foreground">Hours</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.minutes ?? 0).padStart(2, '0')}</p>
+                                        <p className="text-sm text-muted-foreground">Minutes</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.seconds ?? 0).padStart(2, '0')}</p>
+                                        <p className="text-sm text-muted-foreground">Seconds</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-2xl sm:text-4xl font-bold text-primary tabular-nums">{String(countdown?.milliseconds ?? 0).padStart(3, '0')}</p>
+                                        <p className="text-sm text-muted-foreground">Milliseconds</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
