@@ -117,6 +117,7 @@ const OvulationCalculator = () => {
             <PopoverContent className="w-auto p-0">
                 <Calendar
                     mode="single"
+                    month={date}
                     selected={date}
                     onSelect={setDate}
                     captionLayout="dropdown-buttons"
@@ -246,3 +247,5 @@ const OvulationCalculator = () => {
 };
 
 export default OvulationCalculator;
+
+    

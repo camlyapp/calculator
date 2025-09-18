@@ -1,13 +1,13 @@
 
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useActionState, useRef } from 'react';
+import { useState, useEffect, useCallback, useActionState, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { addDays, subDays, format, isValid, differenceInDays, eachDayOfInterval, getMonth, getYear } from 'date-fns';
+import { addDays, subDays, format, isValid, differenceInDays } from 'date-fns';
 import { Button } from './ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
@@ -33,13 +33,6 @@ interface DueDateResult {
     methodUsed: string;
     daysUntilDue: number;
     milestones: { name: string; date: string; }[];
-}
-
-interface CyclePrediction {
-    ovulationDate: Date;
-    fertileWindowStart: Date;
-    fertileWindowEnd: Date;
-    nextPeriodDate: Date;
 }
 
 const askQuestionInitialState = {
@@ -74,9 +67,6 @@ const DueDateCalculator = () => {
 
     const [result, setResult] = useState<DueDateResult | null>(null);
     const [isMounted, setIsMounted] = useState(false);
-    
-    const [predictions, setPredictions] = useState<CyclePrediction[]>([]);
-    const [currentMonth, setCurrentMonth] = useState(new Date());
 
     const [aiAdvice, setAiAdvice] = useState<GetPregnancyAdviceOutput | null>(null);
     const [isLoadingAdvice, setIsLoadingAdvice] = useState(false);
@@ -157,12 +147,6 @@ const DueDateCalculator = () => {
             })
         }
     }, [askQuestionState, toast])
-
-    useEffect(() => {
-        if (selectedDate) {
-            setCurrentMonth(selectedDate);
-        }
-    }, [selectedDate])
 
     const fetchPregnancyAdvice = useCallback(async (week: number) => {
         if (week < 1 || week > 42) return;
@@ -305,22 +289,6 @@ const DueDateCalculator = () => {
             });
             fetchPregnancyAdvice(gestationalWeek);
 
-            const newPredictions: CyclePrediction[] = [];
-            let currentLmp = lmpFromConception;
-             for (let i = 0; i < 6; i++) { // Calculate for next 6 cycles
-                const nextPeriod = addDays(currentLmp, avgCycleLength);
-                const ovulationDay = subDays(nextPeriod, 14);
-                
-                newPredictions.push({
-                    ovulationDate: ovulationDay,
-                    fertileWindowStart: subDays(ovulationDay, 5),
-                    fertileWindowEnd: ovulationDay,
-                    nextPeriodDate: nextPeriod,
-                });
-                currentLmp = nextPeriod;
-            }
-            setPredictions(newPredictions);
-
         } else {
             setResult(null);
             setAiAdvice(null);
@@ -331,31 +299,9 @@ const DueDateCalculator = () => {
        calculateDueDate();
     }, [calculateDueDate]);
 
-    const useMemoResult = useMemo(() => {
-        const fertile: Date[] = [];
-        const ovulation: Date[] = [];
-        const period: Date[] = [];
-
-        predictions.forEach(p => {
-            fertile.push(...eachDayOfInterval({ start: p.fertileWindowStart, end: p.fertileWindowEnd }));
-            ovulation.push(p.ovulationDate);
-            // Assuming period lasts 5 days for visualization
-            period.push(...eachDayOfInterval({ start: p.nextPeriodDate, end: addDays(p.nextPeriodDate, 4)}));
-        });
-        return { fertileDays: fertile, ovulationDays: ovulation, periodDays: period };
-    }, [predictions]);
-
-    const { fertileDays, ovulationDays, periodDays } = useMemoResult;
-
     if (!isMounted) {
         return null;
     }
-    
-    const changeMonth = (amount: number) => {
-        setCurrentMonth(prev => addDays(prev, amount * 30)); // Approximate month change
-    }
-
-    const currentPrediction = predictions.find(p => getMonth(p.ovulationDate) === getMonth(currentMonth) && getYear(p.ovulationDate) === getYear(currentMonth)) || predictions[0];
     
     const getLabelForDate = () => {
         switch(calculationMethod) {
@@ -392,8 +338,12 @@ const DueDateCalculator = () => {
             <PopoverContent className="w-auto p-0">
                 <Calendar
                     mode="single"
+                    month={date}
                     selected={date}
                     onSelect={setDate}
+                    captionLayout="dropdown-buttons"
+                    fromYear={new Date().getFullYear() - 5}
+                    toYear={new Date().getFullYear() + 5}
                     initialFocus
                 />
             </PopoverContent>
@@ -722,3 +672,5 @@ const DueDateCalculator = () => {
 };
 
 export default DueDateCalculator;
+
+    
