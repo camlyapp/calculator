@@ -27,11 +27,13 @@ const Header = () => {
     <header className="bg-card shadow-md sticky top-0 z-50">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center space-x-3">
-            <Image src="/camly.png" alt="Camly Logo" width={32} height={32} className="h-8 w-8" />
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-              Camly
-            </h1>
+          <Link href="/" className="relative flex items-center space-x-3">
+             <div className="relative w-32 h-12 flex items-center justify-center">
+                 <Image src="/camly.png" alt="Camly Logo" layout="fill" objectFit="contain" className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-30" />
+                <h1 className="relative text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
+                    Camly
+                </h1>
+            </div>
           </Link>
           
           <div className="flex items-center gap-2">

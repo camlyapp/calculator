@@ -13,12 +13,10 @@ const Footer = () => {
     <footer className="bg-card shadow-inner mt-auto">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col items-center space-y-4">
-          <Link href="/" className="flex items-center space-x-3">
-             <Image src="/camly.png" alt="Camly Logo" width={40} height={40} className="h-10 w-10" />
-            <span className="text-xl font-bold">
-              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
+           <Link href="/" className="relative flex items-center justify-center w-40 h-16">
+            <Image src="/camly.png" alt="Camly Logo" layout="fill" objectFit="contain" className="absolute opacity-30" />
+            <span className="relative text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
                 Camly
-              </span>
             </span>
           </Link>
 
