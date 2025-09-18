@@ -24,7 +24,7 @@ const CountdownCalculator = () => {
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number, milliseconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
-    const timerRef = useRef<number | null>(null);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
 
     const [countdownProgress, setCountdownProgress] = useState(100);
     const [totalCountdownDuration, setTotalCountdownDuration] = useState(0);
@@ -41,7 +41,7 @@ const CountdownCalculator = () => {
         setTargetTime(formattedTime);
         // Clean up timer on component unmount
         return () => {
-            if (timerRef.current) cancelAnimationFrame(timerRef.current);
+            if (timerRef.current) clearInterval(timerRef.current);
         };
     }, []);
 
@@ -79,17 +79,23 @@ const CountdownCalculator = () => {
                     setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
                 }
 
-                timerRef.current = requestAnimationFrame(updateCountdown);
-
             } else {
                  setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
                  setIsRunning(false);
                  setCountdownProgress(0);
+                 if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = null;
+                 }
             }
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
             setIsRunning(false);
             setCountdownProgress(0);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+             }
         }
     }
 
@@ -105,10 +111,10 @@ const CountdownCalculator = () => {
             oscillator.type = 'sine';
             oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
             gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 60);
             
             oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
+            oscillator.stop(audioContext.currentTime + 60);
         }
     };
 
@@ -117,7 +123,7 @@ const CountdownCalculator = () => {
         if (isRunning) {
             setIsRunning(false);
             if (timerRef.current) {
-                cancelAnimationFrame(timerRef.current);
+                clearInterval(timerRef.current);
                 timerRef.current = null;
             }
         } else {
@@ -164,15 +170,16 @@ const CountdownCalculator = () => {
     
     useEffect(() => {
         if (isRunning) {
-            timerRef.current = requestAnimationFrame(updateCountdown);
+            timerRef.current = setInterval(updateCountdown, 100); // Update every 100ms
         } else {
             if (timerRef.current) {
-                cancelAnimationFrame(timerRef.current);
+                clearInterval(timerRef.current);
+                timerRef.current = null;
             }
         }
         return () => {
             if (timerRef.current) {
-                cancelAnimationFrame(timerRef.current);
+                clearInterval(timerRef.current);
             }
         };
     }, [isRunning]);
@@ -198,13 +205,30 @@ const CountdownCalculator = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
                         <div className="space-y-2 flex flex-col items-center">
                             <Label>Target Date</Label>
-                            <Calendar
-                                mode="single"
-                                selected={targetDate}
-                                onSelect={setTargetDate}
-                                className="rounded-md border"
-                                disabled={isRunning}
-                            />
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal",
+                                            !targetDate && "text-muted-foreground"
+                                        )}
+                                         disabled={isRunning}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {targetDate ? format(targetDate, "PPP") : <span>Pick a date</span>}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={targetDate}
+                                        onSelect={setTargetDate}
+                                        initialFocus
+                                        disabled={isRunning}
+                                    />
+                                </PopoverContent>
+                            </Popover>
                         </div>
                         <div className="space-y-2">
                              <Label htmlFor="target-time">Target Time</Label>
