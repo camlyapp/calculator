@@ -37,7 +37,7 @@ const Header = () => {
           <Link href="/" className="flex items-center space-x-2">
              <div className="relative flex items-center justify-center">
                 <h1 className="relative text-xl sm:text-2xl font-bold tracking-tight bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-rainbow-glow">
-                    <Image src="/camly.png" alt="Camly background" width={40} height={40} className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-30 pointer-events-none" />
+                    <Image src="/camly.png" alt="Camly background" width={40} height={40} className="absolute top-1/2 left-1/3 transform -translate-x-1/2 -translate-y-1/2 opacity-30 pointer-events-none" />
                     Camly
                 </h1>
             </div>
