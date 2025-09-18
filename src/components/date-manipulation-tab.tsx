@@ -10,6 +10,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { add, sub, format, parse } from 'date-fns';
 import { Calendar } from './ui/calendar';
 import AnalogClock from './analog-clock';
+import { Popover, PopoverTrigger, PopoverContent } from './ui/popover';
+import { Clock } from 'lucide-react';
+import TimePicker from './time-picker';
 
 type DateManipulationTabProps = {
   mode: 'time' | 'date';
@@ -91,6 +94,12 @@ const DateManipulationTab = ({ mode }: DateManipulationTabProps) => {
         return null;
     }
 
+    const handleTimeChange = (newTime: { hour: number; minute: number; second: number }) => {
+        const { hour, minute, second } = newTime;
+        const formattedTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+        setStartTime(formattedTime);
+    }
+
     return (
         <Card className="w-full max-w-4xl shadow-2xl mt-6">
             <CardHeader>
@@ -108,13 +117,21 @@ const DateManipulationTab = ({ mode }: DateManipulationTabProps) => {
                         <div className="space-y-2">
                             {mode === 'time' ? (
                                 <>
-                                    <Label htmlFor="start-time">Start Time (HH:MM:SS)</Label>
-                                    <Input 
-                                        id="start-time" 
-                                        value={startTime} 
-                                        onChange={(e) => setStartTime(e.target.value)}
-                                        placeholder="e.g., 10:00:00"
-                                    />
+                                    <Label>Start Time</Label>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                                <Clock className="mr-2 h-4 w-4" />
+                                                {startTime}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <TimePicker
+                                                initialTime={startTime}
+                                                onTimeChange={handleTimeChange}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </>
                             ) : (
                                 <div className="flex flex-col items-center">
