@@ -102,19 +102,28 @@ const CountdownCalculator = () => {
     const playBeep = () => {
         if (typeof window !== 'undefined' && window.AudioContext) {
             const audioContext = new window.AudioContext();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            oscillator.type = 'sine';
-            oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 60);
             
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 60);
+            const playNote = (frequency: number, duration: number, delay: number) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + delay);
+                gainNode.gain.setValueAtTime(1, audioContext.currentTime + delay);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + delay + duration);
+
+                oscillator.start(audioContext.currentTime + delay);
+                oscillator.stop(audioContext.currentTime + delay + duration);
+            }
+            
+            // A simple melody
+            playNote(660, 0.15, 0); // E5
+            playNote(660, 0.15, 0.2);
+            playNote(660, 0.15, 0.4);
+            playNote(880, 0.3, 0.6); // A5
         }
     };
 
