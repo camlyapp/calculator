@@ -1,12 +1,11 @@
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import {config} from 'dotenv';
 
-if (process.env.NODE_ENV !== 'production') {
-  config();
-}
+// In production, environment variables are set by the hosting environment.
+// The apphosting.yaml file configures the GEMINI_API_KEY secret.
 
 export const ai = genkit({
   plugins: [googleAI({apiKey: process.env.GEMINI_API_KEY})],
-  model: 'googleai/gemini-2.0-flash',
+  // You can specify a default model for convenience.
+  // model: 'googleai/gemini-1.5-flash',
 });

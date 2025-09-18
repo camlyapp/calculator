@@ -123,7 +123,11 @@ const suggestLoanOptimizationsFlow = ai.defineFlow(
       disposableIncome: disposableIncome.toFixed(2),
     };
 
-    const {output} = await prompt(promptInput);
+    const {output} = await ai.generate({
+        prompt,
+        input: promptInput,
+        model: 'googleai/gemini-1.5-flash',
+    });
     return output!;
   }
 );

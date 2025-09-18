@@ -63,7 +63,11 @@ const askPregnancyQuestionFlow = ai.defineFlow(
     outputSchema: AskPregnancyQuestionOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const { output } = await ai.generate({
+        prompt,
+        input,
+        model: 'googleai/gemini-1.5-flash',
+    });
     return output!;
   }
 );
