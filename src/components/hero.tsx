@@ -9,26 +9,32 @@ const iconSections = [
     {
         icon: <Landmark className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Financial",
+        href: "/"
     },
     {
         icon: <HeartPulse className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Health",
+        href: "/personal-health-calculators"
     },
      {
         icon: <BrainCircuit className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Math & Science",
+        href: "/math-science-calculators"
     },
      {
         icon: <CalendarDays className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Date & Time",
+        href: "/date-time-calculators"
     },
      {
         icon: <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Other Tools",
+        href: "/other-specialized-calculators"
     },
      {
         icon: <Calculator className="h-8 w-8 sm:h-10 sm:w-10 text-primary" />,
         label: "Calculators",
+        href: "#calculators"
     },
 ]
 
@@ -58,10 +64,12 @@ const Hero = () => {
            <div className="mx-auto lg:order-last">
             <div className="grid grid-cols-3 gap-2 sm:gap-4">
               {iconSections.map(section => (
-                <div key={section.label} className="flex flex-col items-center justify-center p-2 sm:p-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 animate-rainbow-glow bg-[length:400%_400%]">
-                    {section.icon}
-                    <p className="mt-2 text-xs font-semibold text-center">{section.label}</p>
-                </div>
+                <Link href={section.href} key={section.label}>
+                    <div className="flex flex-col items-center justify-center p-2 sm:p-6 bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl shadow-sm hover:scale-105 transition-transform duration-300 animate-rainbow-glow bg-[length:400%_400%]">
+                        {section.icon}
+                        <p className="mt-2 text-xs font-semibold text-center">{section.label}</p>
+                    </div>
+                </Link>
               ))}
             </div>
           </div>
