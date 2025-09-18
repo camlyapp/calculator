@@ -40,9 +40,11 @@ const Header = () => {
              <SearchCommand />
              <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
-                    <Button variant="ghost" size="icon" aria-label="Open menu">
-                        <Menu className="h-6 w-6" />
-                        <span className="sr-only">Open menu</span>
+                   <Button variant="ghost" size="icon" aria-label="Open menu" className="relative">
+                      <div className={cn("flex items-center justify-center rounded-full p-2 transition-all", isSheetOpen && "animated-border-box")}>
+                          <Menu className="h-6 w-6" />
+                      </div>
+                      <span className="sr-only">Open menu</span>
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-auto">
