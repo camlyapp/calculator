@@ -104,6 +104,9 @@ const DateManipulationTab = ({ mode }: DateManipulationTabProps) => {
                                     selected={startDate}
                                     onSelect={setStartDate}
                                     className="rounded-md border"
+                                    captionLayout="dropdown-buttons"
+                                    fromYear={1900}
+                                    toYear={new Date().getFullYear() + 100}
                                 />
                              </div>
                         )}

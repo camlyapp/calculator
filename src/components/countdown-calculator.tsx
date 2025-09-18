@@ -131,6 +131,9 @@ const CountdownCalculator = () => {
                                 onSelect={setTargetDate}
                                 className="rounded-md border"
                                 disabled={isRunning}
+                                captionLayout="dropdown-buttons"
+                                fromYear={new Date().getFullYear()}
+                                toYear={new Date().getFullYear() + 100}
                             />
                         </div>
                         <div className="space-y-2">
