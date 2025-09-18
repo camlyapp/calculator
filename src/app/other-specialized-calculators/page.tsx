@@ -29,7 +29,7 @@ const calculatorTabs = [
 export default function OtherSpecializedCalculators() {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tab || 'body-surface-area');
+  const [activeTab, setActiveTab] = useState(tab || 'loan-eligibility');
 
   useEffect(() => {
     if (tab && calculatorTabs.some(t => t.value === tab)) {
