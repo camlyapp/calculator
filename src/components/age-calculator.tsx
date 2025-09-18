@@ -111,6 +111,7 @@ const AgeCalculator = () => {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">
                 <Calendar
+                    month={date}
                     mode="single"
                     selected={date}
                     onSelect={setDate}
