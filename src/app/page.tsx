@@ -30,6 +30,7 @@ import RoiCalculator from '@/components/roi-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import Hero from '@/components/hero';
 import { useSearchParams } from 'next/navigation';
+import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
     { value: 'suggestions', label: 'AI Suggestions' },
@@ -157,6 +158,7 @@ export default function Home() {
           </Tabs>
         </div>
       </main>
+      <SeoContent />
     </>
   );
 }

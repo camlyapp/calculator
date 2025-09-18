@@ -83,7 +83,6 @@ export default function RootLayout({
           <CurrencyProvider>
             <PwaInstaller />
             {children}
-            <SeoContent />
             <Footer />
             <Toaster />
           </CurrencyProvider>
