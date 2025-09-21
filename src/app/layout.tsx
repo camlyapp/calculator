@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import SeoContent from '@/components/seo-content';
 import { CurrencyProvider } from '@/context/currency-context';
 import PwaInstaller from '@/components/pwa-installer';
+import Script from 'next/script';
 
 export const metadata: Metadata = {
   title: 'Camly - Free Smart Financial & Loan Calculator',
@@ -73,6 +74,16 @@ export default function RootLayout({
         <meta name="theme-color" content="#FFFFFF" />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
+      <Script async src="https://www.googletagmanager.com/gtag/js?id=G-9WSES1FL0W"></Script>
+      <Script id="google-analytics">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-9WSES1FL0W');
+        `}
+      </Script>
       <body className="font-body antialiased flex flex-col min-h-screen bg-background text-foreground">
         <ThemeProvider
           attribute="class"
