@@ -23,12 +23,14 @@ import BreakEvenCalculator from '@/components/break-even-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
+import ChemistrySolver from '@/components/chemistry-solver';
 
 const calculatorTabs = [
     { value: 'algebra', label: 'Algebra' },
     { value: 'basic', label: 'Basic' },
     { value: 'break-even', label: 'Break-Even' },
     { value: 'chemistry', label: 'Chemistry' },
+    { value: 'chemistry-solver', label: 'Chemistry AI Solver' },
     { value: 'discount', label: 'Discount' },
     { value: 'fraction', label: 'Fraction' },
     { value: 'geometry', label: 'Geometry' },
@@ -117,6 +119,9 @@ export default function MathScienceCalculators() {
             </TabsContent>
              <TabsContent value="chemistry">
               <ChemistryCalculator />
+            </TabsContent>
+            <TabsContent value="chemistry-solver">
+              <ChemistrySolver />
             </TabsContent>
           </Tabs>
         </div>

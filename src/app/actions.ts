@@ -9,6 +9,7 @@ import { checkLoanEligibility, type CheckLoanEligibilityInput, type CheckLoanEli
 import { calculateGratuity, type CalculateGratuityInput, type CalculateGratuityOutput } from '@/ai/flows/calculate-gratuity';
 import { getPregnancyAdvice, type GetPregnancyAdviceInput, type GetPregnancyAdviceOutput } from '@/ai/flows/get-pregnancy-advice';
 import { askPregnancyQuestion, type AskPregnancyQuestionInput, type AskPregnancyQuestionOutput } from '@/ai/flows/ask-pregnancy-question';
+import { solveChemistryProblem, type SolveChemistryProblemInput, type SolveChemistryProblemOutput } from '@/ai/flows/solve-chemistry-problem';
 import { generateFaq, type GenerateFaqInput, type GenerateFaqOutput } from '@/ai/flows/generate-faq';
 
 
@@ -276,6 +277,35 @@ export async function askPregnancyQuestionAction(
     } catch (e) {
         console.error(e);
         return { error: 'An unexpected error occurred while asking the AI. Please try again later.' };
+    }
+}
+
+
+const SolveChemistryProblemSchema = z.object({
+  problem: z.string().min(10, "Problem description is too short."),
+});
+
+export async function solveChemistryProblemAction(
+  prevState: any,
+  formData: FormData
+): Promise<{ message?: string; result?: SolveChemistryProblemOutput; errors?: any; error?: string }> {
+    const validatedFields = SolveChemistryProblemSchema.safeParse(Object.fromEntries(formData.entries()));
+
+    if (!validatedFields.success) {
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Invalid form data. Please check your input.',
+        };
+    }
+
+    const aiInput: SolveChemistryProblemInput = validatedFields.data;
+
+    try {
+        const result = await solveChemistryProblem(aiInput);
+        return { result, message: "Your chemistry problem has been solved." };
+    } catch (e) {
+        console.error(e);
+        return { error: 'An unexpected error occurred while solving the problem. Please try again later.' };
     }
 }
 
