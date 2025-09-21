@@ -158,7 +158,7 @@ export default function Home() {
           </Tabs>
         </div>
       </main>
-      <SeoContent />
+      <SeoContent activeCalculator={activeTab} />
     </>
   );
 }

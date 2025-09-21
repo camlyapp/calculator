@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
+import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
     { value: 'bsa', label: 'Body Surface Area' },
@@ -84,6 +85,7 @@ export default function OtherSpecializedCalculators() {
           </Tabs>
         </div>
       </main>
+      <SeoContent activeCalculator={activeTab} />
     </>
   );
 }

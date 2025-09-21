@@ -22,6 +22,7 @@ import MarkupMarginCalculator from '@/components/markup-margin-calculator';
 import BreakEvenCalculator from '@/components/break-even-calculator';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
+import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
     { value: 'algebra', label: 'Algebra' },
@@ -120,6 +121,7 @@ export default function MathScienceCalculators() {
           </Tabs>
         </div>
       </main>
+      <SeoContent activeCalculator={activeTab} />
     </>
   );
 }

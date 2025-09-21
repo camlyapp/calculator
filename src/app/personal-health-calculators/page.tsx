@@ -20,6 +20,7 @@ import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import CreatinineClearanceCalculator from '@/components/creatinine-clearance-calculator';
 import EgfrCalculator from '@/components/egfr-calculator';
 import { useSearchParams } from 'next/navigation';
+import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
     { value: 'age', label: 'Age' },
@@ -108,6 +109,7 @@ export default function PersonalHealthCalculators() {
           </Tabs>
         </div>
       </main>
+      <SeoContent activeCalculator={activeTab} />
     </>
   );
 }

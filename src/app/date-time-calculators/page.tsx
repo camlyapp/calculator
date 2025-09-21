@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
+import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
     { value: 'add-subtract-days', label: 'Add/Subtract Days' },
@@ -81,6 +82,7 @@ export default function DateTimeCalculators() {
           </Tabs>
         </div>
       </main>
+      <SeoContent activeCalculator={activeTab} />
     </>
   );
 }
