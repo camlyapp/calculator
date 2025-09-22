@@ -23,6 +23,7 @@ import TimePicker from './time-picker';
 import AnalogClockModern from './analog-clock-modern';
 import AnalogClockMinimalist from './analog-clock-minimalist';
 import { timezoneInfo } from '@/lib/timezone-info';
+import Flag from 'react-world-flags';
 
 
 const clockComponents = [AnalogClock, AnalogClockModern, AnalogClockMinimalist];
@@ -90,9 +91,17 @@ const WorldClock = () => {
     const [isMounted, setIsMounted] = useState(false);
     const [open, setOpen] = useState(false)
     const [draggedTz, setDraggedTz] = useState<string | null>(null);
+    const [filter, setFilter] = useState('All');
+
+    const filteredTimezones = useMemo(() => {
+        if (filter === 'All') {
+            return timeZones;
+        }
+        return timeZones.filter(tz => tz.startsWith(filter));
+    }, [filter]);
 
     const groupedTimezones = useMemo(() => {
-        return timeZones.reduce((acc, tz) => {
+        return filteredTimezones.reduce((acc, tz) => {
             const [continent, ...rest] = tz.split('/');
             if (!acc[continent]) {
                 acc[continent] = [];
@@ -100,7 +109,7 @@ const WorldClock = () => {
             acc[continent].push(tz);
             return acc;
         }, {} as Record<string, string[]>);
-    }, []);
+    }, [filteredTimezones]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -301,9 +310,22 @@ const WorldClock = () => {
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0" align="start">
+                <PopoverContent className="w-[450px] p-0" align="start">
                      <Command>
                         <CommandInput placeholder="Search timezones..." />
+                        <div className="flex items-center gap-1 p-2 border-b">
+                            {['All', 'America', 'Europe', 'Asia', 'Africa', 'Australia'].map(f => (
+                                <Button 
+                                    key={f} 
+                                    variant={filter === f ? "secondary" : "ghost"} 
+                                    size="sm"
+                                    onClick={() => setFilter(f)}
+                                    className="text-xs h-7"
+                                >
+                                    {f}
+                                </Button>
+                            ))}
+                        </div>
                         <CommandList>
                             <CommandEmpty>No results found.</CommandEmpty>
                              <ScrollArea className="h-64">
@@ -311,27 +333,28 @@ const WorldClock = () => {
                                     <CommandGroup key={continent} heading={continent}>
                                         {tzs.map((tz) => {
                                             const { offset, isDst } = getTimeZoneDetails(displayTime, tz);
-                                            const country = timezoneInfo[tz]?.countryName || '';
+                                            const countryCode = timezoneInfo[tz]?.countryCode || '';
+                                            const countryName = timezoneInfo[tz]?.countryName || '';
                                             return (
                                                 <CommandItem
                                                     key={tz}
-                                                    value={`${tz} ${country}`}
+                                                    value={`${tz} ${countryName}`}
                                                     onSelect={() => addTimezone(tz)}
+                                                    className="flex items-center justify-between"
                                                 >
-                                                    <div className='w-full flex items-center justify-between'>
-                                                        <div className="flex items-center">
-                                                            <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
-                                                            <div>
-                                                                <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
-                                                                <p className="text-xs text-muted-foreground">{`${tz.split('/')[0]}, ${country}`}</p>
-                                                            </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Check className={cn("h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
+                                                         <Flag code={countryCode} className="h-4 w-4 rounded-sm" fallback={<div className="h-4 w-4 bg-muted rounded-sm" />} />
+                                                        <div>
+                                                            <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
+                                                            <p className="text-xs text-muted-foreground">{countryName}</p>
                                                         </div>
-                                                        <div className="text-right">
-                                                            <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
-                                                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                                                                {offset}
-                                                                {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
-                                                            </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
+                                                        <div className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                                                            {offset}
+                                                            {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
                                                         </div>
                                                     </div>
                                                 </CommandItem>
