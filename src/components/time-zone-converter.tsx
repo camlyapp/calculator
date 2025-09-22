@@ -17,7 +17,7 @@ import { ScrollArea } from './ui/scroll-area';
 import AnalogClock from './analog-clock';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Calendar } from './ui/calendar';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import TimePicker from './time-picker';
 
@@ -252,30 +252,28 @@ const TimeConverter = () => {
     }, []);
 
     const { resultTime, resultDate, isResultDst, resultOffset } = useMemo(() => {
-        if (!sourceDate) return { resultTime: '...', resultDate: '...', isResultDst: false, resultOffset: '...' };
+        if (!sourceDate || !isValid(sourceDate)) return { resultTime: '...', resultDate: '...', isResultDst: false, resultOffset: '...' };
 
         const [h, m, s] = sourceTime.split(':').map(Number);
-        const sourceDateTimeString = `${format(sourceDate, 'yyyy-MM-dd')}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        
+        // Construct a date object representing the local time in the source timezone
+        const year = sourceDate.getFullYear();
+        const month = sourceDate.getMonth();
+        const day = sourceDate.getDate();
+
+        // Create a temporary date string and then parse it. This is more robust than manual offsets.
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         
         try {
-            // This is complex. We need to interpret the local time in the source TZ.
-            // A robust library would be better, but we can do a reasonable approximation.
-            // Let's create a date object and then format it in the target timezone.
-            // This relies on the browser's environment understanding the IANA timezones.
-             const sourceFormatter = new Intl.DateTimeFormat('en-CA', {
-                timeZone: sourceTz,
-                year: 'numeric', month: 'numeric', day: 'numeric',
-                hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false
-            });
-            const parts = sourceFormatter.formatToParts(new Date());
-            const getPart = (type: string) => parts.find(p => p.type === type)?.value || '';
+            // A trick to parse a date as if it's in a specific timezone
+            const tzDate = new Date(new Date(dateString).toLocaleString("en-US", {timeZone: sourceTz}));
+            const localDate = new Date(dateString);
+            const diff = localDate.getTime() - tzDate.getTime();
+            const dateInSourceTz = new Date(localDate.getTime() - diff);
 
-            // Construct an ISO-like string for the source time in its own timezone
-            const offset = new Intl.DateTimeFormat('en-US', {timeZoneName: 'shortOffset', timeZone: sourceTz}).formatToParts().find(p=>p.type==='timeZoneName')?.value?.replace('GMT','');
-            
-            // This is not perfectly robust across all edge cases but works for many scenarios.
-            const dateInSourceTz = new Date(sourceDateTimeString + offset);
-
+            if (!isValid(dateInSourceTz)) {
+                throw new Error("Could not create a valid date in the source timezone.");
+            }
 
             const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
             const resultTime = targetFormatter.format(dateInSourceTz);
