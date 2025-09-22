@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 interface SandboxAnimationProps {
   percentage: number; // 0 to 100
   className?: string;
+  isPaused?: boolean;
 }
 
-const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
+const SandboxAnimation = ({ percentage, className, isPaused = false }: SandboxAnimationProps) => {
   // Clamp percentage between 0 and 100
   const clampedPercentage = Math.max(0, Math.min(100, percentage));
 
@@ -19,7 +20,7 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
 
   return (
     <div className={cn("w-32 h-48", className)}>
-      <svg width="100%" height="100%" viewBox="0 0 150 150" aria-label="Sandbox animation showing time remaining">
+      <svg width="100%" height="100%" viewBox="0 0 160 160" aria-label="Sandbox animation showing time remaining">
         <defs>
           <clipPath id="top-clip">
             <path d="M 45 15 H 105 L 75 70 L 45 15 Z" />
@@ -41,6 +42,7 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
           strokeWidth="4" 
           strokeLinecap="round"
           className={cn(clampedPercentage > 0 && "animate-hourglass-spin origin-center-center")}
+          style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
         />
 
         {/* Top Sand (disappearing) */}
@@ -75,7 +77,7 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
             strokeWidth="2"
             strokeDasharray="1 3"
             className="animate-[flow_500ms_linear_infinite]"
-            style={{ strokeLinecap: 'round' }}
+            style={{ strokeLinecap: 'round', animationPlayState: isPaused ? 'paused' : 'running' }}
           />
         )}
       </svg>
@@ -84,3 +86,5 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
 };
 
 export default SandboxAnimation;
+
+    

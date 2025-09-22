@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { isFuture, format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Mic, MicOff, Volume, Volume1, Volume2, Percent } from 'lucide-react';
+import { CalendarIcon, Mic, MicOff, Volume, Volume1, Volume2, Percent, Pause, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import TimePicker from './time-picker';
@@ -21,10 +21,13 @@ const CountdownCalculator = () => {
     const [targetTime, setTargetTime] = useState('00:00:00');
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number, milliseconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
+    const [isPaused, setIsPaused] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
+    
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const alarmRef = useRef<NodeJS.Timeout | null>(null);
-    const endTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const remainingTimeOnPauseRef = useRef<number>(0);
+    const targetTimestampRef = useRef<number>(0);
 
 
     const [countdownProgress, setCountdownProgress] = useState(100);
@@ -50,7 +53,6 @@ const CountdownCalculator = () => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
             if (alarmRef.current) clearInterval(alarmRef.current);
-            if (endTimeoutRef.current) clearTimeout(endTimeoutRef.current);
         };
     }, []);
 
@@ -128,117 +130,85 @@ const CountdownCalculator = () => {
 
     
     const updateCountdown = () => {
-        const fullTargetDate = getFullTargetDate();
+        const now = new Date().getTime();
+        let difference = targetTimestampRef.current - now;
 
-        if (fullTargetDate && isFuture(fullTargetDate)) {
-            const now = new Date().getTime();
-            const target = fullTargetDate.getTime();
-            let difference = target - now;
+        if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                difference -= days * (1000 * 60 * 60 * 24);
+                const hours = Math.floor(difference / (1000 * 60 * 60));
+                difference -= hours * (1000 * 60 * 60);
+                const minutes = Math.floor(difference / (1000 * 60));
+                difference -= minutes * (1000 * 60);
+                const seconds = Math.floor(difference / 1000);
+                const milliseconds = difference % 1000;
+            
+            if (isSecondSoundOn && lastPlayedSecondRef.current !== seconds) {
+                playTick();
+                lastPlayedSecondRef.current = seconds;
+            }
+            
+            if (isHourlySoundOn && lastPlayedHourRef.current !== hours && minutes === 59 && seconds === 59) {
+                    playHourlyChime();
+                    lastPlayedHourRef.current = hours;
+            }
 
-            if (difference > 0) {
-                 const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                 difference -= days * (1000 * 60 * 60 * 24);
-                 const hours = Math.floor(difference / (1000 * 60 * 60));
-                 difference -= hours * (1000 * 60 * 60);
-                 const minutes = Math.floor(difference / (1000 * 60));
-                 difference -= minutes * (1000 * 60);
-                 const seconds = Math.floor(difference / 1000);
-                 const milliseconds = difference % 1000;
-                
-                if (isSecondSoundOn && lastPlayedSecondRef.current !== seconds) {
-                    playTick();
-                    lastPlayedSecondRef.current = seconds;
-                }
-                
-                if (isHourlySoundOn && lastPlayedHourRef.current !== hours && minutes === 59 && seconds === 59) {
-                     playHourlyChime();
-                     lastPlayedHourRef.current = hours;
-                }
+            setCountdown({ days, hours, minutes, seconds, milliseconds });
 
-                setCountdown({ days, hours, minutes, seconds, milliseconds });
-
-                if (totalCountdownDuration > 0) {
-                    const remainingTime = (target - now);
-                    setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
-                }
-
-            } else {
-                // This case is now handled by the timeout in handleStartStop
+            if (totalCountdownDuration > 0) {
+                const remainingTime = (targetTimestampRef.current - now);
+                setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
             }
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
             setIsRunning(false);
             setCountdownProgress(0);
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-                timerRef.current = null;
-             }
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (Notification.permission === 'granted') {
+                    new Notification('Countdown Finished!', {
+                    body: `Your countdown has ended.`,
+                    icon: '/camly.png'
+                    });
+            }
+            if (!alarmRef.current) {
+                playBeep();
+                alarmRef.current = setInterval(playBeep, 2000);
+            }
         }
     }
 
 
     const handleStartStop = async () => {
+        // --- STOP ---
         if (isRunning) {
             setIsRunning(false);
+            setIsPaused(false);
             if (timerRef.current) clearInterval(timerRef.current);
             if (alarmRef.current) clearInterval(alarmRef.current);
-            if (endTimeoutRef.current) clearTimeout(endTimeoutRef.current);
-            timerRef.current = null;
             alarmRef.current = null;
-            endTimeoutRef.current = null;
-        } else {
+            setCountdown(null);
+            setCountdownProgress(100);
+            return;
+        }
+
+        // --- START ---
+        if (!isRunning) {
             if (alarmRef.current) clearInterval(alarmRef.current);
+            alarmRef.current = null;
             
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
                  if ('Notification' in window && Notification.permission === 'default') {
-                    const permission = await Notification.requestPermission();
-                    if (permission !== 'granted') {
-                        toast({
-                            variant: 'destructive',
-                            title: 'Permission Denied',
-                            description: 'You will not be notified when the countdown ends.',
-                        });
-                    }
+                    await Notification.requestPermission();
                 }
                 const now = new Date().getTime();
                 const totalDuration = fullTargetDate.getTime() - now;
                 setTotalCountdownDuration(totalDuration);
                 setCountdownProgress(100);
-
-                const currentCountdown = {
-                    days: Math.floor(totalDuration / (1000 * 60 * 60 * 24)),
-                    hours: Math.floor((totalDuration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-                    minutes: Math.floor((totalDuration % (1000 * 60 * 60)) / (1000 * 60)),
-                    seconds: Math.floor((totalDuration % (1000 * 60)) / 1000),
-                    milliseconds: totalDuration % 1000,
-                };
-                lastPlayedSecondRef.current = currentCountdown.seconds;
-                lastPlayedHourRef.current = currentCountdown.hours;
+                targetTimestampRef.current = fullTargetDate.getTime();
 
                 setIsRunning(true);
-                
-                const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
-                if (timeRemaining > 0) {
-                     endTimeoutRef.current = setTimeout(() => {
-                         if (Notification.permission === 'granted') {
-                             new Notification('Countdown Finished!', {
-                                body: `Your countdown for ${fullTargetDate.toLocaleString()} has ended.`,
-                                icon: '/camly.png'
-                             });
-                         }
-                         setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-                         setIsRunning(false);
-                         setCountdownProgress(0);
-                         if (timerRef.current) clearInterval(timerRef.current);
-
-                         if (!alarmRef.current) {
-                            playBeep();
-                            alarmRef.current = setInterval(playBeep, 2000);
-                         }
-
-                     }, timeRemaining);
-                }
+                setIsPaused(false);
             } else {
                 toast({
                     variant: 'destructive',
@@ -248,10 +218,28 @@ const CountdownCalculator = () => {
             }
         }
     };
+
+    const handlePauseResume = () => {
+        if (!isRunning) return;
+
+        setIsPaused(prev => {
+            const isNowPaused = !prev;
+            if (isNowPaused) {
+                // Pausing
+                if (timerRef.current) clearInterval(timerRef.current);
+                remainingTimeOnPauseRef.current = targetTimestampRef.current - new Date().getTime();
+            } else {
+                // Resuming
+                const newTargetTimestamp = new Date().getTime() + remainingTimeOnPauseRef.current;
+                targetTimestampRef.current = newTargetTimestamp;
+            }
+            return isNowPaused;
+        });
+    }
     
     useEffect(() => {
-        if (isRunning) {
-            timerRef.current = setInterval(updateCountdown, 100); // Update every 100ms
+        if (isRunning && !isPaused) {
+            timerRef.current = setInterval(updateCountdown, 100);
         } else {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
@@ -263,7 +251,7 @@ const CountdownCalculator = () => {
                 clearInterval(timerRef.current);
             }
         };
-    }, [isRunning, isSecondSoundOn, isHourlySoundOn]);
+    }, [isRunning, isPaused, isSecondSoundOn, isHourlySoundOn]);
     
      if (!isMounted) {
         return null;
@@ -273,6 +261,21 @@ const CountdownCalculator = () => {
         const { hour, minute, second } = newTime;
         const formattedTime = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
         setTargetTime(formattedTime);
+    }
+
+    const renderMainButton = () => {
+        if (isRunning) {
+            return (
+                 <Button onClick={handleStartStop} className="w-full" variant="destructive">
+                    Stop Countdown
+                </Button>
+            )
+        }
+        return (
+             <Button onClick={handleStartStop} className="w-full">
+                Start Countdown
+            </Button>
+        )
     }
 
     return (
@@ -332,27 +335,32 @@ const CountdownCalculator = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
                         <div className="flex items-center space-x-2">
-                             <Switch id="second-sound" checked={isSecondSoundOn} onCheckedChange={setIsSecondSoundOn} disabled={!isRunning}/>
+                             <Switch id="second-sound" checked={isSecondSoundOn} onCheckedChange={setIsSecondSoundOn} />
                              <Label htmlFor="second-sound" className="flex items-center gap-2">
                                 <Volume1 className="h-5 w-5" /> Second Tick Sound
                             </Label>
                         </div>
                          <div className="flex items-center space-x-2">
-                             <Switch id="hourly-sound" checked={isHourlySoundOn} onCheckedChange={setIsHourlySoundOn} disabled={!isRunning}/>
+                             <Switch id="hourly-sound" checked={isHourlySoundOn} onCheckedChange={setIsHourlySoundOn}/>
                              <Label htmlFor="hourly-sound" className="flex items-center gap-2">
                                 <Volume2 className="h-5 w-5" /> Hourly Chime
                             </Label>
                         </div>
                     </div>
 
-                    <Button onClick={handleStartStop} className="w-full">
-                        {isRunning ? 'Stop Countdown' : 'Start Countdown'}
-                    </Button>
+                    <div className="flex gap-4">
+                        {renderMainButton()}
+                        {isRunning && (
+                             <Button onClick={handlePauseResume} className="w-full" variant="secondary">
+                                {isPaused ? <><Play className="mr-2 h-4 w-4" />Resume</> : <><Pause className="mr-2 h-4 w-4" />Pause</>}
+                            </Button>
+                        )}
+                    </div>
 
                     {(countdown || isRunning) && (
                         <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/50 p-6 rounded-lg">
                            <div className="flex items-center justify-center gap-4">
-                                <SandboxAnimation percentage={countdownProgress} />
+                                <SandboxAnimation percentage={countdownProgress} isPaused={isPaused} />
                                 <div className="flex items-center text-primary">
                                     <span className="text-3xl font-bold tabular-nums">{countdownProgress.toFixed(1)}</span>
                                     <Percent className="h-6 w-6" />
