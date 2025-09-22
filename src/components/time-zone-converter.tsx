@@ -246,14 +246,14 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20"
+                                    className="w-24 h-24"
                                 />
                                 <ClockComponent2
                                     hours={h}
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20"
+                                    className="w-24 h-24"
                                     style={{ '--clock-accent-color': color } as React.CSSProperties}
                                 />
                                 <ClockComponent3
@@ -261,7 +261,7 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20"
+                                    className="w-24 h-24"
                                 />
                             </div>
                             <div className="flex-1 w-full">
@@ -491,4 +491,5 @@ export default TimeZoneConverter;
     
 
     
+
 
