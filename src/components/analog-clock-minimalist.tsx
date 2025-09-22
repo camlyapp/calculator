@@ -33,7 +33,7 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
         <svg width="90%" height="90%" viewBox="0 0 100 100" aria-label="Vibrant animated analog clock with Roman numerals" {...props}>
             {/* Roman Numerals */}
             {romanNumerals.map((num, i) => {
-                 const angle = (i * 30 - 60) * (Math.PI / 180);
+                 const angle = (i * 30 - 90) * (Math.PI / 180); // Corrected angle calculation
                  const x = 50 + 40 * Math.cos(angle);
                  const y = 50 + 40 * Math.sin(angle);
                 return (
