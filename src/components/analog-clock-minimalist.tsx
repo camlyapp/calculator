@@ -25,51 +25,74 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
   const secondDeg = (seconds / 60) * 360;
   const minuteDeg = ((minutes + seconds / 60) / 60) * 360;
   const hourDeg = (((hours % 12) + minutes / 60) / 12) * 360;
+  
+  const romanNumerals = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
+  const vibrantColors = [
+      'hsl(var(--chart-1))', 
+      'hsl(var(--chart-2))', 
+      'hsl(var(--chart-3))', 
+      'hsl(var(--chart-4))', 
+      'hsl(var(--chart-5))',
+      'hsl(var(--accent))'
+  ];
 
   return (
     <div className={cn("w-24 h-24 rounded-full bg-card flex items-center justify-center relative", className)}>
-        <svg width="100%" height="100%" viewBox="0 0 100 100" aria-label="Minimalist analog clock" {...props}>
-             <defs>
-                <linearGradient id="handGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: 'hsl(var(--foreground))', stopOpacity: 1 }} />
-                    <stop offset="100%" style={{ stopColor: 'hsl(var(--muted-foreground))', stopOpacity: 1 }} />
-                </linearGradient>
-            </defs>
+        <svg width="100%" height="100%" viewBox="0 0 100 100" aria-label="Vibrant analog clock with Roman numerals" {...props}>
             {/* Clock Face */}
             <circle cx="50" cy="50" r="48" fill="hsl(var(--card))" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="1" />
             
-            {/* Hour Markers as dots */}
-            {Array.from({ length: 12 }).map((_, i) => (
-                <circle
-                    key={i}
-                    cx="50"
-                    cy="10"
-                    r={i % 3 === 0 ? 2 : 1}
-                    fill="hsl(var(--muted-foreground))"
-                    transform={`rotate(${i * 30} 50 50)`}
-                />
-            ))}
+            {/* Decorative Color Ring */}
+            <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted-foreground)/0.2)" strokeWidth="4" />
+            
+            {/* Roman Numerals */}
+            {romanNumerals.map((num, i) => {
+                 const angle = (i * 30 - 60) * (Math.PI / 180); // Adjust angle for correct placement
+                 const x = 50 + 38 * Math.cos(angle);
+                 const y = 50 + 38 * Math.sin(angle);
+                return (
+                    <text
+                        key={i}
+                        x={x}
+                        y={y}
+                        textAnchor="middle"
+                        dominantBaseline="central"
+                        fontSize={i % 3 === 0 ? "12" : "8"}
+                        fontWeight={i % 3 === 0 ? "bold" : "normal"}
+                        fill={vibrantColors[i % vibrantColors.length]}
+                        className="font-serif"
+                    >
+                        {num}
+                    </text>
+                )
+            })}
 
              {/* Hour Hand */}
-            <path
-                d="M 48 50 L 48 30 L 52 30 L 52 50 Z"
-                fill="url(#handGradient)"
+             <line
+                x1="50" y1="50"
+                x2="50" y2="30"
+                stroke="hsl(var(--foreground))"
+                strokeWidth="4"
+                strokeLinecap="round"
                 transform={`rotate(${hourDeg} 50 50)`}
                 style={{ transition: 'transform 0.3s ease-in-out' }}
             />
              {/* Minute Hand */}
-            <path
-                d="M 49 50 L 49 18 L 51 18 L 51 50 Z"
-                fill="url(#handGradient)"
+            <line
+                x1="50" y1="50"
+                x2="50" y2="18"
+                stroke="hsl(var(--foreground))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
                 transform={`rotate(${minuteDeg} 50 50)`}
                 style={{ transition: 'transform 0.3s ease-in-out' }}
             />
              {/* Second Hand */}
              <rect
                 x="49.5"
-                y="18"
+                y="15"
                 width="1"
-                height="32"
+                height="35"
                 rx="0.5"
                 fill={color}
                 transform={`rotate(${secondDeg} 50 50)`}
