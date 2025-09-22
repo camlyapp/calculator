@@ -455,7 +455,7 @@ const TimeZoneConverter = () => {
             <Tabs defaultValue="world-clock" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="world-clock">World Clock</TabsTrigger>
-                    <TabsTrigger value="converter">Converter</TabsTrigger>
+                    <TabsTrigger value="converter">Time Converter</TabsTrigger>
                 </TabsList>
                 <TabsContent value="world-clock">
                     <WorldClock />
