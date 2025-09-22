@@ -16,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AllCalculators from '@/components/all-calculators';
-import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import CreatinineClearanceCalculator from '@/components/creatinine-clearance-calculator';
 import EgfrCalculator from '@/components/egfr-calculator';
 import { useSearchParams } from 'next/navigation';
@@ -52,7 +51,7 @@ export default function PersonalHealthCalculators() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-5xl mx-auto space-y-8">
-          <GlobalCurrencySwitcher />
+          
           <AllCalculators />
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
                <div className="sm:hidden mb-4">

@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Menubar, MenubarMenu, MenubarTrigger, MenubarContent } from './ui/menubar';
+import GlobalCurrencySwitcher from './global-currency-switcher';
 
 
 const navLinks = [
@@ -46,6 +47,7 @@ const Header = () => {
           
           <div className="flex items-center gap-2">
              <SearchCommand />
+             <GlobalCurrencySwitcher />
              <Menubar className="p-0 border-none bg-transparent">
               <MenubarMenu>
                 <MenubarTrigger asChild>

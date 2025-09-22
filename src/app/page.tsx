@@ -27,7 +27,6 @@ import FdCalculator from '@/components/fd-calculator';
 import PpfCalculator from '@/components/ppf-calculator';
 import GratuityCalculator from '@/components/gratuity-calculator';
 import RoiCalculator from '@/components/roi-calculator';
-import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import Hero from '@/components/hero';
 import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
@@ -72,7 +71,7 @@ export default function Home() {
       <Hero />
       <main id="calculators" className="flex-grow p-4 sm:p-6 md:p-8">
         <div className="w-full max-w-7xl mx-auto space-y-8">
-          <GlobalCurrencySwitcher />
+          
           
           <AllCalculators />
 

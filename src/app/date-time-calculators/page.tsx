@@ -12,7 +12,6 @@ import DateManipulationTab from '@/components/date-manipulation-tab';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import AllCalculators from '@/components/all-calculators';
-import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
 import TimeZoneConverter from '@/components/time-zone-converter';
@@ -43,7 +42,7 @@ export default function DateTimeCalculators() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-4xl mx-auto space-y-8">
-          <GlobalCurrencySwitcher />
+          
           <AllCalculators />
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
             <div className="sm:hidden mb-4">

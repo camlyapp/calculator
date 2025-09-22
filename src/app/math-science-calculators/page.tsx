@@ -20,7 +20,6 @@ import AllCalculators from '@/components/all-calculators';
 import DiscountCalculator from '@/components/discount-calculator';
 import MarkupMarginCalculator from '@/components/markup-margin-calculator';
 import BreakEvenCalculator from '@/components/break-even-calculator';
-import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
 import ChemistrySolver from '@/components/chemistry-solver';
@@ -58,7 +57,7 @@ export default function MathScienceCalculators() {
       <Header />
       <main className="flex-grow p-4 sm:p-6 md:p-8 flex flex-col items-center">
         <div className="w-full max-w-4xl mx-auto space-y-8">
-          <GlobalCurrencySwitcher />
+          
           <AllCalculators />
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full mt-8">
             <div className="sm:hidden mb-4">
