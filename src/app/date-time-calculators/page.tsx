@@ -15,6 +15,7 @@ import AllCalculators from '@/components/all-calculators';
 import GlobalCurrencySwitcher from '@/components/global-currency-switcher';
 import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
+import TimeZoneConverter from '@/components/time-zone-converter';
 
 const calculatorTabs = [
     { value: 'add-subtract-days', label: 'Add/Subtract Days' },
@@ -22,6 +23,7 @@ const calculatorTabs = [
     { value: 'countdown', label: 'Countdown' },
     { value: 'date-difference', label: 'Date Difference' },
     { value: 'workdays', label: 'Workdays' },
+    { value: 'time-zone', label: 'Time Zone Converter' },
 ];
 
 export default function DateTimeCalculators() {
@@ -78,6 +80,9 @@ export default function DateTimeCalculators() {
             </TabsContent>
             <TabsContent value="countdown">
               <CountdownCalculator />
+            </TabsContent>
+            <TabsContent value="time-zone">
+              <TimeZoneConverter />
             </TabsContent>
           </Tabs>
         </div>
