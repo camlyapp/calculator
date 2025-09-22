@@ -31,28 +31,26 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
         <svg width="100%" height="100%" viewBox="0 0 100 100" aria-label="Minimalist analog clock" {...props}>
              {/* Clock Face */}
             <circle cx="50" cy="50" r="48" fill="hsl(var(--card))" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="1" />
-
-            {/* Main markers (12, 3, 6, 9) */}
-            {Array.from({ length: 4 }).map((_, i) => (
-                <rect
+            
+            {/* Hour Markers as dots */}
+            {Array.from({ length: 12 }).map((_, i) => (
+                <circle
                     key={i}
-                    x="49"
-                    y="4"
-                    width="2"
-                    height="8"
-                    fill="hsl(var(--foreground))"
-                    rx="1"
-                    transform={`rotate(${i * 90} 50 50)`}
+                    cx="50"
+                    cy="10"
+                    r={i % 3 === 0 ? 2 : 1}
+                    fill="hsl(var(--muted-foreground))"
+                    transform={`rotate(${i * 30} 50 50)`}
                 />
             ))}
 
             {/* Hour Hand */}
             <rect
-                x="48"
-                y="35"
-                width="4"
-                height="15"
-                rx="2"
+                x="48.5"
+                y="28"
+                width="3"
+                height="22"
+                rx="1.5"
                 fill="hsl(var(--foreground))"
                 transform={`rotate(${hourDeg} 50 50)`}
                 style={{ transition: 'transform 0.3s ease-in-out' }}
@@ -60,29 +58,28 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
              {/* Minute Hand */}
             <rect
                 x="49"
-                y="20"
+                y="15"
                 width="2"
-                height="30"
+                height="35"
                 rx="1"
                 fill="hsl(var(--foreground))"
                 transform={`rotate(${minuteDeg} 50 50)`}
                 style={{ transition: 'transform 0.3s ease-in-out' }}
             />
-             {/* Second Hand */}
-             <line
-                x1="50"
-                y1="60"
-                x2="50"
-                y2="15"
-                stroke="var(--clock-accent-color)"
-                strokeWidth="1.5"
-                strokeLinecap="round"
+             {/* Second Hand - Now a thicker, filled rectangle for accessibility */}
+             <rect
+                x="49.5"
+                y="18"
+                width="1"
+                height="32"
+                rx="0.5"
+                fill="hsl(var(--primary))"
                 transform={`rotate(${secondDeg} 50 50)`}
                 style={{ transition: 'transform 0.1s linear' }}
             />
 
             {/* Center dot */}
-            <circle cx="50" cy="50" r="2" fill="var(--clock-accent-color)" />
+            <circle cx="50" cy="50" r="3" fill="hsl(var(--card))" stroke="hsl(var(--foreground))" strokeWidth="1" />
         </svg>
     </div>
   );
