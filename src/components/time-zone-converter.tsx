@@ -365,7 +365,7 @@ const TimeConverter = () => {
 
                  const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
                  const resultTime = targetFormatter.format(finalDate);
-                 const resultDate = new Intl.DateTimeFormat('en-US', { time Zone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(finalDate);
+                 const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(finalDate);
                  const { isDst, offset: targetOffset } = getTimeZoneDetails(finalDate, targetTz);
                  return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
 
