@@ -54,9 +54,8 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
             })}
 
              {/* Hour Hand */}
-             <line
-                x1="50" y1="50"
-                x2="50" y2="30"
+             <path
+                d="M 50 50 L 50 30"
                 stroke="hsl(var(--foreground))"
                 strokeWidth="4"
                 strokeLinecap="round"
@@ -64,9 +63,8 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
                 style={{ transition: 'transform 0.3s ease-in-out' }}
             />
              {/* Minute Hand */}
-            <line
-                x1="50" y1="50"
-                x2="50" y2="18"
+            <path
+                d="M 50 50 L 50 18"
                 stroke="hsl(var(--foreground))"
                 strokeWidth="2.5"
                 strokeLinecap="round"
@@ -74,16 +72,18 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
                 style={{ transition: 'transform 0.3s ease-in-out' }}
             />
              {/* Second Hand */}
-             <rect
-                x="49.5"
-                y="15"
-                width="1"
-                height="35"
-                rx="0.5"
-                fill={color}
+             <line
+                x1="50"
+                y1="50"
+                x2="50"
+                y2="15"
+                stroke={color}
+                strokeWidth="1.5"
                 transform={`rotate(${secondDeg} 50 50)`}
                 style={{ transition: 'transform 0.1s linear' }}
-            />
+             />
+             <circle cx="50" cy="15" r="2.5" fill={color} transform={`rotate(${secondDeg} 50 50)`} style={{ transition: 'transform 0.1s linear' }} />
+            
             {/* Center dot */}
             <circle cx="50" cy="50" r="4" fill={color} />
             <circle cx="50" cy="50" r="2" fill="hsl(var(--card))" />
