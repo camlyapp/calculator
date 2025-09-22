@@ -25,8 +25,6 @@ import AnalogClockMinimalist from './analog-clock-minimalist';
 import { timezoneInfo } from '@/lib/timezone-info';
 import Flag from 'react-world-flags';
 import TimeZoneSearch from './timezone-search';
-import { calculateBusinessDaysAction } from '@/app/actions';
-import type { CalculateBusinessDaysOutput } from '@/ai/flows/calculate-business-days';
 import { Skeleton } from './ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 
@@ -50,6 +48,7 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
             hour: 'numeric',
             minute: 'numeric',
             second: 'numeric',
+            weekday: 'numeric', // 1 (Mon) to 7 (Sun) for `en-US`
             hour12: false,
             timeZoneName: 'shortOffset',
         });
@@ -58,10 +57,10 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
         const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
         const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0');
         const second = parseInt(parts.find(p => p.type === 'second')?.value || '0');
+        const weekday = parseInt(parts.find(p => p.type === 'weekday')?.value || '0');
         const offset = parts.find(p => p.type === 'timeZoneName')?.value || 'GMT';
 
         // Check for DST by comparing standard and DST offsets.
-        // This is a heuristic: get the offsets in January and June and see if they differ.
         const janDate = new Date(date.getFullYear(), 0, 1);
         const julDate = new Date(date.getFullYear(), 6, 1);
         
@@ -71,14 +70,15 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
         const janOffsetPart = janFormatter.formatToParts(janDate).find(p=>p.type==='timeZoneName');
         const julOffsetPart = julFormatter.formatToParts(julDate).find(p=>p.type==='timeZoneName');
 
-        // It's DST if the offsets are different and the current offset matches the "summer" offset.
         const isDst = (janOffsetPart?.value !== julOffsetPart?.value) && (offset === julOffsetPart?.value);
 
+        const isBusinessHours = hour >= 9 && hour < 17 && weekday >= 1 && weekday <= 5; // Mon-Fri, 9am-5pm
 
-        return { h: hour, m: minute, s: second, offset, isDst };
+
+        return { h: hour, m: minute, s: second, offset, isDst, isBusinessHours };
     } catch(e) {
         console.error(`Failed to get details for timezone: ${timeZone}`, e);
-        return { h: 0, m: 0, s: 0, offset: 'N/A', isDst: false };
+        return { h: 0, m: 0, s: 0, offset: 'N/A', isDst: false, isBusinessHours: false };
     }
 }
 
@@ -210,7 +210,7 @@ const WorldClock = () => {
 
             <div className="space-y-4">
                 {selectedTimezones.map((tz, index) => {
-                    const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
+                    const { h, m, s, offset, isDst, isBusinessHours } = getTimeZoneDetails(displayTime, tz);
                     const countryInfo = timezoneInfo[tz];
                     const countryName = countryInfo ? countryInfo.countryName : '';
                     const color = clockColors[index % clockColors.length];
@@ -257,7 +257,7 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-border"
                                 />
                             </div>
                             <div className="flex-1 w-full">
@@ -276,6 +276,13 @@ const WorldClock = () => {
                                     <div className="text-right">
                                         <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
                                         <p className="text-xs text-muted-foreground h-4">{getDayIndicator(displayTime, tz)}</p>
+                                         <div className={cn(
+                                            "flex items-center justify-end gap-1 text-xs font-semibold mt-1",
+                                            isBusinessHours ? "text-green-600" : "text-red-600"
+                                        )}>
+                                            {isBusinessHours ? <Briefcase className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                                            {isBusinessHours ? 'Open' : 'Closed'}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -447,185 +454,24 @@ const TimeConverter = () => {
     );
 };
 
-interface ResultRow {
-    id: string;
-    timeZone: string;
-    result: CalculateBusinessDaysOutput | null;
-    isLoading: boolean;
-    error?: string;
-}
-
-const BusinessDaysCalculatorTab = () => {
-    const [startDate, setStartDate] = useState<Date | undefined>(new Date());
-    const [endDate, setEndDate] = useState<Date | undefined>(new Date(new Date().setMonth(new Date().getMonth() + 1)));
-    const [rows, setRows] = useState<ResultRow[]>([
-        { id: `row-${Date.now()}-1`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, result: null, isLoading: false },
-        { id: `row-${Date.now()}-2`, timeZone: 'America/New_York', result: null, isLoading: false },
-    ]);
-    const { toast } = useToast();
-
-    const calculateAll = async () => {
-        if (!startDate || !endDate || !isValid(startDate) || !isValid(endDate)) {
-            toast({ variant: 'destructive', title: 'Invalid Dates', description: 'Please select valid start and end dates.' });
-            return;
-        }
-
-        if (endDate < startDate) {
-            toast({ variant: 'destructive', title: 'Invalid Date Range', description: 'End date cannot be earlier than start date.' });
-            return;
-        }
-
-        const newRows = rows.map(row => ({ ...row, isLoading: true, error: undefined }));
-        setRows(newRows);
-
-        const promises = newRows.map(async (row) => {
-            const response = await calculateBusinessDaysAction({
-                startDate: format(startDate, 'yyyy-MM-dd'),
-                endDate: format(endDate, 'yyyy-MM-dd'),
-                timeZone: row.timeZone,
-            });
-
-            return {
-                ...row,
-                result: response.result || null,
-                isLoading: false,
-                error: response.error,
-            };
-        });
-
-        const settledRows = await Promise.all(promises);
-        setRows(settledRows);
-    };
-    
-    const addRow = () => {
-        const newId = `row-${Date.now()}-${Math.random()}`;
-        setRows([...rows, { id: newId, timeZone: 'Europe/London', result: null, isLoading: false }]);
-    };
-
-    const removeRow = (id: string) => {
-        setRows(rows.filter(row => row.id !== id));
-    };
-
-    const updateRowTimezone = (id: string, timeZone: string) => {
-        setRows(rows.map(row => (row.id === id ? { ...row, timeZone } : row)));
-    };
-    
-    const DatePicker = ({ date, setDate }: { date?: Date, setDate: (d?: Date) => void }) => (
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {date ? format(date, "PPP") : <span>Pick a date</span>}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0"><Calendar mode="single" selected={date} onSelect={setDate} captionLayout="dropdown-buttons" fromYear={1900} toYear={new Date().getFullYear() + 100} initialFocus /></PopoverContent>
-        </Popover>
-    );
-
-    return (
-        <CardContent className="space-y-6 pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                <div className="space-y-2">
-                    <Label>Start Date</Label>
-                    <DatePicker date={startDate} setDate={setStartDate} />
-                </div>
-                <div className="space-y-2">
-                    <Label>End Date</Label>
-                    <DatePicker date={endDate} setDate={setEndDate} />
-                </div>
-            </div>
-
-            <div className="space-y-4">
-                {rows.map((row, index) => (
-                    <div key={row.id} className="p-4 border rounded-lg space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-4 items-end">
-                            <div className="flex-1 space-y-2">
-                                <Label>Timezone</Label>
-                                <TimeZoneSearch
-                                    onSelectTimezone={(tz) => updateRowTimezone(row.id, tz)}
-                                    selectedTimezones={[row.timeZone]}
-                                    trigger={
-                                        <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                            {row.timeZone.replace(/_/g, ' ')}
-                                        </Button>
-                                    }
-                                />
-                            </div>
-                            {rows.length > 1 && (
-                                <Button variant="ghost" size="icon" onClick={() => removeRow(row.id)}>
-                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                            )}
-                        </div>
-
-                        {row.isLoading ? (
-                            <div className="flex items-center justify-center gap-2 py-4">
-                               <Loader2 className="h-5 w-5 animate-spin" />
-                               <p className="text-muted-foreground">Calculating...</p>
-                            </div>
-                        ) : row.error ? (
-                            <p className="text-destructive text-sm">Error: {row.error}</p>
-                        ) : row.result && (
-                            <div className="space-y-2 text-center">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-2 bg-secondary rounded-lg">
-                                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Briefcase className="h-4 w-4"/> Working Days</p>
-                                        <p className="text-2xl font-bold text-primary">{row.result.businessDays}</p>
-                                    </div>
-                                    <div className="p-2 bg-secondary rounded-lg">
-                                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Clock className="h-4 w-4"/> Working Hours</p>
-                                        <p className="text-2xl font-bold text-primary">{row.result.workingHours}</p>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-muted-foreground">
-                                    ({row.result.totalDays} total days - {row.result.weekendDays} weekend days - {row.result.holidays.length} holidays)
-                                </p>
-                                {row.result.holidays.length > 0 && (
-                                    <div className="text-xs text-muted-foreground">
-                                        <p className="font-semibold">Holidays observed:</p>
-                                        <p>{row.result.holidays.map(h => `${h.name} (${format(new Date(h.date), 'MMM d')})`).join(', ')}</p>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
-            </div>
-
-            <div className="flex justify-between">
-                <Button variant="outline" onClick={addRow}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
-                </Button>
-                <Button onClick={calculateAll}>
-                    <CalendarDays className="mr-2 h-4 w-4" /> Calculate All
-                </Button>
-            </div>
-        </CardContent>
-    );
-};
-
 
 const TimeZoneConverter = () => {
     return (
         <Card className="w-full max-w-4xl shadow-2xl mt-6">
             <CardHeader>
                 <CardTitle className="text-2xl">Time Zone Tools</CardTitle>
-                <CardDescription>Compare time zones, convert times, and calculate business days across the globe.</CardDescription>
+                <CardDescription>Compare time zones and convert times across the globe.</CardDescription>
             </CardHeader>
             <Tabs defaultValue="world-clock" className="w-full">
-                <TabsList className="grid w-full grid-cols-3">
+                <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="world-clock">World Clock</TabsTrigger>
                     <TabsTrigger value="converter">Time Converter</TabsTrigger>
-                    <TabsTrigger value="business-days">Business Days</TabsTrigger>
                 </TabsList>
                 <TabsContent value="world-clock">
                     <WorldClock />
                 </TabsContent>
                 <TabsContent value="converter">
                     <TimeConverter />
-                </TabsContent>
-                 <TabsContent value="business-days">
-                    <BusinessDaysCalculatorTab />
                 </TabsContent>
             </Tabs>
         </Card>
