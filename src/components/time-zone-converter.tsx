@@ -17,6 +17,16 @@ import { ScrollArea } from './ui/scroll-area';
 import AnalogClock from './analog-clock';
 
 
+const clockColors = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-2))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-5))',
+    'hsl(var(--accent))',
+];
+
+
 const WorldClock = () => {
     const [localTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
     const [selectedTimezones, setSelectedTimezones] = useState<string[]>([
@@ -136,11 +146,19 @@ const WorldClock = () => {
                 </div>
 
                 <div className="space-y-4">
-                    {selectedTimezones.map(tz => {
+                    {selectedTimezones.map((tz, index) => {
                         const { h, m, s } = getTimeParts(displayTime, tz);
+                        const color = clockColors[index % clockColors.length];
                         return (
                             <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                                <AnalogClock hours={h} minutes={m} seconds={s} />
+                                <AnalogClock 
+                                    hours={h} 
+                                    minutes={m} 
+                                    seconds={s} 
+                                    color={color}
+                                    className="border-2"
+                                    style={{ borderColor: color }}
+                                />
                                 <div className="flex-1">
                                     <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
                                     <p className="text-sm text-muted-foreground">{formatDate(displayTime, tz)}</p>
