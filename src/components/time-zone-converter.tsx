@@ -301,7 +301,7 @@ const WorldClock = () => {
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[350px] p-0" align="start">
+                <PopoverContent className="w-[400px] p-0" align="start">
                      <Command>
                         <CommandInput placeholder="Search timezones..." />
                         <CommandList>
@@ -317,11 +317,12 @@ const WorldClock = () => {
                                                     key={tz}
                                                     value={`${tz} ${country}`}
                                                     onSelect={() => addTimezone(tz)}
+                                                    className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4"
                                                 >
-                                                    <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
+                                                    <Check className={cn("h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
                                                     <div className="flex-1">
                                                         <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
-                                                        <p className="text-xs text-muted-foreground">{`${tz}, ${country}`}</p>
+                                                        <p className="text-xs text-muted-foreground">{`${tz.split('/')[0]}, ${country}`}</p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
@@ -504,3 +505,5 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
+
+    
