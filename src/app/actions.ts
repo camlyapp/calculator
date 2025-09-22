@@ -11,6 +11,7 @@ import { getPregnancyAdvice, type GetPregnancyAdviceInput, type GetPregnancyAdvi
 import { askPregnancyQuestion, type AskPregnancyQuestionInput, type AskPregnancyQuestionOutput } from '@/ai/flows/ask-pregnancy-question';
 import { solveChemistryProblem, type SolveChemistryProblemInput, type SolveChemistryProblemOutput } from '@/ai/flows/solve-chemistry-problem';
 import { generateFaq, type GenerateFaqInput, type GenerateFaqOutput } from '@/ai/flows/generate-faq';
+import { calculateBusinessDays, type CalculateBusinessDaysInput, type CalculateBusinessDaysOutput } from '@/ai/flows/calculate-business-days';
 
 
 import { z } from 'zod';
@@ -333,5 +334,28 @@ export async function generateFaqAction(
     } catch (e) {
         console.error(e);
         return { error: 'An unexpected error occurred while fetching FAQs. Please try again later.' };
+    }
+}
+
+
+const BusinessDaysSchema = z.object({
+    startDate: z.string(),
+    endDate: z.string(),
+    timeZone: z.string(),
+});
+
+export async function calculateBusinessDaysAction(
+    input: CalculateBusinessDaysInput
+): Promise<{ result?: CalculateBusinessDaysOutput; error?: string }> {
+    const validatedFields = BusinessDaysSchema.safeParse(input);
+    if (!validatedFields.success) {
+        return { error: 'Invalid input.' };
+    }
+    try {
+        const result = await calculateBusinessDays(validatedFields.data);
+        return { result };
+    } catch (e: any) {
+        console.error(e);
+        return { error: e.message || 'An unexpected error occurred while calculating business days.' };
     }
 }
