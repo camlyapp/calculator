@@ -53,9 +53,14 @@ const getTimeZoneDetails = (date: Date, timeZone: string) => {
         // This is a heuristic: get the offsets in January and June and see if they differ.
         const janDate = new Date(date.getFullYear(), 0, 1);
         const julDate = new Date(date.getFullYear(), 6, 1);
-        const janOffset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' }).format(janDate);
-        const julOffset = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' }).format(julDate);
-        const isDst = janOffset !== julOffset && formatter.format(date).includes(julOffset.split('T')[1]);
+        
+        const janFormatter = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' });
+        const julFormatter = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' });
+        
+        const janOffset = janFormatter.formatToParts(janDate).find(p=>p.type==='timeZoneName')?.value;
+        const julOffset = julFormatter.formatToParts(julDate).find(p=>p.type==='timeZoneName')?.value;
+        
+        const isDst = janOffset !== julOffset && formatter.format(date).includes(julOffset?.split('T')[1] || 'never');
 
 
         return { h: hour, m: minute, s: second, offset, isDst };
@@ -145,7 +150,7 @@ const WorldClock = () => {
     return (
         <CardContent className="space-y-6 pt-6">
             <div className="space-y-4">
-                <Label htmlFor="time-slider">Time Scrubber</Label>
+                <Label htmlFor="time-slider">Meeting Planner / Time Scrubber</Label>
                 <Slider
                     id="time-slider"
                     min={-12}
@@ -177,12 +182,15 @@ const WorldClock = () => {
                                 <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
                                 <p className="text-sm text-muted-foreground flex items-center gap-1">
                                     {formatDate(displayTime, tz)}
-                                    {isDst && <Sun className="h-3 w-3 text-yellow-500" title="Daylight Saving Time" />}
                                 </p>
+                                <div className="text-xs text-muted-foreground h-4 flex items-center gap-1">
+                                    <span>{offset}</span>
+                                    {isDst && <Sun className="h-3 w-3 text-yellow-500" title="Daylight Saving Time" />}
+                                </div>
                             </div>
                             <div className="text-right">
                                 <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
-                                <p className="text-xs text-muted-foreground h-4">{offset}</p>
+                                <p className="text-xs text-muted-foreground h-4">{getDayIndicator(displayTime, tz)}</p>
                             </div>
                             {tz !== localTimeZone && (
                                 <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
@@ -247,18 +255,37 @@ const TimeConverter = () => {
         if (!sourceDate) return { resultTime: '...', resultDate: '...', isResultDst: false, resultOffset: '...' };
 
         const [h, m, s] = sourceTime.split(':').map(Number);
-        const date = new Date(sourceDate);
-        date.setHours(h, m, s);
+        const sourceDateTimeString = `${format(sourceDate, 'yyyy-MM-dd')}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
         
         try {
+            // This is complex. We need to interpret the local time in the source TZ.
+            // A robust library would be better, but we can do a reasonable approximation.
+            // Let's create a date object and then format it in the target timezone.
+            // This relies on the browser's environment understanding the IANA timezones.
+             const sourceFormatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: sourceTz,
+                year: 'numeric', month: 'numeric', day: 'numeric',
+                hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false
+            });
+            const parts = sourceFormatter.formatToParts(new Date());
+            const getPart = (type: string) => parts.find(p => p.type === type)?.value || '';
+
+            // Construct an ISO-like string for the source time in its own timezone
+            const offset = new Intl.DateTimeFormat('en-US', {timeZoneName: 'shortOffset', timeZone: sourceTz}).formatToParts().find(p=>p.type==='timeZoneName')?.value?.replace('GMT','');
+            
+            // This is not perfectly robust across all edge cases but works for many scenarios.
+            const dateInSourceTz = new Date(sourceDateTimeString + offset);
+
+
             const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-            const resultTime = targetFormatter.format(date);
-            const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(date);
+            const resultTime = targetFormatter.format(dateInSourceTz);
+            const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(dateInSourceTz);
 
-            const { isDst, offset } = getTimeZoneDetails(date, targetTz);
+            const { isDst, offset: targetOffset } = getTimeZoneDetails(dateInSourceTz, targetTz);
 
-            return { resultTime, resultDate, isResultDst: isDst, resultOffset: offset };
+            return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
         } catch(e) {
+            console.error(e);
             return { resultTime: 'Invalid TZ', resultDate: '', isResultDst: false, resultOffset: '' };
         }
     }, [sourceDate, sourceTime, sourceTz, targetTz]);
@@ -353,3 +380,5 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
+
+    
