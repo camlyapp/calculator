@@ -8,12 +8,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { isFuture, format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Mic, MicOff } from 'lucide-react';
+import { CalendarIcon, Mic, MicOff, Volume, Volume1, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import TimePicker from './time-picker';
 import { Clock } from 'lucide-react';
 import SandboxAnimation from './sandbox-animation';
+import { Switch } from './ui/switch';
 
 const CountdownCalculator = () => {
     const tomorrow = new Date();
@@ -33,6 +34,12 @@ const CountdownCalculator = () => {
 
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<any>(null);
+    
+    const [isSecondSoundOn, setIsSecondSoundOn] = useState(false);
+    const [isHourlySoundOn, setIsHourlySoundOn] = useState(false);
+    const lastPlayedSecondRef = useRef<number | null>(null);
+    const lastPlayedHourRef = useRef<number | null>(null);
+
 
     useEffect(() => {
         setIsMounted(true);
@@ -53,51 +60,6 @@ const CountdownCalculator = () => {
         fullDate.setHours(hours, minutes, seconds);
         return fullDate;
     };
-    
-    const updateCountdown = () => {
-        const fullTargetDate = getFullTargetDate();
-
-        if (fullTargetDate && isFuture(fullTargetDate)) {
-            const now = new Date().getTime();
-            const target = fullTargetDate.getTime();
-            let difference = target - now;
-
-            if (difference > 0) {
-                 const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-                 difference -= days * (1000 * 60 * 60 * 24);
-                 const hours = Math.floor(difference / (1000 * 60 * 60));
-                 difference -= hours * (1000 * 60 * 60);
-                 const minutes = Math.floor(difference / (1000 * 60));
-                 difference -= minutes * (1000 * 60);
-                 const seconds = Math.floor(difference / 1000);
-                 const milliseconds = difference % 1000;
-                
-                setCountdown({ days, hours, minutes, seconds, milliseconds });
-
-                if (totalCountdownDuration > 0) {
-                    const remainingTime = (target - now);
-                    setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
-                }
-
-            } else {
-                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-                 setIsRunning(false);
-                 setCountdownProgress(0);
-                 if (timerRef.current) {
-                    clearInterval(timerRef.current);
-                    timerRef.current = null;
-                 }
-            }
-        } else {
-            setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-            setIsRunning(false);
-            setCountdownProgress(0);
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-                timerRef.current = null;
-             }
-        }
-    }
 
     const playBeep = () => {
         if (typeof window !== 'undefined' && window.AudioContext) {
@@ -127,6 +89,99 @@ const CountdownCalculator = () => {
         }
     };
 
+    const playTick = () => {
+        if (typeof window !== 'undefined' && window.AudioContext) {
+            const audioContext = new window.AudioContext();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(100, audioContext.currentTime); // Low frequency for a "tick"
+            gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.05);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+        }
+    };
+    
+    const playHourlyChime = () => {
+        if (typeof window !== 'undefined' && window.AudioContext) {
+            const audioContext = new window.AudioContext();
+            const playNote = (frequency: number, startTime: number, duration: number) => {
+                 const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime + startTime);
+                gainNode.gain.setValueAtTime(0.8, audioContext.currentTime + startTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + startTime + duration);
+                oscillator.start(audioContext.currentTime + startTime);
+                oscillator.stop(audioContext.currentTime + startTime + duration);
+            }
+            playNote(523.25, 0, 0.4); // C5
+            playNote(783.99, 0.5, 0.4); // G5
+        }
+    }
+
+    
+    const updateCountdown = () => {
+        const fullTargetDate = getFullTargetDate();
+
+        if (fullTargetDate && isFuture(fullTargetDate)) {
+            const now = new Date().getTime();
+            const target = fullTargetDate.getTime();
+            let difference = target - now;
+
+            if (difference > 0) {
+                 const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                 difference -= days * (1000 * 60 * 60 * 24);
+                 const hours = Math.floor(difference / (1000 * 60 * 60));
+                 difference -= hours * (1000 * 60 * 60);
+                 const minutes = Math.floor(difference / (1000 * 60));
+                 difference -= minutes * (1000 * 60);
+                 const seconds = Math.floor(difference / 1000);
+                 const milliseconds = difference % 1000;
+                
+                if (isSecondSoundOn && lastPlayedSecondRef.current !== seconds) {
+                    playTick();
+                    lastPlayedSecondRef.current = seconds;
+                }
+                
+                if (isHourlySoundOn && lastPlayedHourRef.current !== hours && minutes === 59 && seconds === 59) {
+                     // Play when the hour is about to change
+                     playHourlyChime();
+                     lastPlayedHourRef.current = hours;
+                }
+
+                setCountdown({ days, hours, minutes, seconds, milliseconds });
+
+                if (totalCountdownDuration > 0) {
+                    const remainingTime = (target - now);
+                    setCountdownProgress((remainingTime / totalCountdownDuration) * 100);
+                }
+
+            } else {
+                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+                 setIsRunning(false);
+                 setCountdownProgress(0);
+                 if (timerRef.current) {
+                    clearInterval(timerRef.current);
+                    timerRef.current = null;
+                 }
+            }
+        } else {
+            setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+            setIsRunning(false);
+            setCountdownProgress(0);
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+             }
+        }
+    }
+
 
     const handleStartStop = async () => {
         if (isRunning) {
@@ -152,6 +207,17 @@ const CountdownCalculator = () => {
                 const totalDuration = fullTargetDate.getTime() - now;
                 setTotalCountdownDuration(totalDuration);
                 setCountdownProgress(100);
+
+                const currentCountdown = {
+                    days: Math.floor(totalDuration / (1000 * 60 * 60 * 24)),
+                    hours: Math.floor((totalDuration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                    minutes: Math.floor((totalDuration % (1000 * 60 * 60)) / (1000 * 60)),
+                    seconds: Math.floor((totalDuration % (1000 * 60)) / 1000),
+                    milliseconds: totalDuration % 1000,
+                };
+                lastPlayedSecondRef.current = currentCountdown.seconds;
+                lastPlayedHourRef.current = currentCountdown.hours;
+
                 setIsRunning(true);
                 
                 const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
@@ -191,7 +257,7 @@ const CountdownCalculator = () => {
                 clearInterval(timerRef.current);
             }
         };
-    }, [isRunning]);
+    }, [isRunning, isSecondSoundOn, isHourlySoundOn]);
     
      if (!isMounted) {
         return null;
@@ -257,6 +323,21 @@ const CountdownCalculator = () => {
                                 </Popover>
                         </div>
                     </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 border rounded-lg">
+                        <div className="flex items-center space-x-2">
+                             <Switch id="second-sound" checked={isSecondSoundOn} onCheckedChange={setIsSecondSoundOn} disabled={!isRunning}/>
+                             <Label htmlFor="second-sound" className="flex items-center gap-2">
+                                <Volume1 className="h-5 w-5" /> Second Tick Sound
+                            </Label>
+                        </div>
+                         <div className="flex items-center space-x-2">
+                             <Switch id="hourly-sound" checked={isHourlySoundOn} onCheckedChange={setIsHourlySoundOn} disabled={!isRunning}/>
+                             <Label htmlFor="hourly-sound" className="flex items-center gap-2">
+                                <Volume2 className="h-5 w-5" /> Hourly Chime
+                            </Label>
+                        </div>
+                    </div>
 
                     <Button onClick={handleStartStop} className="w-full">
                         {isRunning ? 'Stop Countdown' : 'Start Countdown'}
@@ -299,5 +380,3 @@ const CountdownCalculator = () => {
 };
 
 export default CountdownCalculator;
-
-    
