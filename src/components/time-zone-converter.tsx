@@ -317,19 +317,22 @@ const WorldClock = () => {
                                                     key={tz}
                                                     value={`${tz} ${country}`}
                                                     onSelect={() => addTimezone(tz)}
-                                                    className="grid grid-cols-[auto_1fr_auto] items-center gap-x-4"
                                                 >
-                                                    <Check className={cn("h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
-                                                    <div className="flex-1">
-                                                        <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
-                                                        <p className="text-xs text-muted-foreground">{`${tz.split('/')[0]}, ${country}`}</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
-                                                        <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                                                            {offset}
-                                                            {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
-                                                        </p>
+                                                    <div className='w-full flex items-center justify-between'>
+                                                        <div className="flex items-center">
+                                                            <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
+                                                            <div>
+                                                                <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
+                                                                <p className="text-xs text-muted-foreground">{`${tz.split('/')[0]}, ${country}`}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
+                                                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                                                                {offset}
+                                                                {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
+                                                            </p>
+                                                        </div>
                                                     </div>
                                                 </CommandItem>
                                             )
