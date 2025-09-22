@@ -207,6 +207,8 @@ const WorldClock = () => {
             <div className="space-y-4">
                 {selectedTimezones.map((tz, index) => {
                     const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
+                    const countryInfo = timezoneInfo[tz];
+                    const countryName = countryInfo ? countryInfo.countryName : '';
                     const color = clockColors[index % clockColors.length];
                     const isDragging = draggedTz === tz;
                     const ClockComponent1 = clockComponents[0];
@@ -259,6 +261,7 @@ const WorldClock = () => {
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
+                                        <p className="text-sm text-muted-foreground">{countryName}</p>
                                         <p className="text-sm text-muted-foreground flex items-center gap-1">
                                             {formatDate(displayTime, tz)}
                                         </p>
@@ -467,5 +470,3 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
-
-    
