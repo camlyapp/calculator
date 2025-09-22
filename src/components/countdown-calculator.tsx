@@ -24,6 +24,7 @@ const CountdownCalculator = () => {
     const [isMounted, setIsMounted] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const alarmRef = useRef<NodeJS.Timeout | null>(null);
+    const endTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
 
     const [countdownProgress, setCountdownProgress] = useState(100);
@@ -49,6 +50,7 @@ const CountdownCalculator = () => {
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
             if (alarmRef.current) clearInterval(alarmRef.current);
+            if (endTimeoutRef.current) clearTimeout(endTimeoutRef.current);
         };
     }, []);
 
@@ -161,17 +163,7 @@ const CountdownCalculator = () => {
                 }
 
             } else {
-                 setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
-                 setIsRunning(false);
-                 setCountdownProgress(0);
-                 if (timerRef.current) {
-                    clearInterval(timerRef.current);
-                    timerRef.current = null;
-                 }
-                 if (!alarmRef.current) {
-                    playBeep(); // Play once immediately
-                    alarmRef.current = setInterval(playBeep, 2000); // And then every 2 seconds
-                 }
+                // This case is now handled by the timeout in handleStartStop
             }
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
@@ -188,19 +180,15 @@ const CountdownCalculator = () => {
     const handleStartStop = async () => {
         if (isRunning) {
             setIsRunning(false);
-            if (timerRef.current) {
-                clearInterval(timerRef.current);
-                timerRef.current = null;
-            }
-            if (alarmRef.current) {
-                clearInterval(alarmRef.current);
-                alarmRef.current = null;
-            }
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (alarmRef.current) clearInterval(alarmRef.current);
+            if (endTimeoutRef.current) clearTimeout(endTimeoutRef.current);
+            timerRef.current = null;
+            alarmRef.current = null;
+            endTimeoutRef.current = null;
         } else {
-             if (alarmRef.current) {
-                clearInterval(alarmRef.current);
-                alarmRef.current = null;
-            }
+            if (alarmRef.current) clearInterval(alarmRef.current);
+            
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
                  if ('Notification' in window && Notification.permission === 'default') {
@@ -232,13 +220,23 @@ const CountdownCalculator = () => {
                 
                 const timeRemaining = fullTargetDate.getTime() - new Date().getTime();
                 if (timeRemaining > 0) {
-                     setTimeout(() => {
+                     endTimeoutRef.current = setTimeout(() => {
                          if (Notification.permission === 'granted') {
                              new Notification('Countdown Finished!', {
                                 body: `Your countdown for ${fullTargetDate.toLocaleString()} has ended.`,
                                 icon: '/camly.png'
                              });
                          }
+                         setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
+                         setIsRunning(false);
+                         setCountdownProgress(0);
+                         if (timerRef.current) clearInterval(timerRef.current);
+
+                         if (!alarmRef.current) {
+                            playBeep();
+                            alarmRef.current = setInterval(playBeep, 2000);
+                         }
+
                      }, timeRemaining);
                 }
             } else {
@@ -394,7 +392,5 @@ const CountdownCalculator = () => {
 };
 
 export default CountdownCalculator;
-
-    
 
     
