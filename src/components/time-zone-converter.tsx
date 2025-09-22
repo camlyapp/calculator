@@ -213,7 +213,7 @@ const WorldClock = () => {
                 </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {selectedTimezones.map((tz, index) => {
                     const { h, m, s, offset, isDst, isBusinessHours } = getTimeZoneDetails(displayTime, tz);
                     const countryInfo = timezoneInfo[tz];
@@ -233,28 +233,25 @@ const WorldClock = () => {
                             onDrop={(e) => handleDrop(e, tz)}
                             onDragEnd={() => setDraggedTz(null)}
                             className={cn(
-                                'flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-secondary/50 transition-opacity',
+                                'flex flex-col items-center gap-4 p-4 rounded-lg bg-secondary/50 transition-opacity',
                                 tz !== localTimeZone && 'cursor-grab',
                                 isDragging && 'opacity-50'
                             )}
                         >
-                             <div className={cn("flex items-center", tz === localTimeZone && "invisible")}>
-                                <GripVertical className="h-5 w-5 text-muted-foreground" />
-                            </div>
                             <div className="flex items-center justify-center gap-2">
                                 <ClockComponent1
                                     hours={h}
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    className="w-20 h-20"
                                 />
                                 <ClockComponent2
                                     hours={h}
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    className="w-20 h-20"
                                     style={{ '--clock-accent-color': color } as React.CSSProperties}
                                 />
                                 <ClockComponent3
@@ -262,7 +259,7 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    className="w-20 h-20"
                                 />
                             </div>
                             <div className="flex-1 w-full">
@@ -293,10 +290,13 @@ const WorldClock = () => {
                             </div>
                            
                             {tz !== localTimeZone && (
-                                <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
+                                <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)} className="absolute top-2 right-2">
                                     <X className="h-4 w-4" />
                                 </Button>
                             )}
+                             <div className={cn("absolute top-2 left-2", tz === localTimeZone && "invisible")}>
+                                <GripVertical className="h-5 w-5 text-muted-foreground" />
+                            </div>
                         </div>
                     )
                 })}
@@ -485,5 +485,7 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
+
+    
 
     
