@@ -1,9 +1,10 @@
+
 'use server';
 
 /**
- * @fileOverview Calculates the number of business days between two dates, accounting for timezone-specific holidays.
+ * @fileOverview Calculates the number of business days and working hours between two dates, accounting for timezone-specific holidays.
  *
- * - calculateBusinessDays - A function that returns the number of business days and lists the holidays.
+ * - calculateBusinessDays - A function that returns the number of business days, working hours, and lists the holidays.
  * - CalculateBusinessDaysInput - The input type for the calculateBusinessDays function.
  * - CalculateBusinessDaysOutput - The return type for the calculateBusinessDays function.
  */
@@ -26,7 +27,8 @@ const HolidaySchema = z.object({
 const CalculateBusinessDaysOutputSchema = z.object({
   totalDays: z.number().describe("The total number of days in the period."),
   weekendDays: z.number().describe("The number of Saturdays and Sundays in the period."),
-  businessDays: z.number().describe("The net number of business days after excluding weekends and public holidays."),
+  businessDays: z.number().describe("The net number of business days (working days) after excluding weekends and public holidays."),
+  workingHours: z.number().describe("The total number of working hours, assuming a standard 8-hour workday (9am-5pm)."),
   holidays: z.array(HolidaySchema).describe("A list of public holidays that fall on a weekday within the given period for the specified timezone."),
 });
 export type CalculateBusinessDaysOutput = z.infer<typeof CalculateBusinessDaysOutputSchema>;
@@ -49,7 +51,7 @@ const calculateBusinessDaysFlow = ai.defineFlow(
   },
   async ({ startDate, endDate, timeZone }) => {
     
-    const prompt = `You are a calendar and holiday expert. Your task is to calculate the number of business days between two dates for a specific timezone.
+    const prompt = `You are a calendar and holiday expert. Your task is to calculate the number of working days and hours between two dates for a specific timezone.
 
     Follow these steps precisely:
     1.  The date range is from ${startDate} to ${endDate}, inclusive.
@@ -59,7 +61,8 @@ const calculateBusinessDaysFlow = ai.defineFlow(
     5.  Third, identify all public/national holidays that occur within this date range for the specified timezone.
     6.  CRITICAL: Only count holidays that fall on a weekday (Monday-Friday). If a holiday falls on a weekend, it does not reduce the business day count.
     7.  List the weekday public holidays you found, with their date and name.
-    8.  Finally, calculate the net business days by subtracting the count of weekend days AND the count of weekday public holidays from the total number of days.
+    8.  Calculate the net 'businessDays' (working days) by subtracting the count of weekend days AND the count of weekday public holidays from the total number of days.
+    9.  Calculate the 'workingHours' by multiplying the number of business days by 8 (assuming a standard 8-hour workday).
 
     Return the result in the specified JSON format.
     `;

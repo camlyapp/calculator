@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { timeZones } from '@/lib/timezones';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { PlusCircle, Trash2, X, Sun, Moon, GripVertical, Loader2, CalendarDays } from 'lucide-react';
+import { PlusCircle, Trash2, X, Sun, Moon, GripVertical, Loader2, CalendarDays, Briefcase } from 'lucide-react';
 import { Slider } from './ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandInput, CommandGroup, CommandItem, CommandList } from './ui/command';
@@ -257,7 +257,7 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-border"
+                                    className="w-20 h-20 sm:w-24 sm:h-24"
                                 />
                             </div>
                             <div className="flex-1 w-full">
@@ -559,16 +559,25 @@ const BusinessDaysCalculatorTab = () => {
                         </div>
 
                         {row.isLoading ? (
-                            <div className="space-y-2">
-                                <Skeleton className="h-8 w-full" />
-                                <Skeleton className="h-6 w-3/4" />
+                            <div className="flex items-center justify-center gap-2 py-4">
+                               <Loader2 className="h-5 w-5 animate-spin" />
+                               <p className="text-muted-foreground">Calculating...</p>
                             </div>
                         ) : row.error ? (
                             <p className="text-destructive text-sm">Error: {row.error}</p>
                         ) : row.result && (
-                            <div className="space-y-2">
-                                <p className="text-2xl font-bold text-primary text-center">{row.result.businessDays} Business Days</p>
-                                <p className="text-xs text-muted-foreground text-center">
+                            <div className="space-y-2 text-center">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="p-2 bg-secondary rounded-lg">
+                                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Briefcase className="h-4 w-4"/> Working Days</p>
+                                        <p className="text-2xl font-bold text-primary">{row.result.businessDays}</p>
+                                    </div>
+                                    <div className="p-2 bg-secondary rounded-lg">
+                                        <p className="text-sm text-muted-foreground flex items-center justify-center gap-1"><Clock className="h-4 w-4"/> Working Hours</p>
+                                        <p className="text-2xl font-bold text-primary">{row.result.workingHours}</p>
+                                    </div>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
                                     ({row.result.totalDays} total days - {row.result.weekendDays} weekend days - {row.result.holidays.length} holidays)
                                 </p>
                                 {row.result.holidays.length > 0 && (
