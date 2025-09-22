@@ -22,6 +22,7 @@ const CountdownCalculator = () => {
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number, milliseconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isPaused, setIsPaused] = useState(false);
+    const [isFinished, setIsFinished] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     
     const timerRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,6 +163,7 @@ const CountdownCalculator = () => {
         } else {
             setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0, milliseconds: 0 });
             setIsRunning(false);
+            setIsFinished(true);
             setCountdownProgress(0);
             if (timerRef.current) clearInterval(timerRef.current);
             if (Notification.permission === 'granted') {
@@ -177,24 +179,33 @@ const CountdownCalculator = () => {
         }
     }
 
+    const resetState = () => {
+        setIsRunning(false);
+        setIsPaused(false);
+        setIsFinished(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+        if (alarmRef.current) clearInterval(alarmRef.current);
+        alarmRef.current = null;
+        setCountdown(null);
+        setCountdownProgress(100);
+    }
+
 
     const handleStartStop = async () => {
         // --- STOP ---
-        if (isRunning) {
-            setIsRunning(false);
-            setIsPaused(false);
-            if (timerRef.current) clearInterval(timerRef.current);
-            if (alarmRef.current) clearInterval(alarmRef.current);
-            alarmRef.current = null;
-            setCountdown(null);
-            setCountdownProgress(100);
+        if (isRunning || isFinished) {
+            if (alarmRef.current) {
+                clearInterval(alarmRef.current);
+                alarmRef.current = null;
+            } else {
+                 resetState();
+            }
             return;
         }
 
         // --- START ---
         if (!isRunning) {
-            if (alarmRef.current) clearInterval(alarmRef.current);
-            alarmRef.current = null;
+            resetState();
             
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
@@ -264,6 +275,13 @@ const CountdownCalculator = () => {
     }
 
     const renderMainButton = () => {
+        if (isFinished) {
+            return (
+                <Button onClick={handleStartStop} className="w-full" variant="destructive">
+                    {alarmRef.current ? 'Stop Alarm' : 'Reset'}
+                </Button>
+            )
+        }
         if (isRunning) {
             return (
                  <Button onClick={handleStartStop} className="w-full" variant="destructive">
@@ -357,7 +375,7 @@ const CountdownCalculator = () => {
                         )}
                     </div>
 
-                    {(countdown || isRunning) && (
+                    {(countdown || isRunning || isFinished) && (
                         <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/50 p-6 rounded-lg">
                            <div className="flex items-center justify-center gap-6">
                                 <SandboxAnimation percentage={countdownProgress} isPaused={isPaused} />
