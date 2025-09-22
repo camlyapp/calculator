@@ -61,14 +61,16 @@ const getTimeZoneDetails = (date: Date, timeZone: string) => {
         const janFormatter = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' });
         const julFormatter = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'shortOffset' });
         
-        const janOffset = janFormatter.formatToParts(janDate).find(p=>p.type==='timeZoneName')?.value;
-        const julOffset = julFormatter.formatToParts(julDate).find(p=>p.type==='timeZoneName')?.value;
-        
-        const isDst = janOffset !== julOffset && formatter.format(date).includes(julOffset?.split('T')[1] || 'never');
+        const janOffsetPart = janFormatter.formatToParts(janDate).find(p=>p.type==='timeZoneName');
+        const julOffsetPart = julFormatter.formatToParts(julDate).find(p=>p.type==='timeZoneName');
+
+        // It's DST if the offsets are different and the current offset matches the "summer" offset.
+        const isDst = (janOffsetPart?.value !== julOffsetPart?.value) && (offset === julOffsetPart?.value);
 
 
         return { h: hour, m: minute, s: second, offset, isDst };
     } catch(e) {
+        console.error(`Failed to get details for timezone: ${timeZone}`, e);
         return { h: 0, m: 0, s: 0, offset: 'N/A', isDst: false };
     }
 }
@@ -81,8 +83,6 @@ const WorldClock = () => {
         'America/New_York',
         'Europe/London',
         'Asia/Tokyo',
-        'Australia/Sydney',
-        'America/Sao_Paulo',
     ]);
     const [timeOffset, setTimeOffset] = useState(0); // Offset in hours from current time
     const [now, setNow] = useState(new Date());
@@ -90,6 +90,16 @@ const WorldClock = () => {
     const [open, setOpen] = useState(false)
     const [draggedTz, setDraggedTz] = useState<string | null>(null);
 
+    const groupedTimezones = useMemo(() => {
+        return timeZones.reduce((acc, tz) => {
+            const [continent, ...rest] = tz.split('/');
+            if (!acc[continent]) {
+                acc[continent] = [];
+            }
+            acc[continent].push(tz);
+            return acc;
+        }, {} as Record<string, string[]>);
+    }, []);
 
     useEffect(() => {
         setIsMounted(true);
@@ -138,14 +148,18 @@ const WorldClock = () => {
     }
     
     const getDayIndicator = (date: Date, timeZone: string): string => {
-        const localDate = new Date(date.toLocaleString('en-US', { timeZone: localTimeZone }));
-        const targetDate = new Date(date.toLocaleString('en-US', { timeZone }));
+        try {
+            const localDate = new Date(date.toLocaleString('en-US', { timeZone: localTimeZone }));
+            const targetDate = new Date(date.toLocaleString('en-US', { timeZone }));
 
-        const localDay = localDate.getDate();
-        const targetDay = targetDate.getDate();
+            const localDay = localDate.getDate();
+            const targetDay = targetDate.getDate();
 
-        if (targetDay > localDay || (targetDay === 1 && localDay > 25)) return 'Next Day';
-        if (targetDay < localDay || (localDay === 1 && targetDay > 25)) return 'Prev. Day';
+            if (targetDay > localDay || (targetDay === 1 && localDay > 25)) return 'Next Day';
+            if (targetDay < localDay || (localDay === 1 && targetDay > 25)) return 'Prev. Day';
+        } catch(e) {
+            return '';
+        }
         
         return '';
     }
@@ -205,6 +219,10 @@ const WorldClock = () => {
                     const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
                     const color = clockColors[index % clockColors.length];
                     const isDragging = draggedTz === tz;
+                    const ClockComponent1 = clockComponents[0];
+                    const ClockComponent2 = clockComponents[1];
+                    const ClockComponent3 = clockComponents[2];
+
                     return (
                         <div
                             key={tz}
@@ -219,21 +237,33 @@ const WorldClock = () => {
                                 isDragging && 'opacity-50'
                             )}
                         >
-                             <div className={cn("hidden sm:flex items-center", tz === localTimeZone && "invisible")}>
+                             <div className={cn("flex items-center", tz === localTimeZone && "invisible")}>
                                 <GripVertical className="h-5 w-5 text-muted-foreground" />
                             </div>
                             <div className="flex items-center justify-center gap-2">
-                                {clockComponents.map((ClockComponent, clockIndex) => (
-                                    <ClockComponent
-                                        key={clockIndex}
-                                        hours={h}
-                                        minutes={m}
-                                        seconds={s}
-                                        color={color}
-                                        className="w-20 h-20 sm:w-24 sm:h-24"
-                                        style={{ '--clock-accent-color': color } as React.CSSProperties}
-                                    />
-                                ))}
+                                <ClockComponent1
+                                    hours={h}
+                                    minutes={m}
+                                    seconds={s}
+                                    color={color}
+                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                />
+                                <ClockComponent2
+                                    hours={h}
+                                    minutes={m}
+                                    seconds={s}
+                                    color={color}
+                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    style={{ '--clock-accent-color': color } as React.CSSProperties}
+                                />
+                                <ClockComponent3
+                                    hours={h}
+                                    minutes={m}
+                                    seconds={s}
+                                    color={color}
+                                    className="w-20 h-20 sm:w-24 sm:h-24"
+                                    style={{ '--clock-accent-color': color } as React.CSSProperties}
+                                />
                             </div>
                             <div className="flex-1 w-full">
                                 <div className="flex justify-between items-start">
@@ -275,25 +305,27 @@ const WorldClock = () => {
                         <CommandInput placeholder="Search timezones..." />
                         <CommandList>
                             <CommandEmpty>No results found.</CommandEmpty>
-                            <CommandGroup>
-                                <ScrollArea className="h-64">
-                                {timeZones.map((tz) => (
-                                    <CommandItem
-                                        key={tz}
-                                        value={tz}
-                                        onSelect={() => addTimezone(tz)}
-                                    >
-                                       <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0"
-                                        )}
-                                        />
-                                        {tz.replace(/_/g, ' ')}
-                                    </CommandItem>
+                             <ScrollArea className="h-64">
+                                {Object.entries(groupedTimezones).map(([continent, tzs]) => (
+                                    <CommandGroup key={continent} heading={continent}>
+                                        {tzs.map((tz) => (
+                                            <CommandItem
+                                                key={tz}
+                                                value={tz}
+                                                onSelect={() => addTimezone(tz)}
+                                            >
+                                            <Check
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0"
+                                                )}
+                                                />
+                                                {tz.split('/').pop()?.replace(/_/g, ' ')}
+                                            </CommandItem>
+                                        ))}
+                                    </CommandGroup>
                                 ))}
-                                </ScrollArea>
-                            </CommandGroup>
+                            </ScrollArea>
                         </CommandList>
                     </Command>
                 </PopoverContent>
@@ -336,8 +368,26 @@ const TimeConverter = () => {
             const diff = localDate.getTime() - tzDate.getTime();
             const dateInSourceTz = new Date(localDate.getTime() - diff);
             
-            if (!isValid(dateInSourceTz)) {
-                 throw new Error("Could not create a valid date in the source timezone.");
+             if (!isValid(dateInSourceTz)) {
+                // Fallback for when the above method fails (can happen in some environments)
+                 const fallbackDate = new Date(sourceDate);
+                 fallbackDate.setHours(h, m, s, 0);
+                 const dateStr = fallbackDate.toISOString().slice(0, 19).replace('T', ' ');
+                 
+                 const formatter = new Intl.DateTimeFormat('en-US', { timeZone: sourceTz, year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: false });
+                 const parts = formatter.formatToParts(dateInSourceTz);
+                 const getPart = (type: string) => parts.find(p => p.type === type)?.value || '0';
+                 const isoString = `${getPart('year')}-${getPart('month')}-${getPart('day')}T${getPart('hour')}:${getPart('minute')}:${getPart('second')}Z`;
+                 const finalDate = new Date(isoString);
+                 
+                 if (!isValid(finalDate)) throw new Error("Could not create a valid date in the source timezone.");
+
+                 const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                 const resultTime = targetFormatter.format(finalDate);
+                 const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(finalDate);
+                 const { isDst, offset: targetOffset } = getTimeZoneDetails(finalDate, targetTz);
+                 return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
+
             }
 
 
