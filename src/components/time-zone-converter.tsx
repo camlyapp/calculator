@@ -24,6 +24,7 @@ import AnalogClockModern from './analog-clock-modern';
 import AnalogClockMinimalist from './analog-clock-minimalist';
 import { timezoneInfo } from '@/lib/timezone-info';
 import Flag from 'react-world-flags';
+import TimeZoneSearch from './timezone-search';
 
 
 const clockComponents = [AnalogClock, AnalogClockModern, AnalogClockMinimalist];
@@ -38,7 +39,7 @@ const clockColors = [
 ];
 
 // Function to get time zone details
-const getTimeZoneDetails = (date: Date, timeZone: string) => {
+export const getTimeZoneDetails = (date: Date, timeZone: string) => {
     try {
         const formatter = new Intl.DateTimeFormat('en-US', {
             timeZone,
@@ -89,27 +90,7 @@ const WorldClock = () => {
     const [timeOffset, setTimeOffset] = useState(0); // Offset in hours from current time
     const [now, setNow] = useState(new Date());
     const [isMounted, setIsMounted] = useState(false);
-    const [open, setOpen] = useState(false)
     const [draggedTz, setDraggedTz] = useState<string | null>(null);
-    const [filter, setFilter] = useState('All');
-
-    const filteredTimezones = useMemo(() => {
-        if (filter === 'All') {
-            return timeZones;
-        }
-        return timeZones.filter(tz => tz.startsWith(filter));
-    }, [filter]);
-
-    const groupedTimezones = useMemo(() => {
-        return filteredTimezones.reduce((acc, tz) => {
-            const [continent, ...rest] = tz.split('/');
-            if (!acc[continent]) {
-                acc[continent] = [];
-            }
-            acc[continent].push(tz);
-            return acc;
-        }, {} as Record<string, string[]>);
-    }, [filteredTimezones]);
 
     useEffect(() => {
         setIsMounted(true);
@@ -121,7 +102,6 @@ const WorldClock = () => {
         if (!selectedTimezones.includes(timezone)) {
             setSelectedTimezones([...selectedTimezones, timezone]);
         }
-        setOpen(false);
     };
 
     const removeTimezone = (timezone: string) => {
@@ -304,69 +284,15 @@ const WorldClock = () => {
                 })}
             </div>
 
-            <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
+            <TimeZoneSearch 
+                onSelectTimezone={addTimezone}
+                selectedTimezones={selectedTimezones}
+                trigger={
                     <Button variant="outline" className="w-full">
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
                     </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[450px] p-0" align="start">
-                     <Command>
-                        <CommandInput placeholder="Search timezones..." />
-                        <div className="flex items-center gap-1 p-2 border-b">
-                            {['All', 'America', 'Europe', 'Asia', 'Africa', 'Australia'].map(f => (
-                                <Button 
-                                    key={f} 
-                                    variant={filter === f ? "secondary" : "ghost"} 
-                                    size="sm"
-                                    onClick={() => setFilter(f)}
-                                    className="text-xs h-7"
-                                >
-                                    {f}
-                                </Button>
-                            ))}
-                        </div>
-                        <CommandList>
-                            <CommandEmpty>No results found.</CommandEmpty>
-                             <ScrollArea className="h-64">
-                                {Object.entries(groupedTimezones).map(([continent, tzs]) => (
-                                    <CommandGroup key={continent} heading={continent}>
-                                        {tzs.map((tz) => {
-                                            const { offset, isDst } = getTimeZoneDetails(displayTime, tz);
-                                            const countryCode = timezoneInfo[tz]?.countryCode || '';
-                                            const countryName = timezoneInfo[tz]?.countryName || '';
-                                            return (
-                                                <CommandItem
-                                                    key={tz}
-                                                    value={`${tz} ${countryName}`}
-                                                    onSelect={() => addTimezone(tz)}
-                                                    className="flex items-center justify-between"
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <Check className={cn("h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
-                                                         <Flag code={countryCode} className="h-4 w-4 rounded-sm" fallback={<div className="h-4 w-4 bg-muted rounded-sm" />} />
-                                                        <div>
-                                                            <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
-                                                            <p className="text-xs text-muted-foreground">{countryName}</p>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
-                                                        <div className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                                                            {offset}
-                                                            {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
-                                                        </div>
-                                                    </div>
-                                                </CommandItem>
-                                            )
-                                        })}
-                                    </CommandGroup>
-                                ))}
-                            </ScrollArea>
-                        </CommandList>
-                    </Command>
-                </PopoverContent>
-            </Popover>
+                }
+            />
         </CardContent>
     );
 };
@@ -456,17 +382,27 @@ const TimeConverter = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                  <div className="space-y-2">
                     <Label>From Timezone</Label>
-                    <Select value={sourceTz} onValueChange={setSourceTz}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent><ScrollArea className="h-64">{timeZones.map(tz => <SelectItem key={tz} value={tz}>{tz.replace(/_/g, ' ')}</SelectItem>)}</ScrollArea></SelectContent>
-                    </Select>
+                    <TimeZoneSearch
+                        onSelectTimezone={setSourceTz}
+                        selectedTimezones={[sourceTz]}
+                        trigger={
+                            <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                {sourceTz.replace(/_/g, ' ')}
+                            </Button>
+                        }
+                    />
                 </div>
                  <div className="space-y-2">
                     <Label>To Timezone</Label>
-                    <Select value={targetTz} onValueChange={setTargetTz}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent><ScrollArea className="h-64">{timeZones.map(tz => <SelectItem key={tz} value={tz}>{tz.replace(/_/g, ' ')}</SelectItem>)}</ScrollArea></SelectContent>
-                    </Select>
+                    <TimeZoneSearch
+                        onSelectTimezone={setTargetTz}
+                        selectedTimezones={[targetTz]}
+                        trigger={
+                             <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                {targetTz.replace(/_/g, ' ')}
+                            </Button>
+                        }
+                    />
                 </div>
             </div>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
