@@ -92,7 +92,11 @@ export default {
         'flow': {
           '0%': { 'stroke-dashoffset': '0' },
           '100%': { 'stroke-dashoffset': '-4' },
-        }
+        },
+        'hourglass-spin': {
+            '0%': { transform: 'rotate(0deg)', 'transform-origin': 'center' },
+            '100%': { transform: 'rotate(360deg)', 'transform-origin': 'center' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -100,6 +104,7 @@ export default {
         'rainbow-glow': 'rainbow-glow 4s ease-in-out infinite',
         'border-spin': 'border-spin 4s linear infinite',
         'flow': 'flow 500ms linear infinite',
+        'hourglass-spin': 'hourglass-spin 20s linear infinite',
       },
     },
   },

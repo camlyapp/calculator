@@ -40,6 +40,7 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
           stroke="hsl(var(--foreground) / 0.5)" 
           strokeWidth="4" 
           strokeLinecap="round"
+          className="animate-hourglass-spin"
         />
 
         {/* Top Sand (disappearing) */}
