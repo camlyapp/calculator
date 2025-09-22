@@ -176,6 +176,19 @@ const WorldClock = () => {
                     const color = clockColors[index % clockColors.length];
                     return (
                         <div key={tz} className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                             <div className="flex gap-2">
+                                {clockComponents.map((ClockComponent, clockIndex) => (
+                                    <ClockComponent
+                                        key={clockIndex}
+                                        hours={h}
+                                        minutes={m}
+                                        seconds={s}
+                                        color={color}
+                                        className="w-20 h-20 sm:w-24 sm:h-24"
+                                        style={{ '--clock-accent-color': color } as React.CSSProperties}
+                                    />
+                                ))}
+                            </div>
                             <div className="flex-1">
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -194,19 +207,7 @@ const WorldClock = () => {
                                     </div>
                                 </div>
                             </div>
-                             <div className="flex gap-2">
-                                {clockComponents.map((ClockComponent, clockIndex) => (
-                                    <ClockComponent
-                                        key={clockIndex}
-                                        hours={h}
-                                        minutes={m}
-                                        seconds={s}
-                                        color={color}
-                                        className="w-20 h-20 sm:w-24 sm:h-24"
-                                        style={{ '--clock-accent-color': color } as React.CSSProperties}
-                                    />
-                                ))}
-                            </div>
+                           
                             {tz !== localTimeZone && (
                                 <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
                                     <X className="h-4 w-4" />
@@ -284,31 +285,13 @@ const TimeConverter = () => {
         
         try {
             // A trick to parse a date as if it's in a specific timezone
-            const formatter = new Intl.DateTimeFormat('en-CA', {
-                timeZone: sourceTz,
-                year: 'numeric', month: '2-digit', day: '2-digit',
-                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
-            });
-
-            const parts = formatter.formatToParts(new Date(dateString));
-            const mapping = parts.reduce((acc, part) => { acc[part.type] = part.value; return acc; }, {} as Record<string, string>);
+             const localDate = new Date(dateString);
+            const tzDate = new Date(localDate.toLocaleString("en-US", {timeZone: sourceTz}));
+            const diff = localDate.getTime() - tzDate.getTime();
+            const dateInSourceTz = new Date(localDate.getTime() - diff);
             
-            const dateInSourceTz = new Date(`${mapping.year}-${mapping.month}-${mapping.day}T${mapping.hour}:${mapping.minute}:${mapping.second}`);
-
             if (!isValid(dateInSourceTz)) {
-                // Fallback for environments where the above trick doesn't work well
-                const localDate = new Date(dateString);
-                const tzDate = new Date(localDate.toLocaleString("en-US", {timeZone: sourceTz}));
-                const diff = localDate.getTime() - tzDate.getTime();
-                const correctedDate = new Date(localDate.getTime() - diff);
-                if (!isValid(correctedDate)) throw new Error("Could not create a valid date in the source timezone.");
-                
-                 const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-                 const resultTime = targetFormatter.format(correctedDate);
-                 const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(correctedDate);
-
-                 const { isDst, offset: targetOffset } = getTimeZoneDetails(correctedDate, targetTz);
-                 return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
+                 throw new Error("Could not create a valid date in the source timezone.");
             }
 
 
