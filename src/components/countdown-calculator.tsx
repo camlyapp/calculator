@@ -17,15 +17,14 @@ import SandboxAnimation from './sandbox-animation';
 import { Switch } from './ui/switch';
 
 const CountdownCalculator = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-
-    const [targetDate, setTargetDate] = useState<Date | undefined>(tomorrow);
+    const [targetDate, setTargetDate] = useState<Date | undefined>(new Date());
     const [targetTime, setTargetTime] = useState('00:00:00');
     const [countdown, setCountdown] = useState<{ days: number, hours: number, minutes: number, seconds: number, milliseconds: number } | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [isMounted, setIsMounted] = useState(false);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const alarmRef = useRef<NodeJS.Timeout | null>(null);
+
 
     const [countdownProgress, setCountdownProgress] = useState(100);
     const [totalCountdownDuration, setTotalCountdownDuration] = useState(0);
@@ -35,7 +34,7 @@ const CountdownCalculator = () => {
     const [isListening, setIsListening] = useState(false);
     const recognitionRef = useRef<any>(null);
     
-    const [isSecondSoundOn, setIsSecondSoundOn] = useState(false);
+    const [isSecondSoundOn, setIsSecondSoundOn] = useState(true);
     const [isHourlySoundOn, setIsHourlySoundOn] = useState(false);
     const lastPlayedSecondRef = useRef<number | null>(null);
     const lastPlayedHourRef = useRef<number | null>(null);
@@ -46,9 +45,10 @@ const CountdownCalculator = () => {
         const now = new Date();
         const formattedTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
         setTargetTime(formattedTime);
-        // Clean up timer on component unmount
+        // Clean up timers on component unmount
         return () => {
             if (timerRef.current) clearInterval(timerRef.current);
+            if (alarmRef.current) clearInterval(alarmRef.current);
         };
     }, []);
 
@@ -81,11 +81,10 @@ const CountdownCalculator = () => {
                 oscillator.stop(audioContext.currentTime + delay + duration);
             }
             
-            // A simple melody
-            playNote(660, 0.15, 0); // E5
+            playNote(660, 0.15, 0); 
             playNote(660, 0.15, 0.2);
             playNote(660, 0.15, 0.4);
-            playNote(880, 0.3, 0.6); // A5
+            playNote(880, 0.3, 0.6);
         }
     };
 
@@ -150,7 +149,6 @@ const CountdownCalculator = () => {
                 }
                 
                 if (isHourlySoundOn && lastPlayedHourRef.current !== hours && minutes === 59 && seconds === 59) {
-                     // Play when the hour is about to change
                      playHourlyChime();
                      lastPlayedHourRef.current = hours;
                 }
@@ -169,6 +167,10 @@ const CountdownCalculator = () => {
                  if (timerRef.current) {
                     clearInterval(timerRef.current);
                     timerRef.current = null;
+                 }
+                 if (!alarmRef.current) {
+                    playBeep(); // Play once immediately
+                    alarmRef.current = setInterval(playBeep, 2000); // And then every 2 seconds
                  }
             }
         } else {
@@ -190,7 +192,15 @@ const CountdownCalculator = () => {
                 clearInterval(timerRef.current);
                 timerRef.current = null;
             }
+            if (alarmRef.current) {
+                clearInterval(alarmRef.current);
+                alarmRef.current = null;
+            }
         } else {
+             if (alarmRef.current) {
+                clearInterval(alarmRef.current);
+                alarmRef.current = null;
+            }
             const fullTargetDate = getFullTargetDate();
             if (fullTargetDate && isFuture(fullTargetDate)) {
                  if ('Notification' in window && Notification.permission === 'default') {
@@ -229,8 +239,6 @@ const CountdownCalculator = () => {
                                 icon: '/camly.png'
                              });
                          }
-                         playBeep();
-                         setIsRunning(false);
                      }, timeRemaining);
                 }
             } else {
@@ -386,5 +394,7 @@ const CountdownCalculator = () => {
 };
 
 export default CountdownCalculator;
+
+    
 
     
