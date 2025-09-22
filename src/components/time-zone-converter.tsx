@@ -318,21 +318,17 @@ const WorldClock = () => {
                                                     value={`${tz} ${country}`}
                                                     onSelect={() => addTimezone(tz)}
                                                 >
-                                                    <div className='flex justify-between items-center w-full'>
-                                                        <div>
-                                                            <p className="font-semibold text-sm flex items-center">
-                                                                <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
-                                                                {tz.split('/').pop()?.replace(/_/g, ' ')}
-                                                            </p>
-                                                            <p className="text-xs text-muted-foreground ml-6">{country}</p>
-                                                        </div>
-                                                        <div className="text-right">
-                                                            <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
-                                                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
-                                                                {offset}
-                                                                {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
-                                                            </p>
-                                                        </div>
+                                                    <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
+                                                    <div className="flex-1">
+                                                        <p className="font-semibold text-sm">{tz.split('/').pop()?.replace(/_/g, ' ')}</p>
+                                                        <p className="text-xs text-muted-foreground">{`${tz}, ${country}`}</p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
+                                                        <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                                                            {offset}
+                                                            {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
+                                                        </p>
                                                     </div>
                                                 </CommandItem>
                                             )
@@ -508,5 +504,3 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
-
-    
