@@ -27,29 +27,15 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
   const hourDeg = (((hours % 12) + minutes / 60) / 12) * 360;
   
   const romanNumerals = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
-  const vibrantColors = [
-      'hsl(var(--chart-1))', 
-      'hsl(var(--chart-2))', 
-      'hsl(var(--chart-3))', 
-      'hsl(var(--chart-4))', 
-      'hsl(var(--chart-5))',
-      'hsl(var(--accent))'
-  ];
 
   return (
-    <div className={cn("w-24 h-24 rounded-full bg-card flex items-center justify-center relative", className)}>
-        <svg width="100%" height="100%" viewBox="0 0 100 100" aria-label="Vibrant analog clock with Roman numerals" {...props}>
-            {/* Clock Face */}
-            <circle cx="50" cy="50" r="48" fill="hsl(var(--card))" stroke="hsl(var(--foreground) / 0.1)" strokeWidth="1" />
-            
-            {/* Decorative Color Ring */}
-            <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted-foreground)/0.2)" strokeWidth="4" />
-            
+    <div className={cn("w-24 h-24 rounded-full bg-card flex items-center justify-center relative animated-border-box", className)}>
+        <svg width="90%" height="90%" viewBox="0 0 100 100" aria-label="Vibrant animated analog clock with Roman numerals" {...props}>
             {/* Roman Numerals */}
             {romanNumerals.map((num, i) => {
-                 const angle = (i * 30 - 60) * (Math.PI / 180); // Adjust angle for correct placement
-                 const x = 50 + 38 * Math.cos(angle);
-                 const y = 50 + 38 * Math.sin(angle);
+                 const angle = (i * 30 - 60) * (Math.PI / 180);
+                 const x = 50 + 40 * Math.cos(angle);
+                 const y = 50 + 40 * Math.sin(angle);
                 return (
                     <text
                         key={i}
@@ -57,9 +43,9 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
                         y={y}
                         textAnchor="middle"
                         dominantBaseline="central"
-                        fontSize={i % 3 === 0 ? "12" : "8"}
+                        fontSize={i % 3 === 0 ? "10" : "7"}
                         fontWeight={i % 3 === 0 ? "bold" : "normal"}
-                        fill={vibrantColors[i % vibrantColors.length]}
+                        fill="hsl(var(--primary))"
                         className="font-serif"
                     >
                         {num}
