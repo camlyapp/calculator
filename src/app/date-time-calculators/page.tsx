@@ -28,7 +28,7 @@ const calculatorTabs = [
 export default function DateTimeCalculators() {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tab || 'countdown');
+  const [activeTab, setActiveTab] = useState(tab || 'time-zone');
 
   useEffect(() => {
     if (tab && calculatorTabs.some(t => t.value === tab)) {
