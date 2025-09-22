@@ -20,7 +20,11 @@ import { Calendar } from './ui/calendar';
 import { format, isValid } from 'date-fns';
 import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import TimePicker from './time-picker';
+import AnalogClockModern from './analog-clock-modern';
+import AnalogClockMinimalist from './analog-clock-minimalist';
 
+
+const clockComponents = [AnalogClock, AnalogClockModern, AnalogClockMinimalist];
 
 const clockColors = [
     'hsl(var(--chart-1))',
@@ -77,6 +81,8 @@ const WorldClock = () => {
         'America/New_York',
         'Europe/London',
         'Asia/Tokyo',
+        'Australia/Sydney',
+        'America/Sao_Paulo',
     ]);
     const [timeOffset, setTimeOffset] = useState(0); // Offset in hours from current time
     const [now, setNow] = useState(new Date());
@@ -168,15 +174,16 @@ const WorldClock = () => {
                 {selectedTimezones.map((tz, index) => {
                     const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
                     const color = clockColors[index % clockColors.length];
+                    const ClockComponent = clockComponents[index % clockComponents.length];
                     return (
                         <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                            <AnalogClock 
-                                hours={h} 
-                                minutes={m} 
-                                seconds={s} 
+                            <ClockComponent
+                                hours={h}
+                                minutes={m}
+                                seconds={s}
                                 color={color}
-                                className="border-2"
-                                style={{ borderColor: color }}
+                                className="w-24 h-24"
+                                style={{ '--clock-accent-color': color } as React.CSSProperties}
                             />
                             <div className="flex-1">
                                 <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
@@ -255,6 +262,9 @@ const TimeConverter = () => {
         if (!sourceDate || !isValid(sourceDate)) return { resultTime: '...', resultDate: '...', isResultDst: false, resultOffset: '...' };
 
         const [h, m, s] = sourceTime.split(':').map(Number);
+        if (isNaN(h) || isNaN(m) || isNaN(s)) {
+            return { resultTime: 'Invalid Time', resultDate: '', isResultDst: false, resultOffset: '' };
+        }
         
         // Construct a date object representing the local time in the source timezone
         const year = sourceDate.getFullYear();
@@ -262,18 +272,37 @@ const TimeConverter = () => {
         const day = sourceDate.getDate();
 
         // Create a temporary date string and then parse it. This is more robust than manual offsets.
-        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')} ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
         
         try {
             // A trick to parse a date as if it's in a specific timezone
-            const tzDate = new Date(new Date(dateString).toLocaleString("en-US", {timeZone: sourceTz}));
-            const localDate = new Date(dateString);
-            const diff = localDate.getTime() - tzDate.getTime();
-            const dateInSourceTz = new Date(localDate.getTime() - diff);
+            const formatter = new Intl.DateTimeFormat('en-CA', {
+                timeZone: sourceTz,
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            });
+
+            const parts = formatter.formatToParts(new Date(dateString));
+            const mapping = parts.reduce((acc, part) => { acc[part.type] = part.value; return acc; }, {} as Record<string, string>);
+            
+            const dateInSourceTz = new Date(`${mapping.year}-${mapping.month}-${mapping.day}T${mapping.hour}:${mapping.minute}:${mapping.second}`);
 
             if (!isValid(dateInSourceTz)) {
-                throw new Error("Could not create a valid date in the source timezone.");
+                // Fallback for environments where the above trick doesn't work well
+                const localDate = new Date(dateString);
+                const tzDate = new Date(localDate.toLocaleString("en-US", {timeZone: sourceTz}));
+                const diff = localDate.getTime() - tzDate.getTime();
+                const correctedDate = new Date(localDate.getTime() - diff);
+                if (!isValid(correctedDate)) throw new Error("Could not create a valid date in the source timezone.");
+                
+                 const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                 const resultTime = targetFormatter.format(correctedDate);
+                 const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(correctedDate);
+
+                 const { isDst, offset: targetOffset } = getTimeZoneDetails(correctedDate, targetTz);
+                 return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
             }
+
 
             const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
             const resultTime = targetFormatter.format(dateInSourceTz);
