@@ -23,7 +23,7 @@ const calculatorTabs = [
     { value: 'countdown', label: 'Countdown' },
     { value: 'date-difference', label: 'Date Difference' },
     { value: 'workdays', label: 'Workdays' },
-    { value: 'time-zone', label: 'Time Zone Converter' },
+    { value: 'time-zone', label: 'Time Zone Tools' },
 ];
 
 export default function DateTimeCalculators() {
