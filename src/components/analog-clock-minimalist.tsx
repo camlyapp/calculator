@@ -45,7 +45,7 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
                         dominantBaseline="central"
                         fontSize={i % 3 === 0 ? "10" : "7"}
                         fontWeight={i % 3 === 0 ? "bold" : "normal"}
-                        fill="hsl(var(--primary))"
+                        fill="hsl(var(--foreground))"
                         className="font-serif"
                     >
                         {num}
