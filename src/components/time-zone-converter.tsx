@@ -459,8 +459,8 @@ const BusinessDaysCalculatorTab = () => {
     const [startDate, setStartDate] = useState<Date | undefined>(new Date());
     const [endDate, setEndDate] = useState<Date | undefined>(new Date(new Date().setMonth(new Date().getMonth() + 1)));
     const [rows, setRows] = useState<ResultRow[]>([
-        { id: useId(), timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, result: null, isLoading: false },
-        { id: useId(), timeZone: 'America/New_York', result: null, isLoading: false },
+        { id: `row-${Date.now()}-1`, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, result: null, isLoading: false },
+        { id: `row-${Date.now()}-2`, timeZone: 'America/New_York', result: null, isLoading: false },
     ]);
     const { toast } = useToast();
 
@@ -498,7 +498,8 @@ const BusinessDaysCalculatorTab = () => {
     };
     
     const addRow = () => {
-        setRows([...rows, { id: useId(), timeZone: 'Europe/London', result: null, isLoading: false }]);
+        const newId = `row-${Date.now()}-${Math.random()}`;
+        setRows([...rows, { id: newId, timeZone: 'Europe/London', result: null, isLoading: false }]);
     };
 
     const removeRow = (id: string) => {
