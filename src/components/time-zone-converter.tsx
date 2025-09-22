@@ -58,9 +58,11 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
         });
         const parts = formatter.formatToParts(date);
         
-        const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
-        const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0');
-        const second = parseInt(parts.find(p => p.type === 'second')?.value || '0');
+        const getPart = (type: Intl.DateTimeFormatPartTypes) => parts.find(p => p.type === type)?.value || '0';
+        
+        const hour = parseInt(getPart('hour'));
+        const minute = parseInt(getPart('minute'));
+        const second = parseInt(getPart('second'));
         const weekdayStr = parts.find(p => p.type === 'weekday')?.value || 'Sun';
         const weekday = weekdayMap[weekdayStr];
         const offset = parts.find(p => p.type === 'timeZoneName')?.value || 'GMT';
