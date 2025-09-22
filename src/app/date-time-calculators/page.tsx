@@ -17,18 +17,18 @@ import SeoContent from '@/components/seo-content';
 import TimeZoneConverter from '@/components/time-zone-converter';
 
 const calculatorTabs = [
+    { value: 'date-difference', label: 'Date Difference' },
     { value: 'add-subtract-days', label: 'Add/Subtract Days' },
+    { value: 'workdays', label: 'Workdays (Simple)' },
     { value: 'time-calculator', label: 'Add/Subtract Time' },
     { value: 'countdown', label: 'Countdown' },
-    { value: 'date-difference', label: 'Date Difference' },
-    { value: 'workdays', label: 'Workdays (Simple)' },
     { value: 'time-zone', label: 'Time Zone' },
 ];
 
 export default function DateTimeCalculators() {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tab || 'time-zone');
+  const [activeTab, setActiveTab] = useState(tab || 'date-difference');
 
   useEffect(() => {
     if (tab && calculatorTabs.some(t => t.value === tab)) {

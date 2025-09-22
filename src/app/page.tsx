@@ -32,26 +32,35 @@ import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
-    { value: 'suggestions', label: 'AI Suggestions' },
-    { value: 'budget', label: 'Budget' },
-    { value: 'comparison', label: 'Comparison' },
-    { value: 'compound-interest', label: 'Compound Interest' },
+    // Loans & Mortgages
     { value: 'calculator', label: 'EMI Calculator' },
-    { value: 'fd-calculator', label: 'FD Calculator' },
-    { value: 'gratuity', label: 'Gratuity' },
-    { value: 'gst', label: 'GST' },
-    { value: 'indian-tax', label: 'Indian Tax' },
-    { value: 'investment', label: 'Investment' },
-    { value: 'lumpsum-calculator', label: 'Lumpsum' },
     { value: 'mortgage-calculator', label: 'Mortgage' },
-    { value: 'ppf-calculator', label: 'PPF Calculator' },
-    { value: 'rd-calculator', label: 'RD Calculator' },
+    { value: 'comparison', label: 'Comparison' },
     { value: 'refinance', label: 'Refinancing' },
-    { value: 'retirement', label: 'Retirement' },
-    { value: 'roi', label: 'ROI' },
-    { value: 'savings', label: 'Savings' },
+    { value: 'suggestions', label: 'AI Suggestions' },
+    
+    // Investments
     { value: 'sip-calculator', label: 'SIP Calculator' },
+    { value: 'lumpsum-calculator', label: 'Lumpsum' },
+    { value: 'investment', label: 'Investment' },
+    { value: 'compound-interest', label: 'Compound Interest' },
+    { value: 'roi', label: 'ROI' },
+    
+    // Indian Investments & Savings
+    { value: 'fd-calculator', label: 'FD Calculator' },
+    { value: 'rd-calculator', label: 'RD Calculator' },
+    { value: 'ppf-calculator', label: 'PPF Calculator' },
+
+    // Savings & Planning
+    { value: 'savings', label: 'Savings' },
+    { value: 'retirement', label: 'Retirement' },
+    { value: 'budget', label: 'Budget' },
+    
+    // Taxes & Gratuity
+    { value: 'indian-tax', label: 'Indian Tax' },
     { value: 'tax', label: 'US Tax' },
+    { value: 'gst', label: 'GST' },
+    { value: 'gratuity', label: 'Gratuity' },
 ];
 
 export default function Home() {

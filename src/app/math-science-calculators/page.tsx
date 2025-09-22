@@ -25,26 +25,33 @@ import SeoContent from '@/components/seo-content';
 import ChemistrySolver from '@/components/chemistry-solver';
 
 const calculatorTabs = [
-    { value: 'algebra', label: 'Algebra' },
+    // General Math
     { value: 'basic', label: 'Basic' },
+    { value: 'scientific', label: 'Scientific' },
+    { value: 'graphing', label: 'Graphing' },
+    
+    // Specific Math
+    { value: 'algebra', label: 'Algebra' },
+    { value: 'geometry', label: 'Geometry' },
+    { value: 'fraction', label: 'Fraction' },
+    { value: 'percentage', label: 'Percentage' },
+    
+    // Business & Finance Math
+    { value: 'discount', label: 'Discount' },
+    { value: 'markup-margin', label: 'Markup & Margin' },
     { value: 'break-even', label: 'Break-Even' },
+
+    // Science
+    { value: 'physics', label: 'Physics' },
     { value: 'chemistry', label: 'Chemistry' },
     { value: 'chemistry-solver', label: 'Chemistry AI Solver' },
-    { value: 'discount', label: 'Discount' },
-    { value: 'fraction', label: 'Fraction' },
-    { value: 'geometry', label: 'Geometry' },
-    { value: 'graphing', label: 'Graphing' },
-    { value: 'markup-margin', label: 'Markup & Margin' },
-    { value: 'percentage', label: 'Percentage' },
-    { value: 'physics', label: 'Physics' },
-    { value: 'scientific', label: 'Scientific' },
     { value: 'unit', label: 'Unit Converter' },
 ];
 
 export default function MathScienceCalculators() {
   const searchParams = useSearchParams();
   const tab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(tab || 'algebra');
+  const [activeTab, setActiveTab] = useState(tab || 'basic');
 
   useEffect(() => {
     if (tab && calculatorTabs.some(t => t.value === tab)) {

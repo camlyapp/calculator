@@ -22,17 +22,22 @@ import { useSearchParams } from 'next/navigation';
 import SeoContent from '@/components/seo-content';
 
 const calculatorTabs = [
-    { value: 'age', label: 'Age' },
+    // Pregnancy
+    { value: 'due-date', label: 'Due Date' },
+    { value: 'ovulation', label: 'Ovulation' },
+
+    // General Wellness
     { value: 'bmi', label: 'BMI' },
     { value: 'bmr', label: 'BMR' },
-    { value: 'body-fat', label: 'Body Fat' },
     { value: 'calorie', label: 'Calorie' },
-    { value: 'creatinine-clearance', label: 'Creatinine Clearance' },
-    { value: 'due-date', label: 'Due Date' },
-    { value: 'egfr', label: 'eGFR' },
-    { value: 'heart-rate', label: 'Heart Rate' },
     { value: 'ideal-weight', label: 'Ideal Weight' },
-    { value: 'ovulation', label: 'Ovulation' },
+    { value: 'body-fat', label: 'Body Fat' },
+    { value: 'heart-rate', label: 'Heart Rate' },
+    { value: 'age', label: 'Age' },
+
+    // Clinical
+    { value: 'creatinine-clearance', label: 'Creatinine Clearance' },
+    { value: 'egfr', label: 'eGFR' },
 ];
 
 export default function PersonalHealthCalculators() {
