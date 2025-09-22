@@ -106,6 +106,9 @@ export default {
         'flow': 'flow 500ms linear infinite',
         'hourglass-spin': 'hourglass-spin 4s linear infinite',
       },
+      transformOrigin: {
+        'center-center': 'center center',
+      }
     },
   },
   plugins: [require('tailwindcss-animate')],
