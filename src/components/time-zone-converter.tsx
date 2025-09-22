@@ -14,6 +14,7 @@ import { Command, CommandEmpty, CommandInput, CommandGroup, CommandItem, Command
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import AnalogClock from './analog-clock';
 
 
 const WorldClock = () => {
@@ -49,6 +50,25 @@ const WorldClock = () => {
     };
 
     const displayTime = new Date(now.getTime() + timeOffset * 60 * 60 * 1000);
+
+    const getTimeParts = (date: Date, timeZone: string): {h: number, m: number, s: number} => {
+        try {
+            const formatter = new Intl.DateTimeFormat('en-US', {
+                timeZone,
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: false,
+            });
+            const parts = formatter.formatToParts(date);
+            const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
+            const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0');
+            const second = parseInt(parts.find(p => p.type === 'second')?.value || '0');
+            return { h: hour, m: minute, s: second };
+        } catch(e) {
+            return { h: 0, m: 0, s: 0};
+        }
+    };
 
     const formatTime = (date: Date, timeZone: string) => {
         try {
@@ -116,23 +136,27 @@ const WorldClock = () => {
                 </div>
 
                 <div className="space-y-4">
-                    {selectedTimezones.map(tz => (
-                        <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                            <div className="flex-1">
-                                <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
-                                <p className="text-sm text-muted-foreground">{formatDate(displayTime, tz)}</p>
+                    {selectedTimezones.map(tz => {
+                        const { h, m, s } = getTimeParts(displayTime, tz);
+                        return (
+                            <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                                <AnalogClock hours={h} minutes={m} seconds={s} />
+                                <div className="flex-1">
+                                    <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
+                                    <p className="text-sm text-muted-foreground">{formatDate(displayTime, tz)}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
+                                    <p className="text-xs text-accent font-semibold h-4">{getDayIndicator(displayTime, tz)}</p>
+                                </div>
+                                {tz !== localTimeZone && (
+                                    <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
-                            <div className="text-right">
-                                <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
-                                <p className="text-xs text-accent font-semibold h-4">{getDayIndicator(displayTime, tz)}</p>
-                            </div>
-                            {tz !== localTimeZone && (
-                                <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
-                                    <X className="h-4 w-4" />
-                                </Button>
-                            )}
-                        </div>
-                    ))}
+                        )
+                    })}
                 </div>
 
                 <Popover open={open} onOpenChange={setOpen}>
@@ -176,5 +200,3 @@ const WorldClock = () => {
 };
 
 export default WorldClock;
-
-    
