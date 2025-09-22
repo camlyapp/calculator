@@ -29,7 +29,7 @@ const AnalogClockMinimalist = ({ hours, minutes, seconds, color = 'hsl(var(--pri
   const romanNumerals = ["XII", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI"];
 
   return (
-    <div className={cn("w-24 h-24 rounded-full bg-card flex items-center justify-center relative animated-border-box", className)}>
+    <div className={cn("w-24 h-24 rounded-full bg-card flex items-center justify-center relative border-2 border-muted", className)}>
         <svg width="90%" height="90%" viewBox="0 0 100 100" aria-label="Vibrant animated analog clock with Roman numerals" {...props}>
             {/* Roman Numerals */}
             {romanNumerals.map((num, i) => {
