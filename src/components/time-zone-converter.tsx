@@ -174,30 +174,38 @@ const WorldClock = () => {
                 {selectedTimezones.map((tz, index) => {
                     const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
                     const color = clockColors[index % clockColors.length];
-                    const ClockComponent = clockComponents[index % clockComponents.length];
                     return (
-                        <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                            <ClockComponent
-                                hours={h}
-                                minutes={m}
-                                seconds={s}
-                                color={color}
-                                className="w-24 h-24"
-                                style={{ '--clock-accent-color': color } as React.CSSProperties}
-                            />
+                        <div key={tz} className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-secondary/50">
                             <div className="flex-1">
-                                <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
-                                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                                    {formatDate(displayTime, tz)}
-                                </p>
-                                <div className="text-xs text-muted-foreground h-4 flex items-center gap-1">
-                                    <span>{offset}</span>
-                                    {isDst && <Sun className="h-3 w-3 text-yellow-500" title="Daylight Saving Time" />}
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
+                                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                            {formatDate(displayTime, tz)}
+                                        </p>
+                                        <div className="text-xs text-muted-foreground h-4 flex items-center gap-1">
+                                            <span>{offset}</span>
+                                            {isDst && <Sun className="h-3 w-3 text-yellow-500" title="Daylight Saving Time" />}
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
+                                        <p className="text-xs text-muted-foreground h-4">{getDayIndicator(displayTime, tz)}</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
-                                <p className="text-xs text-muted-foreground h-4">{getDayIndicator(displayTime, tz)}</p>
+                             <div className="flex gap-2">
+                                {clockComponents.map((ClockComponent, clockIndex) => (
+                                    <ClockComponent
+                                        key={clockIndex}
+                                        hours={h}
+                                        minutes={m}
+                                        seconds={s}
+                                        color={color}
+                                        className="w-20 h-20 sm:w-24 sm:h-24"
+                                        style={{ '--clock-accent-color': color } as React.CSSProperties}
+                                    />
+                                ))}
                             </div>
                             {tz !== localTimeZone && (
                                 <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
