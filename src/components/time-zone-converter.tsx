@@ -13,6 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandInput, CommandGroup, CommandItem, CommandList } from './ui/command';
 import { cn } from '@/lib/utils';
 import { Check } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 
 const WorldClock = () => {
