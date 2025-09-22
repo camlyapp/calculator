@@ -22,6 +22,7 @@ import { Calendar as CalendarIcon, Clock } from 'lucide-react';
 import TimePicker from './time-picker';
 import AnalogClockModern from './analog-clock-modern';
 import AnalogClockMinimalist from './analog-clock-minimalist';
+import { timezoneInfo } from '@/lib/timezone-info';
 
 
 const clockComponents = [AnalogClock, AnalogClockModern, AnalogClockMinimalist];
@@ -300,7 +301,7 @@ const WorldClock = () => {
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[300px] p-0" align="start">
+                <PopoverContent className="w-[350px] p-0" align="start">
                      <Command>
                         <CommandInput placeholder="Search timezones..." />
                         <CommandList>
@@ -308,21 +309,34 @@ const WorldClock = () => {
                              <ScrollArea className="h-64">
                                 {Object.entries(groupedTimezones).map(([continent, tzs]) => (
                                     <CommandGroup key={continent} heading={continent}>
-                                        {tzs.map((tz) => (
-                                            <CommandItem
-                                                key={tz}
-                                                value={tz}
-                                                onSelect={() => addTimezone(tz)}
-                                            >
-                                            <Check
-                                                className={cn(
-                                                    "mr-2 h-4 w-4",
-                                                    selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0"
-                                                )}
-                                                />
-                                                {tz.split('/').pop()?.replace(/_/g, ' ')}
-                                            </CommandItem>
-                                        ))}
+                                        {tzs.map((tz) => {
+                                            const { offset, isDst } = getTimeZoneDetails(displayTime, tz);
+                                            const country = timezoneInfo[tz]?.countryName || '';
+                                            return (
+                                                <CommandItem
+                                                    key={tz}
+                                                    value={`${tz} ${country}`}
+                                                    onSelect={() => addTimezone(tz)}
+                                                >
+                                                    <div className='flex justify-between items-center w-full'>
+                                                        <div>
+                                                            <p className="font-semibold text-sm flex items-center">
+                                                                <Check className={cn("mr-2 h-4 w-4", selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0")} />
+                                                                {tz.split('/').pop()?.replace(/_/g, ' ')}
+                                                            </p>
+                                                            <p className="text-xs text-muted-foreground ml-6">{country}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-sm font-mono">{formatTime(displayTime, tz)}</p>
+                                                            <p className="text-xs text-muted-foreground flex items-center justify-end gap-1">
+                                                                {offset}
+                                                                {isDst && <Sun className="h-3 w-3 text-yellow-500" title="DST" />}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </CommandItem>
+                                            )
+                                        })}
                                     </CommandGroup>
                                 ))}
                             </ScrollArea>
