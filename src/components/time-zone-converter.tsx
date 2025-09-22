@@ -5,166 +5,175 @@ import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Calendar } from './ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Clock, Globe } from 'lucide-react';
-import TimePicker from './time-picker';
-import { cn } from '@/lib/utils';
-import { format as formatDate } from 'date-fns';
 import { timeZones } from '@/lib/timezones';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { ScrollArea } from './ui/scroll-area';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { PlusCircle, Trash2, X } from 'lucide-react';
+import { Slider } from './ui/slider';
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
+import { Command, CommandEmpty, CommandInput, CommandGroup, CommandItem, CommandList } from './ui/command';
+import { cn } from '@/lib/utils';
+import { Check } from 'lucide-react';
 
-const TimeZoneConverter = () => {
-    const [sourceDate, setSourceDate] = useState<Date | undefined>(new Date());
-    const [sourceTime, setSourceTime] = useState('12:00:00');
-    const [fromTimeZone, setFromTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    const [toTimeZone, setToTimeZone] = useState('Europe/London');
+
+const WorldClock = () => {
+    const [localTimeZone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+    const [selectedTimezones, setSelectedTimezones] = useState<string[]>([
+        localTimeZone,
+        'America/New_York',
+        'Europe/London',
+        'Asia/Tokyo',
+    ]);
+    const [timeOffset, setTimeOffset] = useState(0); // Offset in hours from current time
+    const [now, setNow] = useState(new Date());
     const [isMounted, setIsMounted] = useState(false);
+    const [open, setOpen] = useState(false)
+
 
     useEffect(() => {
         setIsMounted(true);
-        const now = new Date();
-        const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
-        setSourceTime(currentTime);
+        const timer = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(timer);
     }, []);
 
-    const fullSourceDate = useMemo(() => {
-        if (!sourceDate) return null;
-        const [hours, minutes, seconds] = sourceTime.split(':').map(Number);
-        const d = new Date(sourceDate);
-        d.setHours(hours, minutes, seconds);
-        return d;
-    }, [sourceDate, sourceTime]);
-
-    const conversionResult = useMemo(() => {
-        if (!fullSourceDate || !fromTimeZone || !toTimeZone) return null;
-        
-        try {
-            // Create a formatter for the source time zone to get UTC parts
-            const sourceFormatter = new Intl.DateTimeFormat('en-US', {
-                timeZone: fromTimeZone,
-                year: 'numeric', month: 'numeric', day: 'numeric',
-                hour: 'numeric', minute: 'numeric', second: 'numeric',
-                hour12: false
-            });
-            const parts = sourceFormatter.formatToParts(fullSourceDate);
-            const partValues: {[key: string]: string} = {};
-            for(const part of parts) {
-                partValues[part.type] = part.value;
-            }
-
-            // Construct a UTC date string. This is a reliable way to create a date
-            // object representing a specific point in time, regardless of the user's local timezone.
-            const utcDateStr = `${partValues.year}-${partValues.month}-${partValues.day}T${partValues.hour === '24' ? '00' : partValues.hour}:${partValues.minute}:${partValues.second}Z`;
-            const dateInUTC = new Date(utcDateStr);
-
-
-            // Now format this UTC date into the target timezone
-            const targetFormatter = new Intl.DateTimeFormat('en-US', {
-                timeZone: toTimeZone,
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: true,
-                timeZoneName: 'short'
-            });
-
-            return targetFormatter.format(fullSourceDate);
-
-        } catch (error) {
-            console.error("Time zone conversion error:", error);
-            return "Invalid time zone";
+    const addTimezone = (timezone: string) => {
+        if (!selectedTimezones.includes(timezone)) {
+            setSelectedTimezones([...selectedTimezones, timezone]);
         }
-    }, [fullSourceDate, fromTimeZone, toTimeZone]);
+        setOpen(false);
+    };
 
-    if (!isMounted) return null;
+    const removeTimezone = (timezone: string) => {
+        if (timezone === localTimeZone) return; // Prevent removing local time
+        setSelectedTimezones(selectedTimezones.filter(tz => tz !== timezone));
+    };
 
-    const handleTimeChange = (newTime: { hour: number; minute: number; second: number }) => {
-        const { hour, minute, second } = newTime;
-        setSourceTime(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`);
+    const displayTime = new Date(now.getTime() + timeOffset * 60 * 60 * 1000);
+
+    const formatTime = (date: Date, timeZone: string) => {
+        try {
+            return new Intl.DateTimeFormat('en-US', {
+                timeZone,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            }).format(date);
+        } catch (e) {
+            return 'Invalid TZ';
+        }
+    };
+    
+    const formatDate = (date: Date, timeZone: string) => {
+         try {
+            return new Intl.DateTimeFormat('en-US', {
+                timeZone,
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+            }).format(date);
+        } catch (e) {
+            return 'N/A';
+        }
+    }
+    
+    const getDayIndicator = (date: Date, timeZone: string): string => {
+        const localDate = new Date(date.toLocaleString('en-US', { timeZone: localTimeZone }));
+        const targetDate = new Date(date.toLocaleString('en-US', { timeZone }));
+
+        const localDay = localDate.getDate();
+        const targetDay = targetDate.getDate();
+
+        if (targetDay > localDay || (targetDay === 1 && localDay > 25)) return 'Next Day';
+        if (targetDay < localDay || (localDay === 1 && targetDay > 25)) return 'Prev. Day';
+        
+        return '';
+    }
+
+    if (!isMounted) {
+        return null; // or a loading skeleton
     }
 
     return (
         <Card className="w-full max-w-4xl shadow-2xl mt-6">
             <CardHeader>
-                <CardTitle className="text-2xl">Time Zone Converter</CardTitle>
-                <CardDescription>Convert times between different time zones, with daylight saving support.</CardDescription>
+                <CardTitle className="text-2xl">World Clock & Meeting Planner</CardTitle>
+                <CardDescription>Compare time zones and find the perfect meeting time.</CardDescription>
             </CardHeader>
-            <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                    <div className="space-y-4">
-                        <h3 className="font-semibold text-lg text-primary">Source Time</h3>
-                        <div className="space-y-2">
-                            <Label>Date</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn("w-full justify-start text-left font-normal", !sourceDate && "text-muted-foreground")}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                        {sourceDate ? formatDate(sourceDate, "PPP") : <span>Pick a date</span>}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar mode="single" selected={sourceDate} onSelect={setSourceDate} initialFocus />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Time</Label>
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button variant="outline" className="w-full justify-start text-left font-normal">
-                                        <Clock className="mr-2 h-4 w-4" />
-                                        {sourceTime}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <TimePicker initialTime={sourceTime} onTimeChange={handleTimeChange} />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-                        <div className="space-y-2">
-                             <Label>From Time Zone</Label>
-                             <Select value={fromTimeZone} onValueChange={setFromTimeZone}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <ScrollArea className="h-72">
-                                    {timeZones.map(tz => <SelectItem key={tz} value={tz}>{tz}</SelectItem>)}
-                                    </ScrollArea>
-                                </SelectContent>
-                             </Select>
-                        </div>
-                    </div>
-                     <div className="space-y-4">
-                         <h3 className="font-semibold text-lg text-accent">Converted Time</h3>
-                         <div className="space-y-2">
-                             <Label>To Time Zone</Label>
-                             <Select value={toTimeZone} onValueChange={setToTimeZone}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                    <ScrollArea className="h-72">
-                                     {timeZones.map(tz => <SelectItem key={tz} value={tz}>{tz}</SelectItem>)}
-                                    </ScrollArea>
-                                </SelectContent>
-                             </Select>
-                        </div>
-                        {conversionResult && (
-                            <div className="text-center bg-secondary/50 p-6 rounded-lg mt-8">
-                                <Label className="text-lg text-muted-foreground">Result</Label>
-                                <p className="text-3xl font-bold text-accent">{conversionResult}</p>
-                            </div>
-                        )}
-                    </div>
+            <CardContent className="space-y-6">
+                <div className="space-y-4">
+                    <Label htmlFor="time-slider">Time Scrubber</Label>
+                    <Slider
+                        id="time-slider"
+                        min={-12}
+                        max={12}
+                        step={0.5}
+                        value={[timeOffset]}
+                        onValueChange={(value) => setTimeOffset(value[0])}
+                    />
+                     <p className="text-center text-sm text-muted-foreground">
+                        {timeOffset === 0 ? "Current Time" : `${Math.abs(timeOffset)} hours ${timeOffset > 0 ? 'from now' : 'ago'}`}
+                    </p>
                 </div>
+
+                <div className="space-y-4">
+                    {selectedTimezones.map(tz => (
+                        <div key={tz} className="flex items-center gap-4 p-4 rounded-lg bg-secondary/50">
+                            <div className="flex-1">
+                                <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
+                                <p className="text-sm text-muted-foreground">{formatDate(displayTime, tz)}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-2xl font-bold tabular-nums">{formatTime(displayTime, tz)}</p>
+                                <p className="text-xs text-accent font-semibold h-4">{getDayIndicator(displayTime, tz)}</p>
+                            </div>
+                            {tz !== localTimeZone && (
+                                <Button variant="ghost" size="icon" onClick={() => removeTimezone(tz)}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                    ))}
+                </div>
+
+                <Popover open={open} onOpenChange={setOpen}>
+                    <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                            <PlusCircle className="mr-2 h-4 w-4" /> Add Timezone
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[300px] p-0" align="start">
+                         <Command>
+                            <CommandInput placeholder="Search timezones..." />
+                            <CommandList>
+                                <CommandEmpty>No results found.</CommandEmpty>
+                                <CommandGroup>
+                                    <ScrollArea className="h-64">
+                                    {timeZones.map((tz) => (
+                                        <CommandItem
+                                            key={tz}
+                                            value={tz}
+                                            onSelect={() => addTimezone(tz)}
+                                        >
+                                           <Check
+                                            className={cn(
+                                                "mr-2 h-4 w-4",
+                                                selectedTimezones.includes(tz) ? "opacity-100" : "opacity-0"
+                                            )}
+                                            />
+                                            {tz.replace(/_/g, ' ')}
+                                        </CommandItem>
+                                    ))}
+                                    </ScrollArea>
+                                </CommandGroup>
+                            </CommandList>
+                        </Command>
+                    </PopoverContent>
+                </Popover>
+
             </CardContent>
         </Card>
     );
-}
+};
 
-export default TimeZoneConverter;
+export default WorldClock;
+
+    
