@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { timeZones } from '@/lib/timezones';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { PlusCircle, Trash2, X, Sun, Moon } from 'lucide-react';
+import { PlusCircle, Trash2, X, Sun, Moon, GripVertical } from 'lucide-react';
 import { Slider } from './ui/slider';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 import { Command, CommandEmpty, CommandInput, CommandGroup, CommandItem, CommandList } from './ui/command';
@@ -88,6 +88,7 @@ const WorldClock = () => {
     const [now, setNow] = useState(new Date());
     const [isMounted, setIsMounted] = useState(false);
     const [open, setOpen] = useState(false)
+    const [draggedTz, setDraggedTz] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -149,6 +150,35 @@ const WorldClock = () => {
         return '';
     }
 
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, tz: string) => {
+        setDraggedTz(tz);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', tz);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault(); 
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, dropTz: string) => {
+        e.preventDefault();
+        if (!draggedTz || draggedTz === dropTz) {
+            setDraggedTz(null);
+            return;
+        }
+
+        const fromIndex = selectedTimezones.indexOf(draggedTz);
+        const toIndex = selectedTimezones.indexOf(dropTz);
+
+        const items = [...selectedTimezones];
+        const [reorderedItem] = items.splice(fromIndex, 1);
+        items.splice(toIndex, 0, reorderedItem);
+
+        setSelectedTimezones(items);
+        setDraggedTz(null);
+    };
+
+
     if (!isMounted) {
         return null;
     }
@@ -174,9 +204,25 @@ const WorldClock = () => {
                 {selectedTimezones.map((tz, index) => {
                     const { h, m, s, offset, isDst } = getTimeZoneDetails(displayTime, tz);
                     const color = clockColors[index % clockColors.length];
+                    const isDragging = draggedTz === tz;
                     return (
-                        <div key={tz} className="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-secondary/50">
-                             <div className="flex gap-2">
+                        <div
+                            key={tz}
+                            draggable={tz !== localTimeZone}
+                            onDragStart={(e) => handleDragStart(e, tz)}
+                            onDragOver={handleDragOver}
+                            onDrop={(e) => handleDrop(e, tz)}
+                            onDragEnd={() => setDraggedTz(null)}
+                            className={cn(
+                                'flex flex-col sm:flex-row items-center gap-4 p-4 rounded-lg bg-secondary/50 transition-opacity',
+                                tz !== localTimeZone && 'cursor-grab',
+                                isDragging && 'opacity-50'
+                            )}
+                        >
+                             <div className={cn("hidden sm:flex items-center", tz === localTimeZone && "invisible")}>
+                                <GripVertical className="h-5 w-5 text-muted-foreground" />
+                            </div>
+                            <div className="flex items-center justify-center gap-2">
                                 {clockComponents.map((ClockComponent, clockIndex) => (
                                     <ClockComponent
                                         key={clockIndex}
@@ -189,7 +235,7 @@ const WorldClock = () => {
                                     />
                                 ))}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 w-full">
                                 <div className="flex justify-between items-start">
                                     <div>
                                         <p className="font-semibold">{tz.replace(/_/g, ' ')}</p>
