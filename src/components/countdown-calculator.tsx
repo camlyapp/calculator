@@ -8,7 +8,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Label } from '@/components/ui/label';
 import { isFuture, format } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { CalendarIcon, Mic, MicOff, Volume, Volume1, Volume2 } from 'lucide-react';
+import { CalendarIcon, Mic, MicOff, Volume, Volume1, Volume2, Percent } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import TimePicker from './time-picker';
@@ -345,7 +345,13 @@ const CountdownCalculator = () => {
 
                     {(countdown || isRunning) && (
                         <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/50 p-6 rounded-lg">
-                           <SandboxAnimation percentage={countdownProgress} />
+                           <div className="flex items-center justify-center gap-4">
+                                <SandboxAnimation percentage={countdownProgress} />
+                                <div className="flex items-center text-primary">
+                                    <span className="text-3xl font-bold tabular-nums">{countdownProgress.toFixed(1)}</span>
+                                    <Percent className="h-6 w-6" />
+                                </div>
+                            </div>
                             <div className="text-center">
                                 <Label className="text-lg text-muted-foreground">Time Remaining</Label>
                                 <div className="flex flex-wrap justify-center items-baseline space-x-2 sm:space-x-4 mt-2">
@@ -380,3 +386,5 @@ const CountdownCalculator = () => {
 };
 
 export default CountdownCalculator;
+
+    
