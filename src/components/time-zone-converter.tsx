@@ -40,6 +40,10 @@ const clockColors = [
     'hsl(var(--accent))',
 ];
 
+const weekdayMap: { [key: string]: number } = {
+    'Sun': 0, 'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6
+};
+
 // Function to get time zone details
 export const getTimeZoneDetails = (date: Date, timeZone: string) => {
     try {
@@ -48,7 +52,7 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
             hour: 'numeric',
             minute: 'numeric',
             second: 'numeric',
-            weekday: 'numeric', // 1 (Mon) to 7 (Sun) for `en-US`
+            weekday: 'short',
             hour12: false,
             timeZoneName: 'shortOffset',
         });
@@ -57,7 +61,8 @@ export const getTimeZoneDetails = (date: Date, timeZone: string) => {
         const hour = parseInt(parts.find(p => p.type === 'hour')?.value || '0');
         const minute = parseInt(parts.find(p => p.type === 'minute')?.value || '0');
         const second = parseInt(parts.find(p => p.type === 'second')?.value || '0');
-        const weekday = parseInt(parts.find(p => p.type === 'weekday')?.value || '0');
+        const weekdayStr = parts.find(p => p.type === 'weekday')?.value || 'Sun';
+        const weekday = weekdayMap[weekdayStr];
         const offset = parts.find(p => p.type === 'timeZoneName')?.value || 'GMT';
 
         // Check for DST by comparing standard and DST offsets.
@@ -257,7 +262,7 @@ const WorldClock = () => {
                                     minutes={m}
                                     seconds={s}
                                     color={color}
-                                    className="w-20 h-20 sm:w-24 sm:h-24 border-4 border-border"
+                                    className="w-20 h-20 sm:w-24 sm:h-24"
                                 />
                             </div>
                             <div className="flex-1 w-full">
@@ -360,7 +365,7 @@ const TimeConverter = () => {
 
                  const targetFormatter = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
                  const resultTime = targetFormatter.format(finalDate);
-                 const resultDate = new Intl.DateTimeFormat('en-US', { timeZone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(finalDate);
+                 const resultDate = new Intl.DateTimeFormat('en-US', { time Zone: targetTz, weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'}).format(finalDate);
                  const { isDst, offset: targetOffset } = getTimeZoneDetails(finalDate, targetTz);
                  return { resultTime, resultDate, isResultDst: isDst, resultOffset: targetOffset };
 
@@ -459,7 +464,7 @@ const TimeZoneConverter = () => {
     return (
         <Card className="w-full max-w-4xl shadow-2xl mt-6">
             <CardHeader>
-                <CardTitle className="text-2xl">Time Zone Tools</CardTitle>
+                <CardTitle className="text-2xl">Time Zone</CardTitle>
                 <CardDescription>Compare time zones and convert times across the globe.</CardDescription>
             </CardHeader>
             <Tabs defaultValue="world-clock" className="w-full">
@@ -480,3 +485,5 @@ const TimeZoneConverter = () => {
 
 
 export default TimeZoneConverter;
+
+    
