@@ -50,6 +50,8 @@ export function SearchCommand() {
     setOpen(false)
     command()
   }, [])
+  
+  const sortedCalculators = React.useMemo(() => allCalculators.sort((a, b) => a.label.localeCompare(b.label)), []);
 
   return (
     <>
@@ -72,7 +74,7 @@ export function SearchCommand() {
         <CommandList>
           <CommandEmpty>No results found.</CommandEmpty>
           <CommandGroup heading="Calculators">
-            {allCalculators.map((calc) => {
+            {sortedCalculators.map((calc) => {
                 const Icon = calc.icon;
                 return (
                     <CommandItem
