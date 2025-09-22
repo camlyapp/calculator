@@ -359,11 +359,11 @@ const CountdownCalculator = () => {
 
                     {(countdown || isRunning) && (
                         <div className="mt-6 flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/50 p-6 rounded-lg">
-                           <div className="flex items-center justify-center gap-4">
+                           <div className="flex items-center justify-center gap-6">
                                 <SandboxAnimation percentage={countdownProgress} isPaused={isPaused} />
                                 <div className="flex items-center text-primary">
-                                    <span className="text-3xl font-bold tabular-nums">{countdownProgress.toFixed(1)}</span>
-                                    <Percent className="h-6 w-6" />
+                                    <span className="text-5xl font-bold tabular-nums">{countdownProgress.toFixed(1)}</span>
+                                    <Percent className="h-8 w-8" />
                                 </div>
                             </div>
                             <div className="text-center">
@@ -400,5 +400,3 @@ const CountdownCalculator = () => {
 };
 
 export default CountdownCalculator;
-
-    

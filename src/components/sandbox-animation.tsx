@@ -19,7 +19,7 @@ const SandboxAnimation = ({ percentage, className, isPaused = false }: SandboxAn
   const bottomSandHeight = ( (100 - clampedPercentage) / 100) * 55;
 
   return (
-    <div className={cn("w-32 h-48", className)}>
+    <div className={cn("w-40 h-60", className)}>
       <svg width="100%" height="100%" viewBox="0 0 160 160" aria-label="Sandbox animation showing time remaining">
         <defs>
           <clipPath id="top-clip">
@@ -86,5 +86,3 @@ const SandboxAnimation = ({ percentage, className, isPaused = false }: SandboxAn
 };
 
 export default SandboxAnimation;
-
-    
