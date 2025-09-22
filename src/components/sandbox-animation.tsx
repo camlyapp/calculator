@@ -28,8 +28,8 @@ const SandboxAnimation = ({ percentage, className }: SandboxAnimationProps) => {
             <path d="M 20 135 H 80 L 50 80 L 20 135 Z" />
           </clipPath>
            <linearGradient id="sandGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="hsl(var(--primary) / 0.8)" />
-              <stop offset="100%" stopColor="hsl(var(--accent) / 0.8)" />
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="100%" stopColor="hsl(var(--accent))" />
             </linearGradient>
         </defs>
 
