@@ -66,9 +66,9 @@ const Header = () => {
                                     key={link.href}
                                     onClick={() => setMenuOpen(false)}
                                 >
-                                    <div className="p-2 rounded-lg border bg-gradient-to-br from-primary/10 to-accent/10 text-card-foreground shadow-sm hover:from-primary/20 hover:to-accent/20 transition-all h-full flex flex-col items-center justify-center text-center">
+                                    <div className="p-2 rounded-lg border bg-gradient-to-br from-primary/10 to-accent/10 bg-popover/30 text-card-foreground shadow-sm hover:from-primary/20 hover:to-accent/20 transition-all h-full flex flex-col items-center justify-center text-center">
                                         <div className="p-2 rounded-full bg-background/70 mb-1">
-                                            <Icon className="h-5 w-5 text-primary" />
+                                            <Icon className="h-7 w-7 text-primary" />
                                         </div>
                                         <h3 className="text-xs font-semibold">{link.label}</h3>
                                     </div>
