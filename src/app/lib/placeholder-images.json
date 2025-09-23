@@ -4,5 +4,10 @@
         "src": "https://picsum.photos/seed/feature-hero/800/600",
         "alt": "Abstract image representing features and technology",
         "data-ai-hint": "abstract technology"
+    },
+    "features_hero": {
+        "src": "https://picsum.photos/seed/features-2/600/600",
+        "alt": "A person using a calculator and looking at charts on a screen",
+        "data-ai-hint": "finance charts"
     }
 }

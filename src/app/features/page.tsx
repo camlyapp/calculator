@@ -50,30 +50,38 @@ export default function FeaturesPage() {
     <>
       <Header />
       <main className="flex-grow">
-        <section className="relative w-full py-20 md:py-32 lg:py-40">
-           <Image 
-              src={placeholderImages.features.src}
-              alt={placeholderImages.features.alt}
-              fill
-              className="object-cover -z-10 opacity-20"
-              data-ai-hint={placeholderImages.features['data-ai-hint']}
-              sizes="100vw"
-            />
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-                    Powerful Features for Every Need
-                </h1>
-                <p className="max-w-[800px] mx-auto text-muted-foreground md:text-xl mt-4">
-                    Discover the tools and intelligence that make Camly the ultimate calculator suite for finance, health, science, and everyday life.
-                </p>
+        <section className="w-full py-12 md:py-24 lg:py-32">
+            <div className="container px-4 md:px-6">
+                <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:gap-24">
+                    <div className="flex flex-col justify-center space-y-4 text-center lg:text-left">
+                        <div className="space-y-4">
+                            <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                                Powerful Features for Every Need
+                            </h1>
+                            <p className="max-w-[600px] text-muted-foreground md:text-xl lg:mx-0">
+                                Discover the tools and intelligence that make Camly the ultimate calculator suite for finance, health, science, and everyday life.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center">
+                         <Image 
+                            src={placeholderImages.features_hero.src}
+                            alt={placeholderImages.features_hero.alt}
+                            width={550}
+                            height={550}
+                            className="mx-auto aspect-square overflow-hidden rounded-xl object-cover"
+                            data-ai-hint={placeholderImages.features_hero['data-ai-hint']}
+                        />
+                    </div>
+                </div>
             </div>
         </section>
 
-        <section className="py-12 md:py-20">
+        <section className="py-12 md:py-20 bg-muted/40">
              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                         <Card key={index} className="bg-card/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                         <Card key={index} className="bg-background hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <CardHeader className="flex-row items-start gap-4 space-y-0">
                                 <div className="p-3 bg-secondary rounded-full">
                                     {feature.icon}
