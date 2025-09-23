@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Delete } from 'lucide-react';
 
 const BasicCalculator = () => {
     const [currentOperand, setCurrentOperand] = useState('0');
@@ -89,11 +90,11 @@ const BasicCalculator = () => {
         setCurrentOperand((parseFloat(currentOperand) / 100).toString());
     }
 
-    const renderButton = (label: string, onClick: () => void, className: string = '') => (
+    const renderButton = (label: string | React.ReactNode, onClick: () => void, className: string = '') => (
         <Button
             onClick={onClick}
             className={`text-2xl h-16 ${className}`}
-            variant={['+', '-', '*', '÷', '='].includes(label) ? 'secondary' : 'outline'}
+            variant={['+', '-', '*', '÷', '=', 'DEL'].includes(label as string) || typeof label !== 'string' ? 'secondary' : 'outline'}
         >
             {label}
         </Button>
@@ -112,7 +113,7 @@ const BasicCalculator = () => {
                 </div>
                 <div className="grid grid-cols-4 gap-2">
                     {renderButton('C', clear, 'bg-destructive/80 hover:bg-destructive text-destructive-foreground')}
-                    {renderButton('+/-', toggleSign)}
+                    {renderButton(<Delete className="h-6 w-6" />, backspace)}
                     {renderButton('%', percentage)}
                     {renderButton('÷', () => chooseOperation('÷'))}
 
