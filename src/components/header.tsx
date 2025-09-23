@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Menu } from 'lucide-react';
+import { BrainCircuit, CalendarDays, HeartPulse, Landmark, Menu, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
@@ -20,11 +20,11 @@ import GlobalCurrencySwitcher from './global-currency-switcher';
 
 
 const navLinks = [
-    { href: '/personal-health-calculators', label: 'Personal & Health' },
-    { href: '/math-science-calculators', label: 'Math & Science' },
-    { href: '/date-time-calculators', label: 'Date & Time' },
-    { href: '/', label: 'Financial' },
-    { href: '/other-specialized-calculators', label: 'Other' },
+    { href: '/', label: 'Financial', icon: Landmark },
+    { href: '/personal-health-calculators', label: 'Personal & Health', icon: HeartPulse },
+    { href: '/math-science-calculators', label: 'Math & Science', icon: BrainCircuit },
+    { href: '/date-time-calculators', label: 'Date & Time', icon: CalendarDays },
+    { href: '/other-specialized-calculators', label: 'Other', icon: Sparkles },
 ];
 
 const Header = () => {
@@ -57,22 +57,25 @@ const Header = () => {
                     </Button>
                 </MenubarTrigger>
                 <MenubarContent align="end" onFocusOutside={() => setMenuOpen(false)} onInteractOutside={() => setMenuOpen(false)}>
-                   <nav className="flex flex-col space-y-1 p-2">
-                        {navLinks.map((link) => (
-                          <Link
-                              href={link.href}
-                              key={link.href}
-                              className={cn(
-                                  "w-full justify-start text-md p-2 rounded-md",
-                                  "hover:bg-accent hover:text-accent-foreground transition-colors",
-                                  pathname === link.href ? "text-primary bg-accent font-semibold" : "text-muted-foreground"
-                              )}
-                              onClick={() => setMenuOpen(false)}
-                          >
-                              {link.label}
-                          </Link>
-                        ))}
-                    </nav>
+                    <div className="p-4 grid grid-cols-2 gap-4">
+                        {navLinks.map((link) => {
+                            const Icon = link.icon;
+                            return (
+                                <Link
+                                    href={link.href}
+                                    key={link.href}
+                                    onClick={() => setMenuOpen(false)}
+                                >
+                                    <div className="p-4 rounded-lg border bg-gradient-to-br from-primary/10 to-accent/10 text-card-foreground shadow-sm hover:from-primary/20 hover:to-accent/20 transition-all h-full flex flex-col items-center justify-center text-center">
+                                        <div className="p-3 rounded-full bg-background/70 mb-2">
+                                            <Icon className="h-5 w-5 text-primary" />
+                                        </div>
+                                        <h3 className="text-sm font-semibold">{link.label}</h3>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
                 </MenubarContent>
               </MenubarMenu>
             </Menubar>
